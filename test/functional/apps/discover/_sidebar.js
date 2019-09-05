@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header']);
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }) {
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
 
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('setAbsoluteRange');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });
 
     describe('field filtering', function () {

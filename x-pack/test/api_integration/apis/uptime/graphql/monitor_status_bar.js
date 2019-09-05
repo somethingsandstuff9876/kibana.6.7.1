@@ -5,9 +5,9 @@
  */
 
 import { omit } from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 // eslint-disable-next-line max-len
-import { monitorStatusBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
+import { getMonitorStatusBarQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_status_bar/get_monitor_status_bar';
 import monitorStatus from './fixtures/monitor_status';
 import monitorStatusById from './fixtures/monitor_status_by_id';
 
@@ -18,11 +18,8 @@ export default function ({ getService }) {
     it('returns the status for all monitors with no ID filtering', async () => {
       const getMonitorStatusBarQuery = {
         operationName: 'MonitorStatus',
-        query: monitorStatusBarQueryString,
-        variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-        },
+        query: getMonitorStatusBarQueryString,
+        variables: { dateRangeStart: 1547805782000, dateRangeEnd: 1547852582000 },
       };
       const {
         body: {
@@ -40,11 +37,11 @@ export default function ({ getService }) {
     it('returns the status for only the given monitor', async () => {
       const getMonitorStatusBarQuery = {
         operationName: 'MonitorStatus',
-        query: monitorStatusBarQueryString,
+        query: getMonitorStatusBarQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          monitorId: 'auto-tcp-0X81440A68E839814C',
+          dateRangeStart: 1547805782000,
+          dateRangeEnd: 1547852582000,
+          monitorId: 'http@http://www.google.com/',
         },
       };
       const {
@@ -55,9 +52,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
-        monitorStatusById
-      );
+      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(monitorStatusById);
     });
   });
 }

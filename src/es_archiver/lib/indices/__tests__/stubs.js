@@ -21,7 +21,6 @@ import sinon from 'sinon';
 
 export const createStubStats = () => ({
   createdIndex: sinon.stub(),
-  createdAliases: sinon.stub(),
   deletedIndex: sinon.stub(),
   skippedIndex: sinon.stub(),
   archivedIndex: sinon.stub(),
@@ -36,9 +35,9 @@ export const createStubStats = () => ({
   },
 });
 
-export const createStubIndexRecord = (index, aliases = {}) => ({
+export const createStubIndexRecord = (index) => ({
   type: 'index',
-  value: { index, aliases }
+  value: { index }
 });
 
 export const createStubDocRecord = (index, id) => ({

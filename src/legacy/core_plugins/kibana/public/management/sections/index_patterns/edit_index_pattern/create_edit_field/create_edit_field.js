@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { setup as data } from '../../../../../../../data/public/legacy';
-const { FieldImpl: Field } = data.indexPatterns.__LEGACY;
-
+import { Field } from 'ui/index_patterns/_field';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
-import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -74,15 +71,15 @@ const destroyFieldEditor = () => {
 };
 
 uiRoutes
-  .when('/management/kibana/index_patterns/:indexPatternId/field/:fieldName*', {
+  .when('/management/kibana/indices/:indexPatternId/field/:fieldName*', {
     mode: 'edit',
     k7Breadcrumbs: getEditFieldBreadcrumbs
   })
-  .when('/management/kibana/index_patterns/:indexPatternId/create-field/', {
+  .when('/management/kibana/indices/:indexPatternId/create-field/', {
     mode: 'create',
     k7Breadcrumbs: getCreateFieldBreadcrumbs
   })
-  .defaults(/management\/kibana\/index_patterns\/[^\/]+\/(field|create-field)(\/|$)/, {
+  .defaults(/management\/kibana\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
     template,
     mapBreadcrumbs($route, breadcrumbs) {
       const { indexPattern } = $route.current.locals;
@@ -98,13 +95,13 @@ uiRoutes
       });
     },
     resolve: {
-      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
-        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
-          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
+      indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
+        return indexPatterns.get($route.current.params.indexPatternId)
+          .catch(redirectWhenMissing('/management/kibana/indices'));
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, config) {
+    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, docTitle, config) {
       const getConfig = (...args) => config.get(...args);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);

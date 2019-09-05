@@ -19,11 +19,11 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, merge } from 'rxjs';
+import { bindNodeCallback, from } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { CoreContext } from '../../core_context';
+import { CoreContext } from '../../../types';
 import { Logger } from '../../logging';
-import { PluginWrapper } from '../plugin';
+import { Plugin } from '../plugin';
 import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
@@ -46,16 +46,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  if (config.additionalPluginPaths.length) {
-    log.warn(
-      `Explicit plugin paths [${config.additionalPluginPaths}] are only supported in development. Relative imports will not work in production.`
-    );
-  }
-
-  const discoveryResults$ = merge(
-    from(config.additionalPluginPaths),
-    processPluginSearchPaths$(config.pluginSearchPaths, log)
-  ).pipe(
+  const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext)
@@ -65,11 +56,9 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   );
 
   return {
-    plugin$: discoveryResults$.pipe(
-      filter((entry): entry is PluginWrapper => entry instanceof PluginWrapper)
-    ),
+    plugin$: discoveryResults$.pipe(filter((entry): entry is Plugin => entry instanceof Plugin)),
     error$: discoveryResults$.pipe(
-      filter((entry): entry is PluginDiscoveryError => !(entry instanceof PluginWrapper))
+      filter((entry): entry is PluginDiscoveryError => !(entry instanceof Plugin))
     ),
   };
 }
@@ -81,7 +70,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
  * @param pluginDirs List of the top-level directories to process.
  * @param log Plugin discovery logger instance.
  */
-function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
+function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logger) {
   return from(pluginDirs).pipe(
     mergeMap(dir => {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
@@ -115,13 +104,7 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      const opaqueId = Symbol(manifest.id);
-      return new PluginWrapper({
-        path,
-        manifest,
-        opaqueId,
-        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
-      });
+      return new Plugin(path, manifest, createPluginInitializerContext(coreContext, manifest));
     }),
     catchError(err => [err])
   );

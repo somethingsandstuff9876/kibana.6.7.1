@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import expect from 'expect.js';
 
 export default function ({ getService }) {
   const testSubjects = getService('testSubjects');
@@ -37,7 +36,6 @@ export default function ({ getService }) {
     await retry.try(async () => {
       await testSubjects.waitForDeleted('visLoadingIndicator');
     });
-    await delay(1000);
   }
 
   async function getTableData() {
@@ -47,6 +45,7 @@ export default function ({ getService }) {
   }
 
   describe('embed by id', function describeIndexTests() {
+
     describe('vis on timebased data without date histogram', () => {
       before(async () => {
         await selectVis('timebased_no-datehistogram');

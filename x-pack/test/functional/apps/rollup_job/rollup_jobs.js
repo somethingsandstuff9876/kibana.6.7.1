@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
@@ -12,12 +12,13 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'header']);
 
-  describe('rollup job', function () {
-    this.tags('smoke');
+  describe('rollup job', async () => {
     before(async () => {
       // init data
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('canvas/default');
+      await Promise.all([
+        esArchiver.loadIfNeeded('logstash_functional'),
+        esArchiver.load('canvas/default'),
+      ]);
       await PageObjects.common.navigateToApp('rollupJob');
     });
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* eslint-disable */
+/* tslint:disable */
 import {
   Client as ESClient,
   GenericParams,
@@ -145,12 +145,12 @@ import {
   TasksGetParams,
   TasksListParams,
 } from 'elasticsearch';
-/* eslint-enable */
+/* tslint:enable */
 
 export class Cluster {
   public callWithRequest: CallClusterWithRequest;
   public callWithInternalUser: CallCluster;
-  constructor(config: ClusterConfig);
+  public constructor(config: ClusterConfig);
 }
 
 export interface ClusterConfig {
@@ -165,8 +165,17 @@ interface RequestHeaders {
   [name: string]: string;
 }
 
+interface ElasticsearchClientLogging {
+  error(err: Error): void;
+  warning(message: string): void;
+  trace(method: string, options: { path: string }, query?: string, statusCode?: number): void;
+  info(): void;
+  debug(): void;
+  close(): void;
+}
+
 interface AssistantAPIClientParams extends GenericParams {
-  path: '/_migration/assistance';
+  path: '/_xpack/migration/assistance';
   method: 'GET';
 }
 
@@ -182,7 +191,7 @@ export interface AssistanceAPIResponse {
 }
 
 interface DeprecationAPIClientParams extends GenericParams {
-  path: '/_migration/deprecations';
+  path: '/_xpack/migration/deprecations';
   method: 'GET';
 }
 
@@ -193,24 +202,21 @@ export interface DeprecationInfo {
   details?: string;
 }
 
-export interface IndexSettingsDeprecationInfo {
-  [indexName: string]: DeprecationInfo[];
-}
-
 export interface DeprecationAPIResponse {
   cluster_settings: DeprecationInfo[];
   ml_settings: DeprecationInfo[];
   node_settings: DeprecationInfo[];
-  index_settings: IndexSettingsDeprecationInfo;
+  index_settings: {
+    [indexName: string]: DeprecationInfo[];
+  };
 }
 
 export interface CallClusterOptions {
   wrap401Errors?: boolean;
-  signal?: AbortSignal;
 }
 
 export interface CallClusterWithRequest {
-  /* eslint-disable */
+  /* tslint:disable */
   (request: Request, endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: CallClusterOptions): ReturnType<ESClient['bulk']>;
   (request: Request, endpoint: 'clearScroll', params: ClearScrollParams, options?: CallClusterOptions): ReturnType<ESClient['clearScroll']>;
   (request: Request, endpoint: 'count', params: CountParams, options?: CallClusterOptions): ReturnType<ESClient['count']>;
@@ -346,6 +352,7 @@ export interface CallClusterWithRequest {
   (request: Request, endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['cancel']>;
   (request: Request, endpoint: 'tasks.get', params: TasksGetParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['get']>;
   (request: Request, endpoint: 'tasks.list', params: TasksListParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['list']>;
+  /* tslint:enable */
 
   // other APIs accessed via transport.request
   (
@@ -365,14 +372,13 @@ export interface CallClusterWithRequest {
   <T = any>(
     request: Request,
     endpoint: string,
-    clientParams?: any,
+    clientParams: any,
     options?: CallClusterOptions
   ): Promise<T>;
-  /* eslint-enable */
 }
 
 export interface CallCluster {
-  /* eslint-disable */
+  /* tslint:disable */
   (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: CallClusterOptions): ReturnType<ESClient['bulk']>;
   (endpoint: 'clearScroll', params: ClearScrollParams, options?: CallClusterOptions): ReturnType<ESClient['clearScroll']>;
   (endpoint: 'count', params: CountParams, options?: CallClusterOptions): ReturnType<ESClient['count']>;
@@ -508,6 +514,7 @@ export interface CallCluster {
   (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['cancel']>;
   (endpoint: 'tasks.get', params: TasksGetParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['get']>;
   (endpoint: 'tasks.list', params: TasksListParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['list']>;
+  /* tslint:enable */
 
   // other APIs accessed via transport.request
   (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: {}): Promise<
@@ -518,12 +525,13 @@ export interface CallCluster {
   >;
 
   // Catch-all definition
-  <T = any>(endpoint: string, clientParams?: any, options?: CallClusterOptions): Promise<T>;
-  /* eslint-enable */
+  <T = any>(endpoint: string, clientParams: any, options?: CallClusterOptions): Promise<T>;
 }
 
 export interface ElasticsearchPlugin {
+  ElasticsearchClientLogging: ElasticsearchClientLogging;
   getCluster(name: string): Cluster;
   createCluster(name: string, config: ClusterConfig): Cluster;
+  filterHeaders(originalHeaders: RequestHeaders, headersToKeep: string[]): void;
   waitUntilReady(): Promise<void>;
 }

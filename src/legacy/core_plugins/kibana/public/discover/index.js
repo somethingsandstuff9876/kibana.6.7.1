@@ -18,21 +18,20 @@
  */
 
 import './saved_searches/saved_searches';
-import { i18n } from '@kbn/i18n';
 import './directives';
 import 'ui/collapsible_sidebar';
 import './components/field_chooser/field_chooser';
 import './controllers/discover';
-import './doc_table/components/table_row';
+import 'ui/doc_table/components/table_row';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'discover',
-    title: i18n.translate('kbn.discover.discoverTitle', {
+    title: i18n('kbn.discover.discoverTitle', {
       defaultMessage: 'Discover',
     }),
-    description: i18n.translate('kbn.discover.discoverDescription', {
+    description: i18n('kbn.discover.discoverDescription', {
       defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
     }),
     icon: 'discoverApp',

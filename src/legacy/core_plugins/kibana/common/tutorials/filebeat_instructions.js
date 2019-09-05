@@ -453,7 +453,7 @@ export function filebeatStatusCheck(moduleName) {
         bool: {
           filter: {
             term: {
-              'event.module': moduleName,
+              'fileset.module': moduleName,
             },
           },
         },

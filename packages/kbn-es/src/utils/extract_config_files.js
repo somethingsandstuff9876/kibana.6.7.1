@@ -55,7 +55,7 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest, options =
 };
 
 function isFile(dest = '') {
-  return path.isAbsolute(dest) && path.extname(dest).length > 0 && fs.existsSync(dest);
+  return path.isAbsolute(dest) && path.extname(dest).length > 0;
 }
 
 function copyFileSync(src, dest) {

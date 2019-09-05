@@ -68,12 +68,11 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
   let icon;
   if (iconType) {
     icon = (
-      <EuiFlexItem grow={false}>
-        <EuiIcon
-          type={iconType}
-          size="xl"
-        />
-      </EuiFlexItem>
+      <EuiIcon
+        type={iconType}
+        size="xl"
+        style={{ marginRight: 16 }}
+      />
     );
   }
   let betaBadge;
@@ -92,14 +91,16 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
 
       <EuiFlexItem>
 
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          {icon}
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {icon}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>
+              <h2>
                 {title} &nbsp;
                 {betaBadge}
-              </h1>
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>

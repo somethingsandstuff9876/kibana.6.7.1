@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 
 export default function ({ getService, getPageObjects }) {
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
     const inspector = getService('inspector');
     const log = getService('log');
     const find = getService('find');
-    const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
+    const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
     before(async function () {
 
@@ -38,9 +38,10 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickRegionMap');
       await PageObjects.visualize.clickRegionMap();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = Shape field');
-      await PageObjects.visualize.clickBucket('Shape field');
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      log.debug('Bucket = shape field');
+      await PageObjects.visualize.clickBucket('shape field');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Field = geo.src');
@@ -63,13 +64,16 @@ export default function ({ getService, getPageObjects }) {
       it('should change results after changing layer to world', async function () {
 
         await PageObjects.visualize.clickOptions();
-        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectLayer', 'World Countries');
+        await  PageObjects.visualize.selectFieldById('World Countries', 'regionMap');
+
+        await PageObjects.common.sleep(1000);//give angular time to go update UI state
 
         //ensure all fields are there
-        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-2 code');
-        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-3 code');
-        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'name');
-        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-2 code');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-3 code', 'joinField');
+        await  PageObjects.visualize.selectFieldById('name', 'joinField');
+        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
+        await PageObjects.common.sleep(2000);//need some time for the data to load
 
         await inspector.open();
         const actualData = await inspector.getTableData();
@@ -79,11 +83,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('should contain a dropdown with the default road_map base layer as an option',
         async () => {
-          const selectField = await find.byCssSelector('#wmsOptionsSelectTmsLayer');
-          const $ = await selectField.parseDomContent();
-          const optionsText = $('option').toArray().map(option => $(option).text());
-
-          expect(optionsText.includes('road_map')).to.be(true);
+          const roadMapExists = await find.existsByCssSelector('[label="road_map"]');
+          expect(roadMapExists).to.be(true);
         });
     });
   });

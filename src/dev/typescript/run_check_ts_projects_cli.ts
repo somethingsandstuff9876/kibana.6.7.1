@@ -21,7 +21,7 @@ import { resolve } from 'path';
 
 import execa from 'execa';
 
-import { run } from '@kbn/dev-utils';
+import { run } from '../run';
 
 const REPO_ROOT = resolve(__dirname, '../../../');
 import { File } from '../file';
@@ -55,7 +55,7 @@ export async function runCheckTsProjectsCli() {
         if (projects.length === 0) {
           isNotInTsProject.push(file);
         }
-        if (projects.length > 1 && !file.isTypescriptAmbient()) {
+        if (projects.length > 1) {
           isInMultipleTsProjects.push(file);
         }
       }
@@ -84,7 +84,7 @@ export async function runCheckTsProjectsCli() {
       process.exit(1);
     },
     {
-      description:
+      helpDescription:
         'Check that all .ts and .tsx files in the repository are assigned to a tsconfig.json file',
     }
   );

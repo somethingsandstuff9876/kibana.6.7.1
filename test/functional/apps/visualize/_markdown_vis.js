@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }) {
 <h3>Inline HTML that should not be rendered as html</h3>
   `;
 
-  describe('visualize app', () => {
+  describe('visualize app', async () => {
     before(async function () {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickMarkdownWidget();
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.visualize.clickGo();
     });
 
-    describe('markdown vis', () => {
+    describe('markdown vis', async () => {
 
       it('should not have inspector enabled', async function () {
         await inspector.expectIsNotEnabled();

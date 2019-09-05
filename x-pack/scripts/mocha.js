@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../scripts/mocha');
+require('@kbn/plugin-helpers').babelRegister();
+require('../dev-tools/mocha').runMocha();

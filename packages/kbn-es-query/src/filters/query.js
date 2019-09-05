@@ -17,18 +17,11 @@
  * under the License.
  */
 
-// Creates a filter corresponding to a raw Elasticsearch query DSL object
-export function buildQueryFilter(query, index, alias) {
-  const filter = {
+export function buildQueryFilter(query, index) {
+  return {
     query: query,
     meta: {
-      index,
+      index: index
     }
   };
-
-  if (alias) {
-    filter.meta.alias = alias;
-  }
-
-  return filter;
 }

@@ -19,105 +19,94 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { find } from 'lodash';
-import { reIdSeries } from './lib/re_id_series';
-import { Series } from './series';
-import { handleAdd, handleDelete, handleChange } from './lib/collection_actions';
-import { newSeriesFn } from './lib/new_series_fn';
-import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
-import { reorder } from './lib/reorder';
+import reIdSeries from './lib/re_id_series';
+import Series from './series';
+import {
+  handleAdd,
+  handleDelete,
+  handleChange
+} from './lib/collection_actions';
+import newSeriesFn from './lib/new_series_fn';
+import Sortable from 'react-anything-sortable';
 
-const DROPPABLE_ID = 'series_editor_dnd';
+class SeriesEditor extends Component {
 
-export class SeriesEditor extends Component {
-  handleClone = series => {
+  constructor(props) {
+    super(props);
+    this.renderRow = this.renderRow.bind(this);
+    this.sortSeries = this.sortSeries.bind(this);
+  }
+
+  handleClone(series) {
     const newSeries = reIdSeries(series);
-
     handleAdd.call(null, this.props, () => newSeries);
-  };
+  }
 
-  sortHandler = ({ destination, source }) => {
-    const canSort = destination && source;
-
-    if (canSort) {
-      const sortFunction = this.getSortFunction({ destination, source });
-
-      sortFunction({ destination, source });
+  sortSeries(index, direction, allSeries) {
+    const newIndex = index + (direction === 'up' ? -1 : 1);
+    if (newIndex < 0 || newIndex >= allSeries.length) {
+      // Don't do anything when series is already at the edge
+      return;
     }
-  };
 
-  getSortFunction = ({ destination, source }) =>
-    destination.droppableId === source.droppableId && source.droppableId === DROPPABLE_ID
-      ? this.sortSeries
-      : this.sortAggregations;
+    const newSeries = allSeries.slice(0);
+    const changeWithElement = allSeries[newIndex];
+    newSeries[newIndex] = allSeries[index];
+    newSeries[index] = changeWithElement;
+    this.props.onChange({ series: newSeries });
+  }
 
-  sortSeries = ({ destination, source }) => {
-    this.props.onChange({
-      series: reorder([...this.props.model.series], source.index, destination.index),
-    });
-  };
-
-  sortAggregations = ({ destination, source }) => {
-    const extractId = ({ droppableId }) => droppableId.split(':')[1];
-    const id = extractId(source);
-    const canSort = id === extractId(destination);
-
-    if (canSort) {
-      const model = [...this.props.model.series];
-      const series = find(model, { id });
-
-      series.metrics = reorder([...series.metrics], source.index, destination.index);
-
-      this.props.onChange({
-        series: model,
-      });
-    }
-  };
-
-  render() {
-    const { limit, model, name, fields, colorPicker } = this.props;
-    const list = model[name].filter((val, index) => index < (limit || Infinity));
-
+  renderRow(row, index, allSeries) {
+    const { props } = this;
+    const { fields, model, name, limit, colorPicker } = props;
     return (
-      <EuiDragDropContext onDragEnd={this.sortHandler}>
-        <EuiDroppable droppableId={DROPPABLE_ID} spacing="l" type="MACRO">
-          {list.map((row, idx) => (
-            <EuiDraggable
-              spacing="m"
-              key={row.id}
-              index={idx}
-              customDragHandle={true}
-              draggableId={`${DROPPABLE_ID}:${row.id}`}
-              disableInteractiveElementBlocking
-            >
-              {provided => (
-                <Series
-                  className="tvbSeriesEditor"
-                  colorPicker={colorPicker}
-                  disableAdd={model[name].length >= limit}
-                  disableDelete={model[name].length < 2}
-                  fields={fields}
-                  onAdd={() => handleAdd(this.props, newSeriesFn)}
-                  onChange={doc => handleChange(this.props, doc)}
-                  onClone={() => this.handleClone(row)}
-                  onDelete={() => handleDelete(this.props, row)}
-                  model={row}
-                  panel={model}
-                  dragHandleProps={provided.dragHandleProps}
-                />
-              )}
-            </EuiDraggable>
-          ))}
-        </EuiDroppable>
-      </EuiDragDropContext>
+      <Series
+        className="tvbSeriesEditor"
+        colorPicker={colorPicker}
+        disableAdd={model[name].length >= limit}
+        disableDelete={model[name].length < 2}
+        fields={fields}
+        key={row.id}
+        onAdd={handleAdd.bind(null, props, newSeriesFn)}
+        onChange={handleChange.bind(null, props)}
+        onClone={() => this.handleClone(row)}
+        onDelete={handleDelete.bind(null, props, row)}
+        onShouldSortItem={(direction) => this.sortSeries(index, direction, allSeries)}
+        model={row}
+        panel={model}
+        sortData={row.id}
+      />
     );
   }
-}
 
+  render() {
+    const { limit, model, name } = this.props;
+    const series = model[name]
+      .filter((val, index) => index < (limit || Infinity))
+      .map(this.renderRow);
+    const handleSort = (data) => {
+      const series = data.map(id => model[name].find(s => s.id === id));
+      this.props.onChange({ series });
+    };
+    return (
+      <div className="tvbSeriesEditor__container">
+        <Sortable
+          dynamic={true}
+          direction="vertical"
+          onSort={handleSort}
+          sortHandle="tvbSeries__sortHandle"
+        >
+          { series }
+        </Sortable>
+      </div>
+    );
+  }
+
+}
 SeriesEditor.defaultProps = {
   name: 'series',
   limit: Infinity,
-  colorPicker: true,
+  colorPicker: true
 };
 
 SeriesEditor.propTypes = {
@@ -126,5 +115,7 @@ SeriesEditor.propTypes = {
   limit: PropTypes.number,
   model: PropTypes.object,
   name: PropTypes.string,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func
 };
+
+export default SeriesEditor;

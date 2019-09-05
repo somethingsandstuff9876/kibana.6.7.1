@@ -3,9 +3,15 @@
 exports[`LoadingIndices should render normally 1`] = `
 <EuiFlexGroup
   alignItems="center"
+  component="div"
+  direction="row"
+  gutterSize="l"
   justifyContent="center"
+  responsive={true}
+  wrap={false}
 >
   <EuiFlexItem
+    component="div"
     grow={false}
   >
     <EuiLoadingSpinner
@@ -13,11 +19,16 @@ exports[`LoadingIndices should render normally 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
+    component="div"
     grow={false}
   >
-    <EuiText>
+    <EuiText
+      grow={true}
+      size="m"
+    >
       <EuiTextColor
         color="subdued"
+        component="span"
       >
         <FormattedMessage
           defaultMessage="Looking for matching indices…"
@@ -27,6 +38,7 @@ exports[`LoadingIndices should render normally 1`] = `
       </EuiTextColor>
     </EuiText>
     <EuiText
+      grow={true}
       size="s"
       style={
         Object {
@@ -36,6 +48,7 @@ exports[`LoadingIndices should render normally 1`] = `
     >
       <EuiTextColor
         color="subdued"
+        component="span"
       >
         <FormattedMessage
           defaultMessage="Just a sec…"

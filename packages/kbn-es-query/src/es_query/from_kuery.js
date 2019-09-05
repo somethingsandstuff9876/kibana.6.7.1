@@ -17,22 +17,27 @@
  * under the License.
  */
 
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-} from '../kuery';
+import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
 
-export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards, dateFormatTZ = null) {
+export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards) {
   const queryASTs = queries.map(query => {
-    return fromKueryExpression(query.query, { allowLeadingWildcards });
+    try {
+      return fromKueryExpression(query.query, { allowLeadingWildcards });
+    } catch (parseError) {
+      try {
+        fromLegacyKueryExpression(query.query);
+      } catch (legacyParseError) {
+        throw parseError;
+      }
+      throw Error('OutdatedKuerySyntaxError');
+    }
   });
-  return buildQuery(indexPattern, queryASTs, { dateFormatTZ });
+  return buildQuery(indexPattern, queryASTs);
 }
 
-function buildQuery(indexPattern, queryASTs, config = null) {
+function buildQuery(indexPattern, queryASTs) {
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
-  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
+  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern);
   return {
     must: [],
     filter: [],

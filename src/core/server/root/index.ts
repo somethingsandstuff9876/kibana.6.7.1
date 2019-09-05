@@ -20,47 +20,40 @@
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
-import { Config, Env } from '../config';
-import { Logger, LoggerFactory, LoggingConfigType, LoggingService } from '../logging';
-import { Server } from '../server';
+import { Server } from '..';
+import { Config, ConfigService, Env } from '../config';
+import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
  */
 export class Root {
   public readonly logger: LoggerFactory;
+  private readonly configService: ConfigService;
   private readonly log: Logger;
-  private readonly loggingService: LoggingService;
   private readonly server: Server;
+  private readonly loggingService: LoggingService;
   private loggingConfigSubscription?: Subscription;
 
   constructor(
     config$: Observable<Config>,
-    env: Env,
+    private readonly env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingService = new LoggingService();
     this.logger = this.loggingService.asLoggerFactory();
     this.log = this.logger.get('root');
-    this.server = new Server(config$, env, this.logger);
-  }
 
-  public async setup() {
-    try {
-      await this.server.setupConfigSchemas();
-      await this.setupLogging();
-      this.log.debug('setting up root');
-      return await this.server.setup();
-    } catch (e) {
-      await this.shutdown(e);
-      throw e;
-    }
+    this.configService = new ConfigService(config$, env, this.logger);
+    this.server = new Server(this.configService, this.logger, this.env);
   }
 
   public async start() {
     this.log.debug('starting root');
+
     try {
-      return await this.server.start();
+      await this.setupLogging();
+      await this.server.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;
@@ -94,14 +87,13 @@ export class Root {
   }
 
   private async setupLogging() {
-    const { configService } = this.server;
     // Stream that maps config updates to logger updates, including update failures.
-    const update$ = configService.getConfig$().pipe(
+    const update$ = this.configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
-      switchMap(() => configService.atPath<LoggingConfigType>('logging')),
+      switchMap(() => this.configService.atPath('logging', LoggingConfig)),
       map(config => this.loggingService.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
-      // eslint-disable-next-line no-console
+      // tslint:disable-next-line no-console
       tap({ error: err => console.error('Configuring logger failed:', err) }),
       publishReplay(1)
     ) as ConnectableObservable<void>;

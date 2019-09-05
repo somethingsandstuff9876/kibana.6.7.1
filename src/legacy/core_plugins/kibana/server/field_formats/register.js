@@ -19,9 +19,7 @@
 
 import { createUrlFormat } from '../../common/field_formats/types/url';
 import { createBytesFormat } from '../../common/field_formats/types/bytes';
-import { createDateOnServerFormat } from '../../common/field_formats/types/date_server';
-import { createDateNanosFormat } from '../../common/field_formats/types/date_nanos';
-import { createRelativeDateFormat } from '../../common/field_formats/types/relative_date';
+import { createDateFormat } from '../../common/field_formats/types/date';
 import { createDurationFormat } from '../../common/field_formats/types/duration';
 import { createIpFormat } from '../../common/field_formats/types/ip';
 import { createNumberFormat } from '../../common/field_formats/types/number';
@@ -36,9 +34,7 @@ import { createStaticLookupFormat } from '../../common/field_formats/types/stati
 export function registerFieldFormats(server) {
   server.registerFieldFormat(createUrlFormat);
   server.registerFieldFormat(createBytesFormat);
-  server.registerFieldFormat(createDateOnServerFormat);
-  server.registerFieldFormat(createDateNanosFormat);
-  server.registerFieldFormat(createRelativeDateFormat);
+  server.registerFieldFormat(createDateFormat);
   server.registerFieldFormat(createDurationFormat);
   server.registerFieldFormat(createIpFormat);
   server.registerFieldFormat(createNumberFormat);

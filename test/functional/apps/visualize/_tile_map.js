@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header', 'settings']);
 
 
   describe('tile map visualize app', function () {
@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         //do not configure aggs
       });
 
@@ -70,9 +71,10 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Geo Coordinates');
-        await PageObjects.visualize.clickBucket('Geo coordinates');
+        await PageObjects.visualize.clickBucket('Geo Coordinates');
         log.debug('Click aggregation Geohash');
         await PageObjects.visualize.selectAggregation('Geohash');
         log.debug('Click field geo.coordinates');
@@ -182,7 +184,7 @@ export default function ({ getService, getPageObjects }) {
           const data = await inspector.getTableData();
           await inspector.close();
 
-          await filterBar.removeAllFilters();
+          await PageObjects.discover.removeAllFilters();
           compareTableData(data, expectedPrecision2DataTable);
         });
 
@@ -209,7 +211,7 @@ export default function ({ getService, getPageObjects }) {
 
       });
 
-      describe('Only request data around extent of map option', () => {
+      describe('Only request data around extent of map option', async () => {
 
         it('when checked adds filters to aggregation', async () => {
           const vizName1 = 'Visualization TileMap';
@@ -236,8 +238,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('zoom warning behavior', function describeIndexTests() {
-      // Zoom warning is only applicable to OSS
-      this.tags(['skipCloud', 'skipFirefox']);
 
       const waitForLoading = false;
       let zoomWarningEnabled;

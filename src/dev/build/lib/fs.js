@@ -29,11 +29,13 @@ import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
-import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
+import { createPromiseFromStreams, createMapStream } from '../../../utils';
 
-import tar from 'tar';
+import { Extract } from 'tar';
 
 const mkdirpAsync = promisify(mkdirpCb);
+const statAsync = promisify(fs.stat);
+const chmodAsync = promisify(fs.chmod);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
@@ -44,17 +46,6 @@ export function assertAbsolute(path) {
     throw new TypeError(
       'Please use absolute paths to keep things explicit. You probably want to use `build.resolvePath()` or `config.resolveFromRepo()`.'
     );
-  }
-}
-
-export function isFileAccessible(path) {
-  assertAbsolute(path);
-
-  try {
-    fs.accessSync(path);
-    return true;
-  } catch (e) {
-    return false;
   }
 }
 
@@ -84,6 +75,25 @@ export async function getChildPaths(path) {
   assertAbsolute(path);
   const childNames = await readdirAsync(path);
   return childNames.map(name => resolve(path, name));
+}
+
+export async function copy(source, destination) {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
+  const stat = await statAsync(source);
+
+  // mkdirp after the stat(), stat will throw if source
+  // doesn't exist and ideally we won't create the parent directory
+  // unless the source exists
+  await mkdirp(dirname(destination));
+
+  await createPromiseFromStreams([
+    fs.createReadStream(source),
+    fs.createWriteStream(destination),
+  ]);
+
+  await chmodAsync(destination, stat.mode);
 }
 
 export async function deleteAll(patterns, log) {
@@ -185,22 +195,20 @@ export async function untar(source, destination, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirpAsync(destination);
-
   await createPromiseFromStreams([
     fs.createReadStream(source),
     createGunzip(),
-    tar.extract({
+    new Extract({
       ...extractOptions,
-      cwd: destination
+      path: destination
     }),
   ]);
 }
 
 export async function compress(type, options = {}, source, destination) {
   const output = fs.createWriteStream(destination);
-  const archive = archiver(type, options.archiverOptions);
-  const name = (options.createRootDirectory ? source.split(sep).slice(-1)[0] : false);
+  const archive = archiver(type, options);
+  const name = source.split(sep).slice(-1)[0];
 
   archive.pipe(output);
 

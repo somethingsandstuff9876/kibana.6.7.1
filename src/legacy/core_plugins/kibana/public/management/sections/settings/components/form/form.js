@@ -44,7 +44,6 @@ class FormUI extends PureComponent {
     save: PropTypes.func.isRequired,
     clear: PropTypes.func.isRequired,
     showNoResultsMessage: PropTypes.bool.isRequired,
-    enableSaving: PropTypes.bool.isRequired,
   }
 
   renderClearQueryLink(totalSettings, currentSettings) {
@@ -100,7 +99,6 @@ class FormUI extends PureComponent {
                   setting={setting}
                   save={this.props.save}
                   clear={this.props.clear}
-                  enableSaving={this.props.enableSaving}
                 />
               );
             })}

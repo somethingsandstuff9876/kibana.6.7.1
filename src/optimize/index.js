@@ -20,7 +20,6 @@
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
 import { DllCompiler } from './dynamic_dll_plugin';
-import { fromRoot } from '../legacy/utils';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -38,12 +37,11 @@ export default async (kbnServer, server, config) => {
     return await kbnServer.mixin(require('./watch/watch'));
   }
 
-  const { newPlatform, uiBundles } = kbnServer;
+  const { uiBundles } = kbnServer;
   server.route(createBundlesRoute({
     regularBundlesPath: uiBundles.getWorkingDir(),
     dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
-    basePublicPath: config.get('server.basePath'),
-    builtCssPath: fromRoot('built_assets/css'),
+    basePublicPath: config.get('server.basePath')
   }));
 
   // in prod, only bundle when something is missing or invalid
@@ -66,10 +64,8 @@ export default async (kbnServer, server, config) => {
   const optimizer = new FsOptimizer({
     logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
-    discoveredPlugins: newPlatform.setup.core.plugins.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
-    workers: config.get('optimize.workers'),
   });
 
   server.log(

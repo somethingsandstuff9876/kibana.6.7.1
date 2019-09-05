@@ -2,6 +2,13 @@
   "type": "index",
   "value": {
     "index": ".reporting-2018.03.11",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0"
+      }
+    },
     "mappings": {
       "esqueue": {
         "properties": {
@@ -26,8 +33,8 @@
           "output": {
             "properties": {
               "content": {
-                "enabled": false,
-                "type": "object"
+                "type": "object",
+                "enabled": false
               },
               "content_type": {
                 "type": "keyword"
@@ -38,8 +45,8 @@
             }
           },
           "payload": {
-            "enabled": false,
-            "type": "object"
+            "type": "object",
+            "enabled": false
           },
           "priority": {
             "type": "byte"
@@ -57,13 +64,6 @@
             "type": "long"
           }
         }
-      }
-    },
-    "settings": {
-      "index": {
-        "auto_expand_replicas": "0-1",
-        "number_of_replicas": "0",
-        "number_of_shards": "1"
       }
     }
   }

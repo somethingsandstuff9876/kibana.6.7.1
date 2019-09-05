@@ -17,25 +17,18 @@
  * under the License.
  */
 
-import { Project } from '@kbn/pm';
+import { exec } from '../lib';
 
 export const InstallDependenciesTask = {
   description: 'Installing node_modules, including production builds of packages',
 
   async run(config, log, build) {
-    const project = await Project.fromPath(build.resolvePath());
+    // We're using --no-bin-links to support systems that don't have symlinks.
+    // This is commonly seen in shared folders on virtual machines
+    const args = ['--production', '--ignore-optional', '--frozen-lockfile', '--no-bin-links', '--prefer-offline'];
 
-    await project.installDependencies({
-      extraArgs: [
-        '--production',
-        '--ignore-optional',
-        '--frozen-lockfile',
-        '--prefer-offline',
-
-        // We're using --no-bin-links to support systems that don't have symlinks.
-        // This is commonly seen in shared folders on virtual machines
-        '--no-bin-links',
-      ]
+    await exec(log, 'yarn', args, {
+      cwd: build.resolvePath(),
     });
   },
 };

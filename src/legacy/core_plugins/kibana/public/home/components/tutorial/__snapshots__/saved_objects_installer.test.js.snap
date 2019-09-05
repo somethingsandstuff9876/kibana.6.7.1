@@ -116,22 +116,36 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
   }
 >
   <EuiSteps
+    firstStepNumber={1}
+    headingElement="p"
     steps={
       Array [
         Object {
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
+              component="div"
+              direction="row"
+              gutterSize="l"
               justifyContent="spaceBetween"
+              responsive={true}
+              wrap={false}
             >
-              <EuiFlexItem>
-                <EuiText>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="m"
+                >
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
                   </p>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem
+                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -141,7 +155,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
                   type="button"
                 >
                   Load Kibana objects
@@ -178,57 +191,66 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
         <div
           className="euiStep"
         >
-          <div
-            className="euiStep__titleWrapper"
+          <EuiScreenReaderOnly>
+            <span
+              className="euiScreenReaderOnly"
+            >
+              <EuiI18n
+                default="Incomplete Step"
+                token="euiStep.incompleteStep"
+              >
+                Incomplete Step
+              </EuiI18n>
+               
+            </span>
+          </EuiScreenReaderOnly>
+          <EuiStepNumber
+            className="euiStep__circle"
+            isHollow={true}
+            number={1}
+            status="incomplete"
           >
-            <EuiI18n
-              default={[Function]}
-              token="euiStep.ariaLabel"
-              values={
-                Object {
-                  "status": "incomplete",
-                }
-              }
+            <div
+              className="euiStepNumber euiStepNumber--incomplete euiStepNumber-isHollow euiStep__circle"
+            />
+          </EuiStepNumber>
+          <EuiTitle
+            className="euiStep__title"
+            size="s"
+            textTransform="none"
+          >
+            <p
+              className="euiTitle euiTitle--small euiStep__title"
             >
-              <EuiStepNumber
-                aria-label="Incomplete Step 1"
-                className="euiStep__circle"
-                isHollow={true}
-                number={1}
-                status="incomplete"
-              >
-                <div
-                  aria-label="Incomplete Step 1"
-                  className="euiStepNumber euiStepNumber--incomplete euiStepNumber-isHollow euiStep__circle"
-                />
-              </EuiStepNumber>
-            </EuiI18n>
-            <EuiTitle
-              className="euiStep__title"
-              size="s"
-            >
-              <p
-                className="euiTitle euiTitle--small euiStep__title"
-              >
-                Load Kibana objects
-              </p>
-            </EuiTitle>
-          </div>
+              Load Kibana objects
+            </p>
+          </EuiTitle>
           <div
             className="euiStep__content"
           >
             <EuiFlexGroup
               alignItems="center"
+              component="div"
+              direction="row"
+              gutterSize="l"
               justifyContent="spaceBetween"
+              responsive={true}
+              wrap={false}
             >
               <div
                 className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  component="div"
+                  grow={true}
+                >
                   <div
                     className="euiFlexItem"
                   >
-                    <EuiText>
+                    <EuiText
+                      grow={true}
+                      size="m"
+                    >
                       <div
                         className="euiText euiText--medium"
                       >
@@ -240,6 +262,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem
+                  component="div"
                   grow={false}
                 >
                   <div
@@ -252,7 +275,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                       iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
                       type="button"
                     >
                       <button
@@ -428,22 +450,36 @@ exports[`bulkCreate should display success message when bulkCreate is successful
   }
 >
   <EuiSteps
+    firstStepNumber={1}
+    headingElement="p"
     steps={
       Array [
         Object {
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
+              component="div"
+              direction="row"
+              gutterSize="l"
               justifyContent="spaceBetween"
+              responsive={true}
+              wrap={false}
             >
-              <EuiFlexItem>
-                <EuiText>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="m"
+                >
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
                   </p>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem
+                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -453,7 +489,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
-                  size="m"
                   type="button"
                 >
                   Load Kibana objects
@@ -490,91 +525,105 @@ exports[`bulkCreate should display success message when bulkCreate is successful
         <div
           className="euiStep"
         >
-          <div
-            className="euiStep__titleWrapper"
+          <EuiScreenReaderOnly>
+            <span
+              className="euiScreenReaderOnly"
+            >
+              <EuiI18n
+                default="Step"
+                token="euiStep.completeStep"
+              >
+                Step
+              </EuiI18n>
+               
+            </span>
+          </EuiScreenReaderOnly>
+          <EuiStepNumber
+            className="euiStep__circle"
+            isHollow={false}
+            number={1}
+            status="complete"
           >
-            <EuiI18n
-              default={[Function]}
-              token="euiStep.ariaLabel"
-              values={
-                Object {
-                  "status": "complete",
-                }
-              }
+            <div
+              className="euiStepNumber euiStepNumber--complete euiStep__circle"
             >
-              <EuiStepNumber
-                aria-label="Step 1"
-                className="euiStep__circle"
-                isHollow={false}
-                number={1}
-                status="complete"
+              <EuiI18n
+                default="complete"
+                token="euiStepNumber.isComplete"
               >
-                <div
-                  aria-label="Step 1"
-                  className="euiStepNumber euiStepNumber--complete euiStep__circle"
+                <EuiIcon
+                  className="euiStepNumber__icon"
+                  size="m"
+                  title="complete"
+                  type="check"
                 >
-                  <EuiI18n
-                    default="complete"
-                    token="euiStepNumber.isComplete"
+                  <check
+                    className="euiIcon euiIcon--medium euiStepNumber__icon"
+                    focusable="false"
+                    height="16"
+                    style={null}
+                    title="complete"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <EuiIcon
-                      aria-label="complete"
-                      className="euiStepNumber__icon"
-                      type="check"
+                    <svg
+                      className="euiIcon euiIcon--medium euiStepNumber__icon"
+                      focusable="false"
+                      height="16"
+                      style={null}
+                      title="complete"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <EuiIconCheck
-                        aria-label="complete"
-                        className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
-                        focusable="false"
-                        style={null}
-                      >
-                        <svg
-                          aria-label="complete"
-                          className="euiIcon euiIcon--medium euiIcon-isLoaded euiStepNumber__icon"
-                          focusable="false"
-                          height={16}
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                            fillRule="evenodd"
-                          />
-                        </svg>
-                      </EuiIconCheck>
-                    </EuiIcon>
-                  </EuiI18n>
-                </div>
-              </EuiStepNumber>
-            </EuiI18n>
-            <EuiTitle
-              className="euiStep__title"
-              size="s"
+                      <path
+                        d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                        fillRule="evenodd"
+                      />
+                    </svg>
+                  </check>
+                </EuiIcon>
+              </EuiI18n>
+            </div>
+          </EuiStepNumber>
+          <EuiTitle
+            className="euiStep__title"
+            size="s"
+            textTransform="none"
+          >
+            <p
+              className="euiTitle euiTitle--small euiStep__title"
             >
-              <p
-                className="euiTitle euiTitle--small euiStep__title"
-              >
-                Load Kibana objects
-              </p>
-            </EuiTitle>
-          </div>
+              Load Kibana objects
+            </p>
+          </EuiTitle>
           <div
             className="euiStep__content"
           >
             <EuiFlexGroup
               alignItems="center"
+              component="div"
+              direction="row"
+              gutterSize="l"
               justifyContent="spaceBetween"
+              responsive={true}
+              wrap={false}
             >
               <div
                 className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  component="div"
+                  grow={true}
+                >
                   <div
                     className="euiFlexItem"
                   >
-                    <EuiText>
+                    <EuiText
+                      grow={true}
+                      size="m"
+                    >
                       <div
                         className="euiText euiText--medium"
                       >
@@ -586,6 +635,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem
+                  component="div"
                   grow={false}
                 >
                   <div
@@ -598,7 +648,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                       iconSide="left"
                       isLoading={false}
                       onClick={[Function]}
-                      size="m"
                       type="button"
                     >
                       <button
@@ -660,22 +709,36 @@ exports[`bulkCreate should display success message when bulkCreate is successful
 
 exports[`renders 1`] = `
 <EuiSteps
+  firstStepNumber={1}
+  headingElement="p"
   steps={
     Array [
       Object {
         "children": <React.Fragment>
           <EuiFlexGroup
             alignItems="center"
+            component="div"
+            direction="row"
+            gutterSize="l"
             justifyContent="spaceBetween"
+            responsive={true}
+            wrap={false}
           >
-            <EuiFlexItem>
-              <EuiText>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <EuiText
+                grow={true}
+                size="m"
+              >
                 <p>
                   Imports index pattern, visualizations and pre-defined dashboards.
                 </p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem
+              component="div"
               grow={false}
             >
               <EuiButton
@@ -685,7 +748,6 @@ exports[`renders 1`] = `
                 iconSide="left"
                 isLoading={false}
                 onClick={[Function]}
-                size="m"
                 type="button"
               >
                 Load Kibana objects

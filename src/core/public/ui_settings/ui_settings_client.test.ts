@@ -28,15 +28,18 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     settings: {},
   }));
 
+  const onUpdateError = jest.fn();
+
   const config = new UiSettingsClient({
     defaults,
     initialSettings,
     api: {
       batchSet,
     } as any,
+    onUpdateError,
   });
 
-  return { config, batchSet };
+  return { config, batchSet, onUpdateError };
 }
 
 describe('#get', () => {

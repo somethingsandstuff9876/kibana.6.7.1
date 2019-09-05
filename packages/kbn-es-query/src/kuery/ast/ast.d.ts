@@ -21,6 +21,8 @@
  * WARNING: these typings are incomplete
  */
 
+import { StaticIndexPattern } from 'ui/index_patterns';
+
 export type KueryNode = any;
 
 export interface KueryParseOptions {
@@ -36,7 +38,6 @@ interface JsonObject {
   [key: string]: JsonValue;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface JsonArray extends Array<JsonValue> {}
 
 export function fromKueryExpression(
@@ -44,6 +45,4 @@ export function fromKueryExpression(
   parseOptions?: KueryParseOptions
 ): KueryNode;
 
-export function toElasticsearchQuery(node: KueryNode, indexPattern: any): JsonObject;
-
-export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;
+export function toElasticsearchQuery(node: KueryNode, indexPattern: StaticIndexPattern): JsonObject;

@@ -48,7 +48,7 @@ export const ActionButtons = ({
     <EuiFlexItem grow={false}>
       <EuiButton
         isDisabled={!submittable}
-        data-test-subj="createIndexPatternButton"
+        data-test-subj="createIndexPatternCreateButton"
         fill
         onClick={createIndexPattern}
       >

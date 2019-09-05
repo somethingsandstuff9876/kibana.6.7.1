@@ -31,3 +31,5 @@ describe('getAxisLabelString(interval)', () => {
     expect(getAxisLabelString(7200000)).to.equal('per 2 hours');
   });
 });
+
+

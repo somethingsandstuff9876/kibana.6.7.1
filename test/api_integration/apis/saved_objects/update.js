@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -51,8 +51,7 @@ export default function ({ getService }) {
               version: 'WzgsMV0=',
               attributes: {
                 title: 'My second favorite vis'
-              },
-              references: [],
+              }
             });
           });
       });

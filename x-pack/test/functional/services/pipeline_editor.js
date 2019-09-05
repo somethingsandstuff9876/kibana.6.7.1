@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { props as propsAsync } from 'bluebird';
 
 export function PipelineEditorProvider({ getService }) {
-  const retry = getService('retry');
   const aceEditor = getService('aceEditor');
   const testSubjects = getService('testSubjects');
 
@@ -30,6 +29,7 @@ export function PipelineEditorProvider({ getService }) {
   const SUBJ_BTN_CANCEL = 'pipelineEdit btnCancel';
   const SUBJ_BTN_DELETE = 'pipelineEdit btnDeletePipeline';
   const SUBJ_LNK_BREADCRUMB_MANAGEMENT = 'breadcrumbs lnkBreadcrumb0';
+  const SUBJ_CONFIRM_MODAL_TEXT = 'confirmModalBodyText';
 
   const DEFAULT_INPUT_VALUES = {
     id: '',
@@ -91,9 +91,9 @@ export function PipelineEditorProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertExists() {
-      await retry.waitFor('pipeline editor visible', async () => (
-        await testSubjects.exists(SUBJ_CONTAINER)
-      ));
+      if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
+        throw new Error('Expected to find the pipeline editor');
+      }
     }
 
     /**
@@ -103,9 +103,9 @@ export function PipelineEditorProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertEditorId(id) {
-      await retry.waitFor(`editor id to be "${id}"`, async () => (
-        await testSubjects.exists(getContainerSubjForId(id))
-      ));
+      if (!(await testSubjects.exists(getContainerSubjForId(id)))) {
+        throw new Error(`Expected editor id to be "${id}"`);
+      }
     }
 
     /**
@@ -123,15 +123,15 @@ export function PipelineEditorProvider({ getService }) {
      */
     async assertInputs(expectedValues) {
       const values = await propsAsync({
-        id: testSubjects.getAttribute(SUBJ_INPUT_ID, 'value'),
-        description: testSubjects.getAttribute(SUBJ_INPUT_DESCRIPTION, 'value'),
+        id: testSubjects.getProperty(SUBJ_INPUT_ID, 'value'),
+        description: testSubjects.getProperty(SUBJ_INPUT_DESCRIPTION, 'value'),
         pipeline: aceEditor.getValue(SUBJ_UI_ACE_PIPELINE),
-        workers: testSubjects.getAttribute(SUBJ_INPUT_WORKERS, 'value'),
-        batchSize: testSubjects.getAttribute(SUBJ_INPUT_BATCH_SIZE, 'value'),
-        queueType: testSubjects.getAttribute(SUBJ_SELECT_QUEUE_TYPE, 'value'),
-        queueMaxBytesNumber: testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
-        queueMaxBytesUnits: testSubjects.getAttribute(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
-        queueCheckpointWrites: testSubjects.getAttribute(
+        workers: testSubjects.getProperty(SUBJ_INPUT_WORKERS, 'value'),
+        batchSize: testSubjects.getProperty(SUBJ_INPUT_BATCH_SIZE, 'value'),
+        queueType: testSubjects.getProperty(SUBJ_SELECT_QUEUE_TYPE, 'value'),
+        queueMaxBytesNumber: testSubjects.getProperty(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
+        queueMaxBytesUnits: testSubjects.getProperty(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
+        queueCheckpointWrites: testSubjects.getProperty(
           SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES,
           'value'
         ),
@@ -141,9 +141,13 @@ export function PipelineEditorProvider({ getService }) {
     }
 
     async assertNoDeleteButton() {
-      await retry.waitFor(`delete button to be hidden`, async () => (
-        !await testSubjects.exists(SUBJ_BTN_DELETE)
-      ));
+      if (await testSubjects.exists(SUBJ_BTN_DELETE)) {
+        throw new Error('Expected there to be no delete button');
+      }
+    }
+
+    assertUnsavedChangesModal() {
+      return testSubjects.exists(SUBJ_CONFIRM_MODAL_TEXT);
     }
   }();
 }

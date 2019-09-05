@@ -17,20 +17,19 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { colorSchemas } from 'ui/vislib/components/color/colormaps';
-import { GaugeOptions } from './components/options';
+import gaugeTemplate from './editors/gauge.html';
+import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
-export default function GaugeVisType(Private) {
+export default function GaugeVisType(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'gauge',
-    title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
+    title: i18n('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
     icon: 'visGauge',
-    description: i18n.translate('kbnVislibVisTypes.gauge.gaugeDescription', {
+    description: i18n('kbnVislibVisTypes.gauge.gaugeDescription', {
       defaultMessage: 'Gauges indicate the status of a metric. Use it to show how a metric\'s value relates to reference threshold values.'
     }),
     visConfig: {
@@ -40,7 +39,7 @@ export default function GaugeVisType(Private) {
         addLegend: true,
         isDisplayWarning: false,
         gauge: {
-          alignment: 'automatic',
+          verticalSplit: false,
           extendRange: true,
           percentageMode: false,
           gaugeType: 'Arc',
@@ -62,7 +61,7 @@ export default function GaugeVisType(Private) {
           scale: {
             show: true,
             labels: false,
-            color: 'rgba(105,112,125,0.2)',
+            color: '#333',
           },
           type: 'meter',
           style: {
@@ -71,7 +70,7 @@ export default function GaugeVisType(Private) {
             mask: false,
             bgMask: false,
             maskBars: 50,
-            bgFill: 'rgba(105,112,125,0.2)',
+            bgFill: '#eee',
             bgColor: true,
             subText: '',
             fontSize: 60,
@@ -84,41 +83,17 @@ export default function GaugeVisType(Private) {
     },
     editorConfig: {
       collections: {
-        gaugeTypes: [
-          {
-            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.arcText', {
-              defaultMessage: 'Arc',
-            }),
-            value: 'Arc',
-          },
-          {
-            text: i18n.translate('kbnVislibVisTypes.gauge.gaugeTypes.circleText', {
-              defaultMessage: 'Circle',
-            }),
-            value: 'Circle',
-          },
-        ],
-        alignments: [
-          {
-            value: 'automatic',
-            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
-          },
-          {
-            value: 'horizontal',
-            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
-          },
-          {
-            value: 'vertical',
-            text: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
-        ],
-        colorSchemas,
+        gaugeTypes: ['Arc', 'Circle'],
+        gaugeColorMode: ['None', 'Labels', 'Background'],
+        scales: ['linear', 'log', 'square root'],
+        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
       },
-      optionsTemplate: GaugeOptions,
+      optionsTemplate: gaugeTemplate,
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.gauge.metricTitle', { defaultMessage: 'Metric' }),
+          title: i18n('kbnVislibVisTypes.gauge.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
@@ -130,10 +105,10 @@ export default function GaugeVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split group' }),
+          title: i18n('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!filter']
         }
       ])
     },

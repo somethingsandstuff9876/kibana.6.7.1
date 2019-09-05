@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -69,8 +69,7 @@ export default function ({ getService }) {
                   version: 'WzgsMV0=',
                   attributes: {
                     title: 'A great new dashboard'
-                  },
-                  references: [],
+                  }
                 },
               ]
             });
@@ -102,8 +101,7 @@ export default function ({ getService }) {
                   version: 'WzAsMV0=',
                   attributes: {
                     title: 'An existing visualization'
-                  },
-                  references: [],
+                  }
                 },
                 {
                   type: 'dashboard',
@@ -112,8 +110,7 @@ export default function ({ getService }) {
                   version: 'WzEsMV0=',
                   attributes: {
                     title: 'A great new dashboard'
-                  },
-                  references: [],
+                  }
                 },
               ]
             });

@@ -10,56 +10,30 @@ exports[`render 1`] = `
   ownFocus={true}
   size="m"
 >
-  <EuiFlyoutHeader
-    hasBorder={true}
-  >
+  <EuiFlyoutBody>
     <EuiTitle
-      size="m"
+      size="s"
+      textTransform="none"
     >
-      <h2>
+      <h1>
         <FormattedMessage
-          defaultMessage="Open search"
+          defaultMessage="Open Search"
           id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
           values={Object {}}
         />
-      </h2>
+      </h1>
     </EuiTitle>
-  </EuiFlyoutHeader>
-  <EuiFlyoutBody>
-    <SavedObjectFinder
-      noItemsMessage={
-        <FormattedMessage
-          defaultMessage="No matching searches found."
-          id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
-          values={Object {}}
-        />
-      }
-      onChoose={[Function]}
-      savedObjectMetaData={
-        Array [
-          Object {
-            "getIconForSavedObject": [Function],
-            "name": "Saved search",
-            "type": "search",
-          },
-        ]
-      }
+    <EuiSpacer
+      size="m"
     />
-  </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiFlexGroup
-      justifyContent="flexEnd"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
+    <InjectIntl(SavedObjectFinderUI)
+      callToActionButton={
         <EuiButton
           color="primary"
-          fill={true}
+          fill={false}
           href="#/management/kibana/objects?_a=(tab:search)"
           iconSide="left"
           onClick={[Function]}
-          size="m"
           type="button"
         >
           <FormattedMessage
@@ -68,8 +42,18 @@ exports[`render 1`] = `
             values={Object {}}
           />
         </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlyoutFooter>
+      }
+      makeUrl={[Function]}
+      noItemsMessage={
+        <FormattedMessage
+          defaultMessage="No matching searches found."
+          id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+          values={Object {}}
+        />
+      }
+      onChoose={[Function]}
+      savedObjectType="search"
+    />
+  </EuiFlyoutBody>
 </EuiFlyout>
 `;

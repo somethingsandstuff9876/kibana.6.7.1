@@ -18,7 +18,6 @@ export default (gulp, { buildTarget }) => {
     });
 
     const buildRoot = resolve(buildTarget, 'kibana/x-pack');
-
     const log = new ToolingLog({
       level: 'info',
       writeTo: process.stdout

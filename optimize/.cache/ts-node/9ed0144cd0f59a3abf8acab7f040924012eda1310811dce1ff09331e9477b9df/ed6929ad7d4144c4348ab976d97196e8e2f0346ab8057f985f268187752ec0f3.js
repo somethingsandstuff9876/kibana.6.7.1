@@ -1,0 +1,97 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+/*
+ * This provides a mechanism for preventing multiple Kibana instances from
+ * simultaneously running migrations on the same index. It synchronizes this
+ * by handling index creation conflicts, and putting this instance into a
+ * poll loop that periodically checks to see if the index is migrated.
+ *
+ * The reason we have to coordinate this, rather than letting each Kibana instance
+ * perform duplicate work, is that if we allowed each Kibana to simply run migrations in
+ * parallel, they would each try to reindex and each try to create the destination index.
+ * If those indices already exist, it may be due to contention between multiple Kibana
+ * instances (which is safe to ignore), but it may be due to a partially completed migration,
+ * or someone tampering with the Kibana alias. In these cases, it's not clear that we should
+ * just migrate data into an existing index. Such an action could result in data loss. Instead,
+ * we should probably fail, and the Kibana sys-admin should clean things up before relaunching
+ * Kibana.
+ */
+const lodash_1 = tslib_1.__importDefault(require("lodash"));
+const DEFAULT_POLL_INTERVAL = 15000;
+/**
+ * Runs the migration specified by opts. If the migration fails due to an index
+ * creation conflict, this falls into a polling loop, checking every pollInterval
+ * milliseconds if the index is migrated.
+ *
+ * @export
+ * @param {Opts} opts
+ * @prop {Migration} runMigration - A function that runs the index migration
+ * @prop {IsMigrated} isMigrated - A function which checks if the index is already migrated
+ * @prop {Logger} log - The migration logger
+ * @prop {number} pollInterval - How often, in ms, to check that the index is migrated
+ * @returns
+ */
+async function coordinateMigration(opts) {
+    try {
+        return await opts.runMigration();
+    }
+    catch (error) {
+        if (handleIndexExists(error, opts.log)) {
+            await waitForMigration(opts.isMigrated, opts.pollInterval);
+            return { status: 'skipped' };
+        }
+        throw error;
+    }
+}
+exports.coordinateMigration = coordinateMigration;
+/**
+ * If the specified error is an index exists error, this logs a warning,
+ * and is the cue for us to fall into a polling loop, waiting for some
+ * other Kibana instance to complete the migration.
+ */
+function handleIndexExists(error, log) {
+    const isIndexExistsError = lodash_1.default.get(error, 'body.error.type') === 'resource_already_exists_exception';
+    if (!isIndexExistsError) {
+        return false;
+    }
+    const index = lodash_1.default.get(error, 'body.error.index');
+    log.warning(`Another Kibana instance appears to be migrating the index. Waiting for ` +
+        `that migration to complete. If no other Kibana instance is attempting ` +
+        `migrations, you can get past this message by deleting index ${index} and ` +
+        `restarting Kibana.`);
+    return true;
+}
+/**
+ * Polls isMigrated every pollInterval milliseconds until it returns true.
+ */
+async function waitForMigration(isMigrated, pollInterval = DEFAULT_POLL_INTERVAL) {
+    while (true) {
+        if (await isMigrated()) {
+            return;
+        }
+        await sleep(pollInterval);
+    }
+}
+function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL3NlcnZlci9zYXZlZF9vYmplY3RzL21pZ3JhdGlvbnMvY29yZS9taWdyYXRpb25fY29vcmRpbmF0b3IudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3NyYy9zZXJ2ZXIvc2F2ZWRfb2JqZWN0cy9taWdyYXRpb25zL2NvcmUvbWlncmF0aW9uX2Nvb3JkaW5hdG9yLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FpQkc7OztBQUVIOzs7Ozs7Ozs7Ozs7Ozs7R0FlRztBQUVILDREQUF1QjtBQUd2QixNQUFNLHFCQUFxQixHQUFHLEtBQUssQ0FBQztBQW1CcEM7Ozs7Ozs7Ozs7OztHQVlHO0FBQ0ksS0FBSyxVQUFVLG1CQUFtQixDQUFDLElBQVU7SUFDbEQsSUFBSTtRQUNGLE9BQU8sTUFBTSxJQUFJLENBQUMsWUFBWSxFQUFFLENBQUM7S0FDbEM7SUFBQyxPQUFPLEtBQUssRUFBRTtRQUNkLElBQUksaUJBQWlCLENBQUMsS0FBSyxFQUFFLElBQUksQ0FBQyxHQUFHLENBQUMsRUFBRTtZQUN0QyxNQUFNLGdCQUFnQixDQUFDLElBQUksQ0FBQyxVQUFVLEVBQUUsSUFBSSxDQUFDLFlBQVksQ0FBQyxDQUFDO1lBQzNELE9BQU8sRUFBRSxNQUFNLEVBQUUsU0FBUyxFQUFFLENBQUM7U0FDOUI7UUFDRCxNQUFNLEtBQUssQ0FBQztLQUNiO0FBQ0gsQ0FBQztBQVZELGtEQVVDO0FBRUQ7Ozs7R0FJRztBQUNILFNBQVMsaUJBQWlCLENBQUMsS0FBVSxFQUFFLEdBQVc7SUFDaEQsTUFBTSxrQkFBa0IsR0FDdEIsZ0JBQUMsQ0FBQyxHQUFHLENBQUMsS0FBSyxFQUFFLGlCQUFpQixDQUFDLEtBQUssbUNBQW1DLENBQUM7SUFDMUUsSUFBSSxDQUFDLGtCQUFrQixFQUFFO1FBQ3ZCLE9BQU8sS0FBSyxDQUFDO0tBQ2Q7SUFFRCxNQUFNLEtBQUssR0FBRyxnQkFBQyxDQUFDLEdBQUcsQ0FBQyxLQUFLLEVBQUUsa0JBQWtCLENBQUMsQ0FBQztJQUUvQyxHQUFHLENBQUMsT0FBTyxDQUNULHlFQUF5RTtRQUN2RSx3RUFBd0U7UUFDeEUsK0RBQStELEtBQUssT0FBTztRQUMzRSxvQkFBb0IsQ0FDdkIsQ0FBQztJQUVGLE9BQU8sSUFBSSxDQUFDO0FBQ2QsQ0FBQztBQUVEOztHQUVHO0FBQ0gsS0FBSyxVQUFVLGdCQUFnQixDQUM3QixVQUFrQyxFQUNsQyxZQUFZLEdBQUcscUJBQXFCO0lBRXBDLE9BQU8sSUFBSSxFQUFFO1FBQ1gsSUFBSSxNQUFNLFVBQVUsRUFBRSxFQUFFO1lBQ3RCLE9BQU87U0FDUjtRQUNELE1BQU0sS0FBSyxDQUFDLFlBQVksQ0FBQyxDQUFDO0tBQzNCO0FBQ0gsQ0FBQztBQUVELFNBQVMsS0FBSyxDQUFDLEVBQVU7SUFDdkIsT0FBTyxJQUFJLE9BQU8sQ0FBQyxDQUFDLENBQUMsRUFBRSxDQUFDLFVBQVUsQ0FBQyxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQUMsQ0FBQztBQUM3QyxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIExpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmUgb3IgbW9yZSBjb250cmlidXRvclxuICogbGljZW5zZSBhZ3JlZW1lbnRzLiBTZWUgdGhlIE5PVElDRSBmaWxlIGRpc3RyaWJ1dGVkIHdpdGhcbiAqIHRoaXMgd29yayBmb3IgYWRkaXRpb25hbCBpbmZvcm1hdGlvbiByZWdhcmRpbmcgY29weXJpZ2h0XG4gKiBvd25lcnNoaXAuIEVsYXN0aWNzZWFyY2ggQi5WLiBsaWNlbnNlcyB0aGlzIGZpbGUgdG8geW91IHVuZGVyXG4gKiB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpOyB5b3UgbWF5XG4gKiBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLFxuICogc29mdHdhcmUgZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW5cbiAqIFwiQVMgSVNcIiBCQVNJUywgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZXG4gKiBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLiAgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGVcbiAqIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQgbGltaXRhdGlvbnNcbiAqIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8qXG4gKiBUaGlzIHByb3ZpZGVzIGEgbWVjaGFuaXNtIGZvciBwcmV2ZW50aW5nIG11bHRpcGxlIEtpYmFuYSBpbnN0YW5jZXMgZnJvbVxuICogc2ltdWx0YW5lb3VzbHkgcnVubmluZyBtaWdyYXRpb25zIG9uIHRoZSBzYW1lIGluZGV4LiBJdCBzeW5jaHJvbml6ZXMgdGhpc1xuICogYnkgaGFuZGxpbmcgaW5kZXggY3JlYXRpb24gY29uZmxpY3RzLCBhbmQgcHV0dGluZyB0aGlzIGluc3RhbmNlIGludG8gYVxuICogcG9sbCBsb29wIHRoYXQgcGVyaW9kaWNhbGx5IGNoZWNrcyB0byBzZWUgaWYgdGhlIGluZGV4IGlzIG1pZ3JhdGVkLlxuICpcbiAqIFRoZSByZWFzb24gd2UgaGF2ZSB0byBjb29yZGluYXRlIHRoaXMsIHJhdGhlciB0aGFuIGxldHRpbmcgZWFjaCBLaWJhbmEgaW5zdGFuY2VcbiAqIHBlcmZvcm0gZHVwbGljYXRlIHdvcmssIGlzIHRoYXQgaWYgd2UgYWxsb3dlZCBlYWNoIEtpYmFuYSB0byBzaW1wbHkgcnVuIG1pZ3JhdGlvbnMgaW5cbiAqIHBhcmFsbGVsLCB0aGV5IHdvdWxkIGVhY2ggdHJ5IHRvIHJlaW5kZXggYW5kIGVhY2ggdHJ5IHRvIGNyZWF0ZSB0aGUgZGVzdGluYXRpb24gaW5kZXguXG4gKiBJZiB0aG9zZSBpbmRpY2VzIGFscmVhZHkgZXhpc3QsIGl0IG1heSBiZSBkdWUgdG8gY29udGVudGlvbiBiZXR3ZWVuIG11bHRpcGxlIEtpYmFuYVxuICogaW5zdGFuY2VzICh3aGljaCBpcyBzYWZlIHRvIGlnbm9yZSksIGJ1dCBpdCBtYXkgYmUgZHVlIHRvIGEgcGFydGlhbGx5IGNvbXBsZXRlZCBtaWdyYXRpb24sXG4gKiBvciBzb21lb25lIHRhbXBlcmluZyB3aXRoIHRoZSBLaWJhbmEgYWxpYXMuIEluIHRoZXNlIGNhc2VzLCBpdCdzIG5vdCBjbGVhciB0aGF0IHdlIHNob3VsZFxuICoganVzdCBtaWdyYXRlIGRhdGEgaW50byBhbiBleGlzdGluZyBpbmRleC4gU3VjaCBhbiBhY3Rpb24gY291bGQgcmVzdWx0IGluIGRhdGEgbG9zcy4gSW5zdGVhZCxcbiAqIHdlIHNob3VsZCBwcm9iYWJseSBmYWlsLCBhbmQgdGhlIEtpYmFuYSBzeXMtYWRtaW4gc2hvdWxkIGNsZWFuIHRoaW5ncyB1cCBiZWZvcmUgcmVsYXVuY2hpbmdcbiAqIEtpYmFuYS5cbiAqL1xuXG5pbXBvcnQgXyBmcm9tICdsb2Rhc2gnO1xuaW1wb3J0IHsgTG9nZ2VyIH0gZnJvbSAnLi9taWdyYXRpb25fbG9nZ2VyJztcblxuY29uc3QgREVGQVVMVF9QT0xMX0lOVEVSVkFMID0gMTUwMDA7XG5cbmV4cG9ydCB0eXBlIE1pZ3JhdGlvblJlc3VsdCA9XG4gIHwgeyBzdGF0dXM6ICdza2lwcGVkJyB9XG4gIHwgeyBzdGF0dXM6ICdwYXRjaGVkJyB9XG4gIHwge1xuICAgICAgc3RhdHVzOiAnbWlncmF0ZWQnO1xuICAgICAgZGVzdEluZGV4OiBzdHJpbmc7XG4gICAgICBzb3VyY2VJbmRleDogc3RyaW5nO1xuICAgICAgZWxhcHNlZE1zOiBudW1iZXI7XG4gICAgfTtcblxuaW50ZXJmYWNlIE9wdHMge1xuICBydW5NaWdyYXRpb246ICgpID0+IFByb21pc2U8TWlncmF0aW9uUmVzdWx0PjtcbiAgaXNNaWdyYXRlZDogKCkgPT4gUHJvbWlzZTxib29sZWFuPjtcbiAgbG9nOiBMb2dnZXI7XG4gIHBvbGxJbnRlcnZhbD86IG51bWJlcjtcbn1cblxuLyoqXG4gKiBSdW5zIHRoZSBtaWdyYXRpb24gc3BlY2lmaWVkIGJ5IG9wdHMuIElmIHRoZSBtaWdyYXRpb24gZmFpbHMgZHVlIHRvIGFuIGluZGV4XG4gKiBjcmVhdGlvbiBjb25mbGljdCwgdGhpcyBmYWxscyBpbnRvIGEgcG9sbGluZyBsb29wLCBjaGVja2luZyBldmVyeSBwb2xsSW50ZXJ2YWxcbiAqIG1pbGxpc2Vjb25kcyBpZiB0aGUgaW5kZXggaXMgbWlncmF0ZWQuXG4gKlxuICogQGV4cG9ydFxuICogQHBhcmFtIHtPcHRzfSBvcHRzXG4gKiBAcHJvcCB7TWlncmF0aW9ufSBydW5NaWdyYXRpb24gLSBBIGZ1bmN0aW9uIHRoYXQgcnVucyB0aGUgaW5kZXggbWlncmF0aW9uXG4gKiBAcHJvcCB7SXNNaWdyYXRlZH0gaXNNaWdyYXRlZCAtIEEgZnVuY3Rpb24gd2hpY2ggY2hlY2tzIGlmIHRoZSBpbmRleCBpcyBhbHJlYWR5IG1pZ3JhdGVkXG4gKiBAcHJvcCB7TG9nZ2VyfSBsb2cgLSBUaGUgbWlncmF0aW9uIGxvZ2dlclxuICogQHByb3Age251bWJlcn0gcG9sbEludGVydmFsIC0gSG93IG9mdGVuLCBpbiBtcywgdG8gY2hlY2sgdGhhdCB0aGUgaW5kZXggaXMgbWlncmF0ZWRcbiAqIEByZXR1cm5zXG4gKi9cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBjb29yZGluYXRlTWlncmF0aW9uKG9wdHM6IE9wdHMpOiBQcm9taXNlPE1pZ3JhdGlvblJlc3VsdD4ge1xuICB0cnkge1xuICAgIHJldHVybiBhd2FpdCBvcHRzLnJ1bk1pZ3JhdGlvbigpO1xuICB9IGNhdGNoIChlcnJvcikge1xuICAgIGlmIChoYW5kbGVJbmRleEV4aXN0cyhlcnJvciwgb3B0cy5sb2cpKSB7XG4gICAgICBhd2FpdCB3YWl0Rm9yTWlncmF0aW9uKG9wdHMuaXNNaWdyYXRlZCwgb3B0cy5wb2xsSW50ZXJ2YWwpO1xuICAgICAgcmV0dXJuIHsgc3RhdHVzOiAnc2tpcHBlZCcgfTtcbiAgICB9XG4gICAgdGhyb3cgZXJyb3I7XG4gIH1cbn1cblxuLyoqXG4gKiBJZiB0aGUgc3BlY2lmaWVkIGVycm9yIGlzIGFuIGluZGV4IGV4aXN0cyBlcnJvciwgdGhpcyBsb2dzIGEgd2FybmluZyxcbiAqIGFuZCBpcyB0aGUgY3VlIGZvciB1cyB0byBmYWxsIGludG8gYSBwb2xsaW5nIGxvb3AsIHdhaXRpbmcgZm9yIHNvbWVcbiAqIG90aGVyIEtpYmFuYSBpbnN0YW5jZSB0byBjb21wbGV0ZSB0aGUgbWlncmF0aW9uLlxuICovXG5mdW5jdGlvbiBoYW5kbGVJbmRleEV4aXN0cyhlcnJvcjogYW55LCBsb2c6IExvZ2dlcikge1xuICBjb25zdCBpc0luZGV4RXhpc3RzRXJyb3IgPVxuICAgIF8uZ2V0KGVycm9yLCAnYm9keS5lcnJvci50eXBlJykgPT09ICdyZXNvdXJjZV9hbHJlYWR5X2V4aXN0c19leGNlcHRpb24nO1xuICBpZiAoIWlzSW5kZXhFeGlzdHNFcnJvcikge1xuICAgIHJldHVybiBmYWxzZTtcbiAgfVxuXG4gIGNvbnN0IGluZGV4ID0gXy5nZXQoZXJyb3IsICdib2R5LmVycm9yLmluZGV4Jyk7XG5cbiAgbG9nLndhcm5pbmcoXG4gICAgYEFub3RoZXIgS2liYW5hIGluc3RhbmNlIGFwcGVhcnMgdG8gYmUgbWlncmF0aW5nIHRoZSBpbmRleC4gV2FpdGluZyBmb3IgYCArXG4gICAgICBgdGhhdCBtaWdyYXRpb24gdG8gY29tcGxldGUuIElmIG5vIG90aGVyIEtpYmFuYSBpbnN0YW5jZSBpcyBhdHRlbXB0aW5nIGAgK1xuICAgICAgYG1pZ3JhdGlvbnMsIHlvdSBjYW4gZ2V0IHBhc3QgdGhpcyBtZXNzYWdlIGJ5IGRlbGV0aW5nIGluZGV4ICR7aW5kZXh9IGFuZCBgICtcbiAgICAgIGByZXN0YXJ0aW5nIEtpYmFuYS5gXG4gICk7XG5cbiAgcmV0dXJuIHRydWU7XG59XG5cbi8qKlxuICogUG9sbHMgaXNNaWdyYXRlZCBldmVyeSBwb2xsSW50ZXJ2YWwgbWlsbGlzZWNvbmRzIHVudGlsIGl0IHJldHVybnMgdHJ1ZS5cbiAqL1xuYXN5bmMgZnVuY3Rpb24gd2FpdEZvck1pZ3JhdGlvbihcbiAgaXNNaWdyYXRlZDogKCkgPT4gUHJvbWlzZTxib29sZWFuPixcbiAgcG9sbEludGVydmFsID0gREVGQVVMVF9QT0xMX0lOVEVSVkFMXG4pIHtcbiAgd2hpbGUgKHRydWUpIHtcbiAgICBpZiAoYXdhaXQgaXNNaWdyYXRlZCgpKSB7XG4gICAgICByZXR1cm47XG4gICAgfVxuICAgIGF3YWl0IHNsZWVwKHBvbGxJbnRlcnZhbCk7XG4gIH1cbn1cblxuZnVuY3Rpb24gc2xlZXAobXM6IG51bWJlcikge1xuICByZXR1cm4gbmV3IFByb21pc2UociA9PiBzZXRUaW1lb3V0KHIsIG1zKSk7XG59XG4iXX0=

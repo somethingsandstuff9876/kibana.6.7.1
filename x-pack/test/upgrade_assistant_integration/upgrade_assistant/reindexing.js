@@ -5,9 +5,9 @@
  */
 
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
-import { ReindexStatus, REINDEX_OP_TYPE } from '../../../legacy/plugins/upgrade_assistant/common/types';
+import { ReindexStatus, REINDEX_OP_TYPE, ReindexWarning } from '../../../plugins/upgrade_assistant/common/types';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -39,9 +39,9 @@ export default function ({ getService }) {
         refresh: true,
         body: {
           query: {
-            'simple_query_string': {
+            "simple_query_string": {
               query: REINDEX_OP_TYPE,
-              fields: ['type']
+              fields: ["type"]
             }
           }
         }
@@ -128,21 +128,40 @@ export default function ({ getService }) {
       });
     });
 
-    it('shows no warnings', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/7.0-data`);
-      expect(resp.body.warnings.length).to.be(0);
+    it('shows warnings for boolean fields', async () => {
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/boolean-test`);
+      expect(resp.body.warnings.includes(ReindexWarning.booleanFields)).to.be(true);
     });
 
-    it('reindexes old 7.0 index', async () => {
+    it('shows warnings for all meta field', async () => {
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/all-field-test`);
+      expect(resp.body.warnings.includes(ReindexWarning.allField)).to.be(true);
+    });
+
+    it('reindexes index with boolean fields', async () => {
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/7.0-data`)
+        .post(`/api/upgrade_assistant/reindex/boolean-test`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body.indexName).to.equal('7.0-data');
+      expect(body.indexName).to.equal('boolean-test');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
-      const lastState = await waitForReindexToComplete('7.0-data');
+      const lastState = await waitForReindexToComplete('boolean-test');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+    });
+
+    it('reindexes index with _all field', async () => {
+      const { body } = await supertest
+        .post(`/api/upgrade_assistant/reindex/all-field-test`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(body.indexName).to.equal('all-field-test');
+      expect(body.status).to.equal(ReindexStatus.inProgress);
+
+      const lastState = await waitForReindexToComplete('all-field-test');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });

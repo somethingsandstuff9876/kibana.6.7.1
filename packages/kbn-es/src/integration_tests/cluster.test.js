@@ -17,11 +17,10 @@
  * under the License.
  */
 
-const { ToolingLog, CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
+const { ToolingLog } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
-const { extractConfigFiles } = require('../utils/extract_config_files');
 
 jest.mock('../install', () => ({
   installSource: jest.fn(),
@@ -30,9 +29,6 @@ jest.mock('../install', () => ({
 }));
 
 jest.mock('execa', () => jest.fn());
-jest.mock('../utils/extract_config_files', () => ({
-  extractConfigFiles: jest.fn(),
-}));
 
 const log = new ToolingLog();
 
@@ -67,7 +63,6 @@ function mockEsBin({ exitCode, start }) {
         JSON.stringify({
           exitCode,
           start,
-          ssl: args.includes('xpack.security.http.ssl.enabled=true'),
         }),
       ],
       options
@@ -77,7 +72,6 @@ function mockEsBin({ exitCode, start }) {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  extractConfigFiles.mockImplementation(config => config);
 });
 
 describe('#installSource()', () => {
@@ -92,7 +86,7 @@ describe('#installSource()', () => {
         })
     );
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     const promise = cluster.installSource();
     await ensureNoResolve(promise);
     resolveInstallSource();
@@ -103,7 +97,7 @@ describe('#installSource()', () => {
 
   it('passes through all options+log to installSource()', async () => {
     installSource.mockResolvedValue({});
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.installSource({ foo: 'bar' });
     expect(installSource).toHaveBeenCalledTimes(1);
     expect(installSource).toHaveBeenCalledWith({
@@ -114,7 +108,7 @@ describe('#installSource()', () => {
 
   it('rejects if installSource() rejects', async () => {
     installSource.mockRejectedValue(new Error('foo'));
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await expect(cluster.installSource()).rejects.toThrowError('foo');
   });
 });
@@ -131,7 +125,7 @@ describe('#installSnapshot()', () => {
         })
     );
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     const promise = cluster.installSnapshot();
     await ensureNoResolve(promise);
     resolveInstallSnapshot();
@@ -142,18 +136,22 @@ describe('#installSnapshot()', () => {
 
   it('passes through all options+log to installSnapshot()', async () => {
     installSnapshot.mockResolvedValue({});
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.installSnapshot({ foo: 'bar' });
     expect(installSnapshot).toHaveBeenCalledTimes(1);
-    expect(installSnapshot).toHaveBeenCalledWith({
-      log,
-      foo: 'bar',
-    });
+    expect(installSnapshot).toHaveBeenCalledWith(
+      // In es6.7, this is the literal object. In 7.0, it also
+      // contains "version": "7.0.0"
+      expect.objectContaining({
+        log,
+        foo: 'bar',
+      })
+    );
   });
 
   it('rejects if installSnapshot() rejects', async () => {
     installSnapshot.mockRejectedValue(new Error('foo'));
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await expect(cluster.installSnapshot()).rejects.toThrowError('foo');
   });
 });
@@ -170,7 +168,7 @@ describe('#installArchive(path)', () => {
         })
     );
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     const promise = cluster.installArchive();
     await ensureNoResolve(promise);
     resolveInstallArchive();
@@ -181,7 +179,7 @@ describe('#installArchive(path)', () => {
 
   it('passes through path and all options+log to installArchive()', async () => {
     installArchive.mockResolvedValue({});
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.installArchive('path', { foo: 'bar' });
     expect(installArchive).toHaveBeenCalledTimes(1);
     expect(installArchive).toHaveBeenCalledWith('path', {
@@ -192,7 +190,7 @@ describe('#installArchive(path)', () => {
 
   it('rejects if installArchive() rejects', async () => {
     installArchive.mockRejectedValue(new Error('foo'));
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await expect(cluster.installArchive()).rejects.toThrowError('foo');
   });
 });
@@ -201,37 +199,37 @@ describe('#start(installPath)', () => {
   it('rejects when bin/elasticsearch exists with 0 before starting', async () => {
     mockEsBin({ exitCode: 0, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('ES exited without starting');
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited without starting');
   });
 
   it('rejects when bin/elasticsearch exists with 143 before starting', async () => {
     mockEsBin({ exitCode: 143, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('ES exited without starting');
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited without starting');
   });
 
   it('rejects when bin/elasticsearch exists with 130 before starting', async () => {
     mockEsBin({ exitCode: 130, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('ES exited without starting');
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited without starting');
   });
 
   it('rejects when bin/elasticsearch exists with 1 before starting', async () => {
     mockEsBin({ exitCode: 1, start: false });
 
-    await expect(new Cluster({ log }).start()).rejects.toThrowError('ES exited with code 1');
+    await expect(new Cluster(log).start()).rejects.toThrowError('ES exited with code 1');
   });
 
   it('resolves when bin/elasticsearch logs "started"', async () => {
     mockEsBin({ start: true });
 
-    await new Cluster({ log }).start();
+    await new Cluster(log).start();
   });
 
   it('rejects if #start() was called previously', async () => {
     mockEsBin({ start: true });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.start();
     await expect(cluster.start()).rejects.toThrowError('ES has already been started');
   });
@@ -239,34 +237,9 @@ describe('#start(installPath)', () => {
   it('rejects if #run() was called previously', async () => {
     mockEsBin({ start: true });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.run();
     await expect(cluster.start()).rejects.toThrowError('ES has already been started');
-  });
-
-  it('sets up SSL when enabled', async () => {
-    mockEsBin({ start: true, ssl: true });
-
-    const cluster = new Cluster({ log, ssl: true });
-    await cluster.start();
-
-    const config = extractConfigFiles.mock.calls[0][0];
-    expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
-  });
-
-  it(`doesn't setup SSL when disabled`, async () => {
-    mockEsBin({ start: true });
-
-    extractConfigFiles.mockReturnValueOnce([]);
-
-    const cluster = new Cluster({ log, ssl: false });
-    await cluster.start();
-
-    const config = extractConfigFiles.mock.calls[0][0];
-    expect(config).toHaveLength(0);
   });
 });
 
@@ -274,31 +247,31 @@ describe('#run()', () => {
   it('resolves when bin/elasticsearch exists with 0', async () => {
     mockEsBin({ exitCode: 0 });
 
-    await new Cluster({ log }).run();
+    await new Cluster(log).run();
   });
 
   it('resolves when bin/elasticsearch exists with 143', async () => {
     mockEsBin({ exitCode: 143 });
 
-    await new Cluster({ log }).run();
+    await new Cluster(log).run();
   });
 
   it('resolves when bin/elasticsearch exists with 130', async () => {
     mockEsBin({ exitCode: 130 });
 
-    await new Cluster({ log }).run();
+    await new Cluster(log).run();
   });
 
   it('rejects when bin/elasticsearch exists with 1', async () => {
     mockEsBin({ exitCode: 1 });
 
-    await expect(new Cluster({ log }).run()).rejects.toThrowError('ES exited with code 1');
+    await expect(new Cluster(log).run()).rejects.toThrowError('ES exited with code 1');
   });
 
   it('rejects if #start() was called previously', async () => {
     mockEsBin({ exitCode: 0, start: true });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.start();
     await expect(cluster.run()).rejects.toThrowError('ES has already been started');
   });
@@ -306,47 +279,22 @@ describe('#run()', () => {
   it('rejects if #run() was called previously', async () => {
     mockEsBin({ exitCode: 0 });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.run();
     await expect(cluster.run()).rejects.toThrowError('ES has already been started');
-  });
-
-  it('sets up SSL when enabled', async () => {
-    mockEsBin({ start: true, ssl: true });
-
-    const cluster = new Cluster({ log, ssl: true });
-    await cluster.run();
-
-    const config = extractConfigFiles.mock.calls[0][0];
-    expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
-  });
-
-  it(`doesn't setup SSL when disabled`, async () => {
-    mockEsBin({ start: true });
-
-    extractConfigFiles.mockReturnValueOnce([]);
-
-    const cluster = new Cluster({ log, ssl: false });
-    await cluster.run();
-
-    const config = extractConfigFiles.mock.calls[0][0];
-    expect(config).toHaveLength(0);
   });
 });
 
 describe('#stop()', () => {
   it('rejects if #run() or #start() was not called', async () => {
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await expect(cluster.stop()).rejects.toThrowError('ES has not been started');
   });
 
   it('resolves when ES exits with 0', async () => {
     mockEsBin({ exitCode: 0, start: true });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.start();
     await cluster.stop();
   });
@@ -354,7 +302,7 @@ describe('#stop()', () => {
   it('resolves when ES exits with 143', async () => {
     mockEsBin({ exitCode: 143, start: true });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.start();
     await cluster.stop();
   });
@@ -362,7 +310,7 @@ describe('#stop()', () => {
   it('resolves when ES exits with 130', async () => {
     mockEsBin({ exitCode: 130, start: true });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await cluster.start();
     await cluster.stop();
   });
@@ -370,7 +318,7 @@ describe('#stop()', () => {
   it('rejects when ES exits with 1', async () => {
     mockEsBin({ exitCode: 1, start: true });
 
-    const cluster = new Cluster({ log });
+    const cluster = new Cluster(log);
     await expect(cluster.run()).rejects.toThrowError('ES exited with code 1');
     await expect(cluster.stop()).rejects.toThrowError('ES exited with code 1');
   });

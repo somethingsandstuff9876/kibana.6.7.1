@@ -17,18 +17,27 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-
 import execa from 'execa';
 import grunt from 'grunt';
-import { safeLoad } from 'js-yaml';
 
-const JOBS_YAML = readFileSync(resolve(__dirname, '../.ci/jobs.yml'), 'utf8');
-const TEST_TAGS = safeLoad(JOBS_YAML)
-  .JOB
-  .filter(id => id.startsWith('kibana-ciGroup'))
-  .map(id => id.replace(/^kibana-/, ''));
+/**
+ * The list of tags that we use in the functional tests, if we add a new group we need to add it to this list
+ * and to the list of jobs in .ci/jobs.yml
+ */
+const TEST_TAGS = [
+  'ciGroup1',
+  'ciGroup2',
+  'ciGroup3',
+  'ciGroup4',
+  'ciGroup5',
+  'ciGroup6',
+  'ciGroup7',
+  'ciGroup8',
+  'ciGroup9',
+  'ciGroup10',
+  'ciGroup11',
+  'ciGroup12'
+];
 
 export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
   return {
@@ -41,10 +50,11 @@ export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
           'scripts/functional_tests',
           '--include-tag', tag,
           '--config', 'test/functional/config.js',
-          // '--config', 'test/functional/config.firefox.js',
           '--bail',
           '--debug',
           '--kibana-install-dir', kibanaInstallDir,
+          '--',
+          '--server.maxPayloadBytes=1648576',
         ],
       }
     }), {}),

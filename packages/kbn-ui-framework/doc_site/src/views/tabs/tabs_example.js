@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable import/no-duplicates */
-
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -32,7 +30,7 @@ import {
 } from '../../components';
 
 import Tabs from './tabs';
-import tabsSource from '!!raw-loader!./tabs';
+const tabsSource = require('!!raw-loader!./tabs');
 const tabsHtml = renderToHtml(Tabs);
 
 export default props => (
@@ -53,6 +51,13 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
+        <Tabs />
+      </GuideDemo>
+
+      <GuideText>
+        Dark themed tabs
+      </GuideText>
+      <GuideDemo isDarkTheme={true}>
         <Tabs />
       </GuideDemo>
     </GuideSection>

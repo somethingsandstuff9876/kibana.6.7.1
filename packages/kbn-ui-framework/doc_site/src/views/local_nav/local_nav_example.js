@@ -62,7 +62,7 @@ import { LocalNavWithTabs } from './local_nav_tabs';
 import localNavWithTabsSource from '!!raw-loader!./local_nav_tabs';
 const localNavWithTabsHtml = renderToHtml(LocalNavWithTabs);
 
-import datePickerHtml from './local_nav_date_picker.html';
+const datePickerHtml = require('./local_nav_date_picker.html');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -86,6 +86,10 @@ export default props => (
       <GuideDemo>
         <SimpleLocalNav />
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <SimpleLocalNav />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -106,6 +110,10 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
+        <LocalNavWithBreadcrumbs />
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
         <LocalNavWithBreadcrumbs />
       </GuideDemo>
     </GuideSection>
@@ -131,6 +139,9 @@ export default props => (
         <LocalNavWithSearch />
       </GuideDemo>
 
+      <GuideDemo isDarkTheme={true}>
+        <LocalNavWithSearch />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -147,6 +158,10 @@ export default props => (
       ]}
     >
       <GuideDemo>
+        <LocalNavWithSearchError />
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
         <LocalNavWithSearchError />
       </GuideDemo>
     </GuideSection>
@@ -175,6 +190,10 @@ export default props => (
       <GuideDemo>
         <LocalNavWithMenuItemStates />
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <LocalNavWithMenuItemStates />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -195,6 +214,10 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
+        <LocalNavWithDropdown />
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
         <LocalNavWithDropdown />
       </GuideDemo>
     </GuideSection>
@@ -219,6 +242,10 @@ export default props => (
       <GuideDemo>
         <LocalNavWithDropdownPanels />
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <LocalNavWithDropdownPanels />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -241,6 +268,10 @@ export default props => (
       <GuideDemo>
         <LocalNavWithTabs />
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <LocalNavWithTabs />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -252,6 +283,11 @@ export default props => (
     >
       <GuideDemo
         html={datePickerHtml}
+      />
+
+      <GuideDemo
+        html={datePickerHtml}
+        isDarkTheme={true}
       />
     </GuideSection>
   </GuidePage>

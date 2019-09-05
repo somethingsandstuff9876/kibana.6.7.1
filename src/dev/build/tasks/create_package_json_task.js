@@ -32,24 +32,24 @@ export const CreatePackageJsonTask = {
       private: true,
       description: pkg.description,
       keywords: pkg.keywords,
+      license: pkg.license,
       version: config.getBuildVersion(),
       branch: pkg.branch,
       build: {
         number: config.getBuildNumber(),
         sha: config.getBuildSha(),
         distributable: true,
-        release: config.isRelease(),
       },
       repository: pkg.repository,
       engines: {
         node: pkg.engines.node,
       },
-      resolutions: pkg.resolutions,
       workspaces: pkg.workspaces,
       dependencies: pkg.dependencies
     };
 
     if (build.isOss()) {
+      delete newPkg.dependencies['x-pack'];
       newPkg.workspaces.packages = newPkg.workspaces.packages.filter(p => !p.startsWith('x-pack'));
     }
 
@@ -69,7 +69,6 @@ export const RemovePackageJsonDepsTask = {
 
     delete pkg.dependencies;
     delete pkg.private;
-    delete pkg.resolutions;
 
     await write(
       build.resolvePath('package.json'),

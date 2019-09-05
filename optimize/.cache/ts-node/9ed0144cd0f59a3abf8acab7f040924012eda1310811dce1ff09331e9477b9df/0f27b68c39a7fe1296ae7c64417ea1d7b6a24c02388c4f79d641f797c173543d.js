@@ -1,0 +1,12 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+var resolvers_1 = require("./resolvers");
+exports.createMonitorsResolvers = resolvers_1.createMonitorsResolvers;
+var schema_gql_1 = require("./schema.gql");
+exports.monitorsSchema = schema_gql_1.monitorsSchema;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvdXB0aW1lL3NlcnZlci9ncmFwaHFsL21vbml0b3JzL2luZGV4LnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS94LXBhY2svcGx1Z2lucy91cHRpbWUvc2VydmVyL2dyYXBocWwvbW9uaXRvcnMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7O0dBSUc7O0FBRUgseUNBQXNEO0FBQTdDLDhDQUFBLHVCQUF1QixDQUFBO0FBQ2hDLDJDQUE4QztBQUFyQyxzQ0FBQSxjQUFjLENBQUEiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IEVsYXN0aWNzZWFyY2ggQi5WLiBhbmQvb3IgbGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZVxuICogb3IgbW9yZSBjb250cmlidXRvciBsaWNlbnNlIGFncmVlbWVudHMuIExpY2Vuc2VkIHVuZGVyIHRoZSBFbGFzdGljIExpY2Vuc2U7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIEVsYXN0aWMgTGljZW5zZS5cbiAqL1xuXG5leHBvcnQgeyBjcmVhdGVNb25pdG9yc1Jlc29sdmVycyB9IGZyb20gJy4vcmVzb2x2ZXJzJztcbmV4cG9ydCB7IG1vbml0b3JzU2NoZW1hIH0gZnJvbSAnLi9zY2hlbWEuZ3FsJztcbiJdfQ==

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 jest.mock('./fs');
 
 import { resolve } from 'path';

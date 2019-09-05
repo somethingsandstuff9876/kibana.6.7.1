@@ -17,15 +17,18 @@
  * under the License.
  */
 
-import { LoggingConfig, config } from './logging_config';
+import { LoggingConfig } from '.';
 
 test('`schema` creates correct schema with defaults.', () => {
-  expect(config.schema.validate({})).toMatchSnapshot();
+  const loggingConfigSchema = LoggingConfig.schema;
+  expect(loggingConfigSchema.validate({})).toMatchSnapshot();
 });
 
 test('`schema` throws if `root` logger does not have appenders configured.', () => {
+  const loggingConfigSchema = LoggingConfig.schema;
+
   expect(() =>
-    config.schema.validate({
+    loggingConfigSchema.validate({
       root: {
         appenders: [],
       },
@@ -47,19 +50,21 @@ test('`getLoggerContext()` returns correct joined context name.', () => {
 });
 
 test('correctly fills in default `appenders` config.', () => {
-  const configValue = new LoggingConfig(config.schema.validate({}));
+  const loggingConfigSchema = LoggingConfig.schema;
+  const config = new LoggingConfig(loggingConfigSchema.validate({}));
 
-  expect(configValue.appenders.size).toBe(1);
+  expect(config.appenders.size).toBe(1);
 
-  expect(configValue.appenders.get('default')).toEqual({
+  expect(config.appenders.get('default')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern', highlight: true },
   });
 });
 
 test('correctly fills in custom `appenders` config.', () => {
-  const configValue = new LoggingConfig(
-    config.schema.validate({
+  const loggingConfigSchema = LoggingConfig.schema;
+  const config = new LoggingConfig(
+    loggingConfigSchema.validate({
       appenders: {
         console: {
           kind: 'console',
@@ -74,19 +79,19 @@ test('correctly fills in custom `appenders` config.', () => {
     })
   );
 
-  expect(configValue.appenders.size).toBe(3);
+  expect(config.appenders.size).toBe(3);
 
-  expect(configValue.appenders.get('default')).toEqual({
+  expect(config.appenders.get('default')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern', highlight: true },
   });
 
-  expect(configValue.appenders.get('console')).toEqual({
+  expect(config.appenders.get('console')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern' },
   });
 
-  expect(configValue.appenders.get('file')).toEqual({
+  expect(config.appenders.get('file')).toEqual({
     kind: 'file',
     layout: { kind: 'pattern' },
     path: 'path',
@@ -94,10 +99,11 @@ test('correctly fills in custom `appenders` config.', () => {
 });
 
 test('correctly fills in default `loggers` config.', () => {
-  const configValue = new LoggingConfig(config.schema.validate({}));
+  const loggingConfigSchema = LoggingConfig.schema;
+  const config = new LoggingConfig(loggingConfigSchema.validate({}));
 
-  expect(configValue.loggers.size).toBe(1);
-  expect(configValue.loggers.get('root')).toEqual({
+  expect(config.loggers.size).toBe(1);
+  expect(config.loggers.get('root')).toEqual({
     appenders: ['default'],
     context: 'root',
     level: 'info',
@@ -105,8 +111,9 @@ test('correctly fills in default `loggers` config.', () => {
 });
 
 test('correctly fills in custom `loggers` config.', () => {
-  const configValue = new LoggingConfig(
-    config.schema.validate({
+  const loggingConfigSchema = LoggingConfig.schema;
+  const config = new LoggingConfig(
+    loggingConfigSchema.validate({
       appenders: {
         file: {
           kind: 'file',
@@ -133,23 +140,23 @@ test('correctly fills in custom `loggers` config.', () => {
     })
   );
 
-  expect(configValue.loggers.size).toBe(4);
-  expect(configValue.loggers.get('root')).toEqual({
+  expect(config.loggers.size).toBe(4);
+  expect(config.loggers.get('root')).toEqual({
     appenders: ['default'],
     context: 'root',
     level: 'info',
   });
-  expect(configValue.loggers.get('plugins')).toEqual({
+  expect(config.loggers.get('plugins')).toEqual({
     appenders: ['file'],
     context: 'plugins',
     level: 'warn',
   });
-  expect(configValue.loggers.get('plugins.pid')).toEqual({
+  expect(config.loggers.get('plugins.pid')).toEqual({
     appenders: ['file'],
     context: 'plugins.pid',
     level: 'trace',
   });
-  expect(configValue.loggers.get('http')).toEqual({
+  expect(config.loggers.get('http')).toEqual({
     appenders: ['default'],
     context: 'http',
     level: 'error',
@@ -157,7 +164,8 @@ test('correctly fills in custom `loggers` config.', () => {
 });
 
 test('fails if loggers use unknown appenders.', () => {
-  const validateConfig = config.schema.validate({
+  const loggingConfigSchema = LoggingConfig.schema;
+  const validateConfig = loggingConfigSchema.validate({
     loggers: [
       {
         appenders: ['unknown'],

@@ -4,46 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
-export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'timePicker']);
+export const UptimePageProvider = ({
+  getPageObjects,
+  getService,
+}: KibanaFunctionalTestDefaultProviders) => {
+  const pageObject = getPageObjects(['common']);
   const uptimeService = getService('uptime');
 
-  return new (class UptimePage {
-    public async goToUptimeOverviewAndLoadData(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
-      monitorIdToCheck: string
-    ) {
-      await pageObjects.common.navigateToApp('uptime');
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.monitorIdExists(monitorIdToCheck);
-    }
-
-    public async loadDataAndGoToMonitorPage(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
-      monitorId: string,
-      monitorName: string
-    ) {
-      await pageObjects.common.navigateToApp('uptime');
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.navigateToMonitorWithId(monitorId);
-      if ((await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName) {
-        throw new Error('Expected monitor name not found');
-      }
-    }
-
-    public async inputFilterQuery(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
-      filterQuery: string
-    ) {
-      await pageObjects.common.navigateToApp('uptime');
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.setFilterText(filterQuery);
-      await uptimeService.monitorIdExists('monitor-page-link-auto-http-0X131221E73F825974');
-    }
-  })();
-}
+  return {
+    async goToUptimeOverview() {
+      await pageObject.common.navigateToApp('uptime');
+      await uptimeService.assertExists();
+    },
+  };
+};

@@ -18,6 +18,6 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/test').startServersCli(
+require('../packages/kbn-test').startServersCli(
   require.resolve('../test/functional/config.js'),
 );

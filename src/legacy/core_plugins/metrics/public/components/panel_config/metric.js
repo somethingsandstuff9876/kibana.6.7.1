@@ -19,10 +19,11 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { SeriesEditor } from '../series_editor';
+import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import { ColorRules } from '../color_rules';
-import { YesNo } from '../yes_no';
+import createTextHandler from '../lib/create_text_handler';
+import ColorRules from '../color_rules';
+import YesNo from '../yes_no';
 import uuid from 'uuid';
 import {
   htmlIdGenerator,
@@ -34,15 +35,14 @@ import {
   EuiFormRow,
   EuiFormLabel,
   EuiSpacer,
+  EuiFieldText,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { QueryBarWrapper } from '../query_bar_wrapper';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+class MetricPanelConfig extends Component {
 
-export class MetricPanelConfig extends Component {
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -50,12 +50,9 @@ export class MetricPanelConfig extends Component {
 
   componentWillMount() {
     const { model } = this.props;
-    if (
-      !model.background_color_rules ||
-      (model.background_color_rules && model.background_color_rules.length === 0)
-    ) {
+    if (!model.background_color_rules || (model.background_color_rules && model.background_color_rules.length === 0)) {
       this.props.onChange({
-        background_color_rules: [{ id: uuid.v1() }],
+        background_color_rules: [{ id: uuid.v1() }]
       });
     }
   }
@@ -66,9 +63,10 @@ export class MetricPanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
-    const defaults = { filter: { query: '', language: getDefaultQueryLanguage() } };
+    const defaults = { filter: '' };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
+    const handleTextChange = createTextHandler(this.props.onChange);
     let view;
     if (selectedTab === 'data') {
       view = (
@@ -87,7 +85,10 @@ export class MetricPanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="tsvb.metric.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="tsvb.metric.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -104,21 +105,16 @@ export class MetricPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={
-                    <FormattedMessage
-                      id="tsvb.metric.optionsTab.panelFilterLabel"
-                      defaultMessage="Panel filter"
-                    />
-                  }
+                  label={(<FormattedMessage
+                    id="tsvb.metric.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
                   fullWidth
                 >
-                  <QueryBarWrapper
-                    query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
-                    }}
-                    onChange={filter => this.props.onChange({ filter })}
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -164,8 +160,14 @@ export class MetricPanelConfig extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
-            <FormattedMessage id="tsvb.metric.dataTab.dataButtonLabel" defaultMessage="Data" />
+          <EuiTab
+            isSelected={selectedTab === 'data'}
+            onClick={() => this.switchTab('data')}
+          >
+            <FormattedMessage
+              id="tsvb.metric.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
@@ -182,6 +184,7 @@ export class MetricPanelConfig extends Component {
       </div>
     );
   }
+
 }
 
 MetricPanelConfig.propTypes = {
@@ -189,3 +192,5 @@ MetricPanelConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
 };
+
+export default MetricPanelConfig;

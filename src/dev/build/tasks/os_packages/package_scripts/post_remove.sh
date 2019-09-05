@@ -44,6 +44,10 @@ if [ "$REMOVE_USER_AND_GROUP" = "true" ]; then
 fi
 
 if [ "$REMOVE_DIRS" = "true" ]; then
+  if [ -d "<%= optimizeDir %>" ]; then
+    rm -rf "<%= optimizeDir %>"
+  fi
+
   if [ -d "<%= pluginsDir %>" ]; then
     rm -rf "<%= pluginsDir %>"
   fi

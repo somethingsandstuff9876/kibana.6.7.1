@@ -1,7 +1,12 @@
 {
   "indices.analyze": {
     "url_params": {
-      "index": ""
+      "index": "",
+      "prefer_local": "__flag__",
+      "format": [
+        "detailed",
+        "text"
+      ]
     },
     "methods": [
       "GET",
@@ -11,6 +16,6 @@
       "_analyze",
       "{indices}/_analyze"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html"
   }
 }

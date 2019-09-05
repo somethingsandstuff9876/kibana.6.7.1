@@ -18,10 +18,9 @@
  */
 
 import uuid from 'uuid';
-
-export const newMetricAggFn = () => {
+export default () => {
   return {
     id: uuid.v1(),
-    type: 'count',
+    type: 'count'
   };
 };

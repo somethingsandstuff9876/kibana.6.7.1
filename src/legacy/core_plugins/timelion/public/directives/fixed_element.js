@@ -23,7 +23,7 @@ const app = require('ui/modules').get('apps/timelion', []);
 app.directive('fixedElementRoot', function () {
   return {
     restrict: 'A',
-    link: function ($elem) {
+    link: function ($scope, $elem) {
       let fixedAt;
       $(window).bind('scroll', function () {
         const fixed = $('[fixed-element]', $elem);

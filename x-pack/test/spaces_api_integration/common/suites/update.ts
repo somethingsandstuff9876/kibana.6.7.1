@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -34,6 +34,14 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
+    });
+  };
+
   const expectNotFound = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
@@ -48,7 +56,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: 'default',
       description: 'a description',
       color: '#ffffff',
-      disabledFeatures: [],
       _reserved: true,
     });
   };
@@ -59,7 +66,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: 'space_1',
       description: 'a description',
       color: '#5c5959',
-      disabledFeatures: [],
     });
   };
 
@@ -82,7 +88,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               description: 'a description',
               color: '#5c5959',
               _reserved: true,
-              disabledFeatures: [],
             })
             .expect(tests.alreadyExists.statusCode)
             .then(tests.alreadyExists.response);
@@ -100,7 +105,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               description: 'a description',
               color: '#ffffff',
               _reserved: false,
-              disabledFeatures: [],
             })
             .expect(tests.defaultSpace.statusCode)
             .then(tests.defaultSpace.response);
@@ -117,7 +121,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               id: 'marketing',
               description: 'a description',
               color: '#5c5959',
-              disabledFeatures: [],
             })
             .expect(tests.newSpace.statusCode)
             .then(tests.newSpace.response);
@@ -131,6 +134,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   updateTest.only = makeUpdateTest(describe.only);
 
   return {
+    createExpectLegacyForbidden,
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectNotFound,

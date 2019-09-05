@@ -1,0 +1,20 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const graphql_tag_1 = tslib_1.__importDefault(require("graphql-tag"));
+exports.rootSchema = graphql_tag_1.default `
+  schema {
+    query: Query
+    mutation: Mutation
+  }
+
+  type Query
+
+  type Mutation
+`;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvaW5mcmEvY29tbW9uL2dyYXBocWwvcm9vdC9zY2hlbWEuZ3FsLnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS94LXBhY2svcGx1Z2lucy9pbmZyYS9jb21tb24vZ3JhcGhxbC9yb290L3NjaGVtYS5ncWwudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7O0dBSUc7OztBQUVILHNFQUE4QjtBQUVqQixRQUFBLFVBQVUsR0FBRyxxQkFBRyxDQUFBOzs7Ozs7Ozs7Q0FTNUIsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZTtcbiAqIHlvdSBtYXkgbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgRWxhc3RpYyBMaWNlbnNlLlxuICovXG5cbmltcG9ydCBncWwgZnJvbSAnZ3JhcGhxbC10YWcnO1xuXG5leHBvcnQgY29uc3Qgcm9vdFNjaGVtYSA9IGdxbGBcbiAgc2NoZW1hIHtcbiAgICBxdWVyeTogUXVlcnlcbiAgICBtdXRhdGlvbjogTXV0YXRpb25cbiAgfVxuXG4gIHR5cGUgUXVlcnlcblxuICB0eXBlIE11dGF0aW9uXG5gO1xuIl19

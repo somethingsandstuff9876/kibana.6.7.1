@@ -19,7 +19,6 @@
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
-  const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -28,14 +27,10 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');
-      await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'Australia/North',
-        'defaultIndex': 'logstash-*',
-        'format:bytes:defaultPattern': '0,0.[000]b'
-      });
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
-      await appsMenu.clickLink('Embedding Vis');
+      await PageObjects.header.clickGlobalNavigationLink('Embedding Vis');
     });
 
     loadTestFile(require.resolve('./embed_by_id'));

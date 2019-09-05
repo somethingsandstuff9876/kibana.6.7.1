@@ -17,14 +17,8 @@
  * under the License.
  */
 
-import { createReadStream } from 'fs';
+import { fromRoot } from '../../../utils';
 
-import globby from 'globby';
-import MultiStream from 'multistream';
-import webpackMerge from 'webpack-merge';
-
-import { fromRoot } from '../../../legacy/utils';
-import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';
 
@@ -53,13 +47,13 @@ export default (kibana) => {
         } = kbnServer;
 
         const testGlobs = [
-          'src/legacy/ui/public/**/*.js',
-          '!src/legacy/ui/public/flot-charts/**/*',
+          'src/ui/public/**/*.js',
+          '!src/ui/public/flot-charts/**/*',
         ];
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
         if (testingPluginIds) {
-          testGlobs.push('!src/legacy/ui/public/**/__tests__/**/*');
+          testGlobs.push('!src/ui/public/**/__tests__/**/*');
           testingPluginIds.split(',').forEach((pluginId) => {
             const plugin = plugins
               .find(plugin => plugin.id === pluginId);
@@ -76,6 +70,7 @@ export default (kibana) => {
             }
 
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+            testGlobs.push(`built_assets/css/plugins/${plugin.id}/**/*.css`);
           });
         } else {
           // add the modules from all of the apps
@@ -85,6 +80,7 @@ export default (kibana) => {
 
           for (const plugin of plugins) {
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
+            testGlobs.push(`built_assets/css/plugins/${plugin.id}/**/*.css`);
           }
         }
 
@@ -95,7 +91,7 @@ export default (kibana) => {
           uiBundles.addPostLoader({
             test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
-            loader: 'istanbul-instrumenter-loader',
+            loader: 'istanbul-instrumenter-loader'
           });
         }
 
@@ -103,47 +99,6 @@ export default (kibana) => {
           id: 'tests',
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
-          extendConfig(webpackConfig) {
-            const mergedConfig = webpackMerge({
-              resolve: {
-                extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
-              }
-            }, webpackConfig);
-
-            /**
-             * [..] it removes the commons bundle creation from the webpack
-             * config when we're building the bundle for the browser tests. It
-             * shouldn't be created, and by default isn't, but something is
-             * triggering it in webpack which breaks the tests so if we just
-             * remove the optimization config it will never happen and the tests
-             * will keep working [..]
-             *
-             * TLDR: If you have any questions about this line, ask Spencer.
-             */
-            delete mergedConfig.optimization.splitChunks.cacheGroups.commons;
-
-            return mergedConfig;
-          }
-        });
-
-        kbnServer.server.route({
-          method: 'GET',
-          path: '/test_bundle/built_css.css',
-          async handler(_, h) {
-            const cssFiles = await globby(
-              testingPluginIds
-                ? testingPluginIds.split(',').map((id) => `built_assets/css/plugins/${id}/**/*.css`)
-                : `built_assets/css/**/*.css`,
-              { cwd: fromRoot('.'), absolute: true }
-            );
-
-            const stream = replacePlaceholder(
-              new MultiStream(cssFiles.map(path => createReadStream(path))),
-              '/built_assets/css/'
-            );
-
-            return h.response(stream).code(200).type('text/css');
-          }
         });
       },
 
@@ -152,7 +107,7 @@ export default (kibana) => {
         'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils/public'),
-      },
-    },
+      }
+    }
   });
 };

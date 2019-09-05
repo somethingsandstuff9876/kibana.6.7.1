@@ -21,6 +21,5 @@ export function getEsQueryConfig(config) {
   const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
   const queryStringOptions = config.get('query:queryString:options');
   const ignoreFilterIfFieldNotInIndex = config.get('courier:ignoreFilterIfFieldNotInIndex');
-  const dateFormatTZ = config.get('dateFormat:tz');
-  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex, dateFormatTZ };
+  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex };
 }

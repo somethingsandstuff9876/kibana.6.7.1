@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { get } from 'lodash';
-import * as esMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
-import * as kibanaMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/kibana/metrics';
-import * as logstashMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/logstash/metrics';
-import * as beatsMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/beats/metrics';
-import * as apmMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/apm/metrics';
+import * as esMetrics from '../../../../../plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
+import * as kibanaMetrics from '../../../../../plugins/monitoring/server/lib/metrics/kibana/metrics';
+import * as logstashMetrics from '../../../../../plugins/monitoring/server/lib/metrics/logstash/metrics';
+import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metrics/beats/metrics';
+import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
 
 export default function ({ getService }) {
   const es = getService('es');
@@ -48,8 +48,8 @@ export default function ({ getService }) {
       let mappings;
 
       before('load mappings', async () => {
-        const template = await es.indices.getTemplate({ name: indexTemplate });
-        mappings = get(template, [indexTemplate, 'mappings', 'properties']);
+        const template = await es.indices.getTemplate({ name: indexTemplate, include_type_name: true });
+        mappings = get(template, [indexTemplate, 'mappings', 'doc', 'properties']);
       });
 
       describe(`for ${name}`, () => { // eslint-disable-line no-loop-func

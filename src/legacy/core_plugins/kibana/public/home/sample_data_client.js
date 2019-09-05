@@ -24,7 +24,7 @@ import { indexPatternService } from './kibana_services';
 const sampleDataUrl = '/api/sample_data';
 
 function clearIndexPatternsCache() {
-  indexPatternService.clearCache();
+  indexPatternService.getIds.clearCache();
 }
 
 export async function listSampleDataSets() {

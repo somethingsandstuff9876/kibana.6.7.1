@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-export default function upgradeCheckup({ loadTestFile }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function upgradeCheckup({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('Upgrade checkup ', function upgradeAssistantTestSuite() {
     this.tags('ciGroup4');
 

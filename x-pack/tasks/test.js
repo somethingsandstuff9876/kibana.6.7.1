@@ -30,6 +30,7 @@ export default (gulp, { mocha }) => {
       'common/**/__tests__/**/*.js',
       'server/**/__tests__/**/*.js',
     ].concat(forPluginServerTests());
+
     return gulp.src(globs, { read: false })
       .pipe(mocha(MOCHA_OPTIONS));
   });

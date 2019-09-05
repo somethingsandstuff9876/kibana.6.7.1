@@ -1,0 +1,48 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const config_schema_1 = require("@kbn/config-schema");
+const legacy_logging_server_1 = require("../legacy_logging_server");
+/**
+ * Simple appender that just forwards `LogRecord` to the legacy KbnServer log.
+ * @internal
+ */
+class LegacyAppender {
+    constructor(legacyLoggingConfig) {
+        this.loggingServer = new legacy_logging_server_1.LegacyLoggingServer(legacyLoggingConfig);
+    }
+    /**
+     * Forwards `LogRecord` to the legacy platform that will layout and
+     * write record to the configured destination.
+     * @param record `LogRecord` instance to forward to.
+     */
+    append(record) {
+        this.loggingServer.log(record);
+    }
+    dispose() {
+        this.loggingServer.stop();
+    }
+}
+LegacyAppender.configSchema = config_schema_1.schema.object({
+    kind: config_schema_1.schema.literal('legacy-appender'),
+    legacyLoggingConfig: config_schema_1.schema.any(),
+});
+exports.LegacyAppender = LegacyAppender;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL2NvcmUvc2VydmVyL2xlZ2FjeV9jb21wYXQvbG9nZ2luZy9hcHBlbmRlcnMvbGVnYWN5X2FwcGVuZGVyLnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS9zcmMvY29yZS9zZXJ2ZXIvbGVnYWN5X2NvbXBhdC9sb2dnaW5nL2FwcGVuZGVycy9sZWdhY3lfYXBwZW5kZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7OztHQWlCRzs7QUFFSCxzREFBNEM7QUFHNUMsb0VBQStEO0FBRS9EOzs7R0FHRztBQUNILE1BQWEsY0FBYztJQVF6QixZQUFZLG1CQUFrRDtRQUM1RCxJQUFJLENBQUMsYUFBYSxHQUFHLElBQUksMkNBQW1CLENBQUMsbUJBQW1CLENBQUMsQ0FBQztJQUNwRSxDQUFDO0lBRUQ7Ozs7T0FJRztJQUNJLE1BQU0sQ0FBQyxNQUFpQjtRQUM3QixJQUFJLENBQUMsYUFBYSxDQUFDLEdBQUcsQ0FBQyxNQUFNLENBQUMsQ0FBQztJQUNqQyxDQUFDO0lBRU0sT0FBTztRQUNaLElBQUksQ0FBQyxhQUFhLENBQUMsSUFBSSxFQUFFLENBQUM7SUFDNUIsQ0FBQzs7QUF0QmEsMkJBQVksR0FBRyxzQkFBTSxDQUFDLE1BQU0sQ0FBQztJQUN6QyxJQUFJLEVBQUUsc0JBQU0sQ0FBQyxPQUFPLENBQUMsaUJBQWlCLENBQUM7SUFDdkMsbUJBQW1CLEVBQUUsc0JBQU0sQ0FBQyxHQUFHLEVBQUU7Q0FDbEMsQ0FBQyxDQUFDO0FBSkwsd0NBd0JDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIExpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmUgb3IgbW9yZSBjb250cmlidXRvclxuICogbGljZW5zZSBhZ3JlZW1lbnRzLiBTZWUgdGhlIE5PVElDRSBmaWxlIGRpc3RyaWJ1dGVkIHdpdGhcbiAqIHRoaXMgd29yayBmb3IgYWRkaXRpb25hbCBpbmZvcm1hdGlvbiByZWdhcmRpbmcgY29weXJpZ2h0XG4gKiBvd25lcnNoaXAuIEVsYXN0aWNzZWFyY2ggQi5WLiBsaWNlbnNlcyB0aGlzIGZpbGUgdG8geW91IHVuZGVyXG4gKiB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpOyB5b3UgbWF5XG4gKiBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLFxuICogc29mdHdhcmUgZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW5cbiAqIFwiQVMgSVNcIiBCQVNJUywgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZXG4gKiBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLiAgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGVcbiAqIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQgbGltaXRhdGlvbnNcbiAqIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCB7IHNjaGVtYSB9IGZyb20gJ0BrYm4vY29uZmlnLXNjaGVtYSc7XG5pbXBvcnQgeyBEaXNwb3NhYmxlQXBwZW5kZXIgfSBmcm9tICcuLi8uLi8uLi9sb2dnaW5nL2FwcGVuZGVycy9hcHBlbmRlcnMnO1xuaW1wb3J0IHsgTG9nUmVjb3JkIH0gZnJvbSAnLi4vLi4vLi4vbG9nZ2luZy9sb2dfcmVjb3JkJztcbmltcG9ydCB7IExlZ2FjeUxvZ2dpbmdTZXJ2ZXIgfSBmcm9tICcuLi9sZWdhY3lfbG9nZ2luZ19zZXJ2ZXInO1xuXG4vKipcbiAqIFNpbXBsZSBhcHBlbmRlciB0aGF0IGp1c3QgZm9yd2FyZHMgYExvZ1JlY29yZGAgdG8gdGhlIGxlZ2FjeSBLYm5TZXJ2ZXIgbG9nLlxuICogQGludGVybmFsXG4gKi9cbmV4cG9ydCBjbGFzcyBMZWdhY3lBcHBlbmRlciBpbXBsZW1lbnRzIERpc3Bvc2FibGVBcHBlbmRlciB7XG4gIHB1YmxpYyBzdGF0aWMgY29uZmlnU2NoZW1hID0gc2NoZW1hLm9iamVjdCh7XG4gICAga2luZDogc2NoZW1hLmxpdGVyYWwoJ2xlZ2FjeS1hcHBlbmRlcicpLFxuICAgIGxlZ2FjeUxvZ2dpbmdDb25maWc6IHNjaGVtYS5hbnkoKSxcbiAgfSk7XG5cbiAgcHJpdmF0ZSByZWFkb25seSBsb2dnaW5nU2VydmVyOiBMZWdhY3lMb2dnaW5nU2VydmVyO1xuXG4gIGNvbnN0cnVjdG9yKGxlZ2FjeUxvZ2dpbmdDb25maWc6IFJlYWRvbmx5PFJlY29yZDxzdHJpbmcsIGFueT4+KSB7XG4gICAgdGhpcy5sb2dnaW5nU2VydmVyID0gbmV3IExlZ2FjeUxvZ2dpbmdTZXJ2ZXIobGVnYWN5TG9nZ2luZ0NvbmZpZyk7XG4gIH1cblxuICAvKipcbiAgICogRm9yd2FyZHMgYExvZ1JlY29yZGAgdG8gdGhlIGxlZ2FjeSBwbGF0Zm9ybSB0aGF0IHdpbGwgbGF5b3V0IGFuZFxuICAgKiB3cml0ZSByZWNvcmQgdG8gdGhlIGNvbmZpZ3VyZWQgZGVzdGluYXRpb24uXG4gICAqIEBwYXJhbSByZWNvcmQgYExvZ1JlY29yZGAgaW5zdGFuY2UgdG8gZm9yd2FyZCB0by5cbiAgICovXG4gIHB1YmxpYyBhcHBlbmQocmVjb3JkOiBMb2dSZWNvcmQpIHtcbiAgICB0aGlzLmxvZ2dpbmdTZXJ2ZXIubG9nKHJlY29yZCk7XG4gIH1cblxuICBwdWJsaWMgZGlzcG9zZSgpIHtcbiAgICB0aGlzLmxvZ2dpbmdTZXJ2ZXIuc3RvcCgpO1xuICB9XG59XG4iXX0=

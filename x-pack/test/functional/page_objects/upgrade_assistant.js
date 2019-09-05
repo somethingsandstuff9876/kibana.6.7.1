@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export function UpgradeAssistantProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -45,9 +45,10 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
     async expectDeprecationLoggingLabel(labelText) {
       return await retry.try(async () => {
         log.debug('expectDeprecationLoggingLabel()');
-        const label = await find.byCssSelector('[data-test-subj="upgradeAssistantDeprecationToggle"] ~ label');
-        const value = await label.getVisibleText();
-        expect(value).to.equal(labelText);
+        const toggle = await testSubjects.find('upgradeAssistantDeprecationToggle');
+        const div = await toggle.getProperty('parentElement');
+        const label = await div.findByCssSelector('label');
+        expect(await label.getVisibleText()).to.eql(labelText);
       });
     }
 

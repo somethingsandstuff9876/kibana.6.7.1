@@ -18,43 +18,26 @@
  */
 
 import './editor/editor';
-import { i18n } from '@kbn/i18n';
+import './wizard/wizard';
+import 'ui/draggable/draggable_container';
+import 'ui/draggable/draggable_item';
+import 'ui/draggable/draggable_handle';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
+import 'ui/directives/scroll_bottom';
+import 'ui/filters/sort_prefix_first';
 import uiRoutes from 'ui/routes';
-import 'ui/capabilities/route_setup';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs';
-
-// load directives
-import '../../../data/public';
 
 uiRoutes
   .defaults(/visualize/, {
-    requireDefaultIndex: true,
-    requireUICapability: 'visualize.show',
-    badge: uiCapabilities => {
-      if (uiCapabilities.visualize.save) {
-        return undefined;
-      }
-
-      return {
-        text: i18n.translate('kbn.visualize.badge.readOnly.text', {
-          defaultMessage: 'Read only',
-        }),
-        tooltip: i18n.translate('kbn.visualize.badge.readOnly.tooltip', {
-          defaultMessage: 'Unable to save visualizations',
-        }),
-        iconType: 'glasses'
-      };
-    }
+    requireDefaultIndex: true
   })
   .when(VisualizeConstants.LANDING_PAGE_PATH, {
     template: visualizeListingTemplate,
-    k7Breadcrumbs: getLandingBreadcrumbs,
     controller: VisualizeListingController,
     controllerAs: 'listingController',
     resolve: {
@@ -63,19 +46,22 @@ uiRoutes
   })
   .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
     template: visualizeListingTemplate,
-    k7Breadcrumbs: getWizardStep1Breadcrumbs,
     controller: VisualizeListingController,
     controllerAs: 'listingController',
     resolve: {
       createNewVis: () => true,
     },
+  })
+  // Old path, will be removed in 7.0
+  .when('/visualize/step/1', {
+    redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'visualize',
     title: 'Visualize',
-    description: i18n.translate(
+    description: i18n(
       'kbn.visualize.visualizeDescription',
       {
         defaultMessage: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',

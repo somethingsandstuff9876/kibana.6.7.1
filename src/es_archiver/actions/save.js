@@ -26,31 +26,31 @@ import mkdirp from 'mkdirp';
 import {
   createListStream,
   createPromiseFromStreams,
-} from '../../legacy/utils';
+} from '../../utils';
 
 import {
   createStats,
   createGenerateIndexRecordsStream,
   createFormatArchiveStreams,
   createGenerateDocRecordsStream,
-  Progress
 } from '../lib';
 
-export async function saveAction({ name, indices, client, dataDir, log, raw }) {
+export async function saveAction({ name, indices, client, dataDir, log }) {
   const outputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
 
   log.info('[%s] Creating archive of %j', name, indices);
 
   await fromNode(cb => mkdirp(outputDir, cb));
-
-  const progress = new Progress();
-  progress.activate(log);
+  const resolvedIndexes = Object.keys(await client.indices.getSettings({
+    index: indices,
+    filterPath: ['*.settings.index.uuid']
+  }));
 
   await Promise.all([
     // export and save the matching indices to mappings.json
     createPromiseFromStreams([
-      createListStream(indices),
+      createListStream(resolvedIndexes),
       createGenerateIndexRecordsStream(client, stats),
       ...createFormatArchiveStreams(),
       createWriteStream(resolve(outputDir, 'mappings.json')),
@@ -58,14 +58,13 @@ export async function saveAction({ name, indices, client, dataDir, log, raw }) {
 
     // export all documents from matching indexes into data.json.gz
     createPromiseFromStreams([
-      createListStream(indices),
-      createGenerateDocRecordsStream(client, stats, progress),
-      ...createFormatArchiveStreams({ gzip: !raw }),
-      createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`))
+      createListStream(resolvedIndexes),
+      createGenerateDocRecordsStream(client, stats),
+      ...createFormatArchiveStreams({ gzip: true }),
+      createWriteStream(resolve(outputDir, 'data.json.gz'))
     ])
   ]);
 
-  progress.deactivate();
   stats.forEachIndex((index, { docs }) => {
     log.info('[%s] Archived %d docs from %j', name, docs.archived, index);
   });

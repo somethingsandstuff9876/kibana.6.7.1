@@ -1,7 +1,6 @@
 {
   "indices.rollover": {
     "url_params": {
-      "include_type_name": "__flag__",
       "timeout": "",
       "dry_run": "__flag__",
       "master_timeout": "",
@@ -14,6 +13,6 @@
       "{alias}/_rollover",
       "{alias}/_rollover/{new_index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html"
   }
 }

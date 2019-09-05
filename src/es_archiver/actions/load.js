@@ -23,7 +23,7 @@ import { createReadStream } from 'fs';
 import {
   createPromiseFromStreams,
   concatStreamProviders,
-} from '../../legacy/utils';
+} from '../../utils';
 
 import {
   isGzip,
@@ -34,9 +34,6 @@ import {
   createCreateIndexStream,
   createIndexDocRecordsStream,
   migrateKibanaIndex,
-  Progress,
-  getEnabledKibanaPluginIds,
-  createDefaultSpace,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -53,7 +50,6 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await getEnabledKibanaPluginIds(kibanaUrl);
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -70,36 +66,29 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
     { objectMode: true }
   );
 
-  const progress = new Progress('load progress');
-  progress.activate(log);
-
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log, kibanaPluginIds }),
-    createIndexDocRecordsStream(client, stats, progress),
+    createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }),
+    createIndexDocRecordsStream(client, stats),
   ]);
 
-  progress.deactivate();
   const result = stats.toJSON();
 
-  for (const [index, { docs }] of Object.entries(result)) {
-    if (!docs && docs.indexed > 0) {
+  const indicesToRefresh = Object
+    .entries(result)
+    .filter(([, stats]) => !stats.deleted)
+    .map(([index, { docs }]) => {
       log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
-    }
-  }
+      return index;
+    });
 
   await client.indices.refresh({
-    index: '_all',
-    allowNoIndices: true,
+    index: indicesToRefresh
   });
 
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
-    await migrateKibanaIndex({ client, log, kibanaPluginIds });
-
-    if (kibanaPluginIds.includes('spaces')) {
-      await createDefaultSpace({ client, index: '.kibana' });
-    }
+    await migrateKibanaIndex({ client, log });
   }
 
   return result;

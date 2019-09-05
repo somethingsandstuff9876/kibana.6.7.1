@@ -6,25 +6,8 @@
 
 import Joi from 'joi';
 
-const scope = 'testing';
-const taskManagerQuery = {
-  bool: {
-    filter: {
-      bool: {
-        must: [
-          {
-            term: {
-              'task.scope': scope,
-            }
-          }
-        ]
-      }
-    }
-  }
-};
-
 export function initRoutes(server) {
-  const taskManager = server.plugins.task_manager;
+  const { taskManager } = server;
 
   server.route({
     path: '/api/sample_tasks',
@@ -42,10 +25,7 @@ export function initRoutes(server) {
     },
     async handler(request) {
       try {
-        const task = await taskManager.schedule({
-          ...request.payload,
-          scope: [scope],
-        }, { request });
+        const task = await taskManager.schedule(request.payload, { request });
         return task;
       } catch (err) {
         return err;
@@ -58,9 +38,7 @@ export function initRoutes(server) {
     method: 'GET',
     async handler() {
       try {
-        return taskManager.fetch({
-          query: taskManagerQuery,
-        });
+        return taskManager.fetch();
       } catch (err) {
         return err;
       }
@@ -72,9 +50,7 @@ export function initRoutes(server) {
     method: 'DELETE',
     async handler() {
       try {
-        const { docs: tasks } = await taskManager.fetch({
-          query: taskManagerQuery,
-        });
+        const { docs: tasks } = await taskManager.fetch();
         return Promise.all(tasks.map((task) => taskManager.remove(task.id)));
       } catch (err) {
         return err;

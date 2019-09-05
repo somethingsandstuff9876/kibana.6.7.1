@@ -18,7 +18,6 @@
  */
 
 import { keyCodes } from '@elastic/eui';
-import template from './history.html';
 
 const { memoize } = require('lodash');
 const moment = require('moment');
@@ -31,55 +30,37 @@ require('ui/modules')
   .directive('senseHistory', function () {
     return {
       restrict: 'E',
-      template,
+      template: require('./history.html'),
       controllerAs: 'history',
-      scope: {
-        isShown: '=',
-        historyDirty: '=',
-        close: '&',
-      },
       controller: function ($scope, $element) {
-        $scope.$watch('historyDirty', () => {
-          this.init();
+        this.reqs = history.getHistory();
+        this.selectedIndex = 0;
+        this.selectedReq = this.reqs[this.selectedIndex];
+        this.viewingReq = this.selectedReq;
+
+        // calculate the text description of a request
+        this.describeReq = memoize((req) => {
+          const endpoint = req.endpoint;
+          const date = moment(req.time);
+
+          let formattedDate = date.format('MMM D');
+          if (date.diff(moment(), 'days') > -7) {
+            formattedDate = date.fromNow();
+          }
+
+          return `${endpoint} (${formattedDate})`;
         });
-
-        $scope.$watch('isShown', () => {
-          if ($scope.isShown) this.init();
-        });
-
-        this.init = () => {
-          this.reqs = history.getHistory();
-          this.selectedIndex = 0;
-          this.selectedReq = this.reqs[this.selectedIndex];
-          this.viewingReq = this.selectedReq;
-
-          // calculate the text description of a request
-          this.describeReq = memoize((req) => {
-            const endpoint = req.endpoint;
-            const date = moment(req.time);
-
-            let formattedDate = date.format('MMM D');
-            if (date.diff(moment(), 'days') > -7) {
-              formattedDate = date.fromNow();
-            }
-
-            return `${endpoint} (${formattedDate})`;
-          });
-          this.describeReq.cache = new WeakMap();
-        };
+        this.describeReq.cache = new WeakMap();
 
         // main actions
         this.clear = () => {
           history.clearHistory($element);
-          this.init();
-        };
-
-        this.close = () => {
-          $scope.close();
+          $scope.kbnTopNav.close();
         };
 
         this.restore = (req = this.selectedReq) => {
           history.restoreFromHistory(req);
+          $scope.kbnTopNav.close();
         };
 
         this.onKeyDown = (ev) => {

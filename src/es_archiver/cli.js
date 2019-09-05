@@ -26,14 +26,13 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
-import readline from 'readline';
 
 import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 import { ToolingLog } from '@kbn/dev-utils';
-import { readConfigFile } from '@kbn/test';
+import { readConfigFile } from '../functional_test_runner';
 
 const cmd = new Command('node scripts/es_archiver');
 
@@ -51,45 +50,21 @@ cmd
     console.log(readFileSync(resolve(__dirname, './cli_help.txt'), 'utf8'));
   });
 
-cmd
-  .option('--raw', `don't gzip the archive`)
-  .command('save <name> <indices...>')
+cmd.command('save <name> <indices...>')
   .description('archive the <indices ...> into the --dir with <name>')
-  .action((name, indices) => execute((archiver, { raw }) => archiver.save(name, indices, { raw })));
+  .action((name, indices) => execute('save', name, indices));
 
 cmd.command('load <name>')
   .description('load the archive in --dir with <name>')
-  .action(name => execute(archiver => archiver.load(name)));
+  .action(name => execute('load', name));
 
 cmd.command('unload <name>')
   .description('remove indices created by the archive in --dir with <name>')
-  .action(name => execute(archiver => archiver.unload(name)));
-
-cmd.command('empty-kibana-index')
-  .description('[internal] Delete any Kibana indices, and initialize the Kibana index as Kibana would do on startup.')
-  .action(() => execute(archiver => archiver.emptyKibanaIndex()));
-
-cmd.command('edit [prefix]')
-  .description('extract the archives under the prefix, wait for edits to be completed, and then recompress the archives')
-  .action(prefix => (
-    execute(archiver => archiver.edit(prefix, async () => {
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-
-      await new Promise(resolve => {
-        rl.question(`Press enter when you're done`, () => {
-          rl.close();
-          resolve();
-        });
-      });
-    }))
-  ));
+  .action(name => execute('unload', name));
 
 cmd.command('rebuild-all')
   .description('[internal] read and write all archives in --dir to remove any inconsistencies')
-  .action(() => execute(archiver => archiver.rebuildAll()));
+  .action(() => execute('rebuildAll'));
 
 cmd.parse(process.argv);
 
@@ -98,7 +73,7 @@ if (missingCommand) {
   execute();
 }
 
-async function execute(fn) {
+async function execute(operation, ...args) {
   try {
     const log = new ToolingLog({
       level: cmd.verbose ? 'debug' : 'info',
@@ -120,10 +95,7 @@ async function execute(fn) {
       log.error(msg);
     };
 
-    if (!fn) {
-      error(`Unknown command "${cmd.args[0]}"`);
-    }
-
+    if (!operation) error('Missing or invalid command');
     if (!cmd.esUrl) {
       error('You must specify either --es-url or --config flags');
     }
@@ -139,6 +111,7 @@ async function execute(fn) {
     }
 
     // run!
+
     const client = new elasticsearch.Client({
       host: cmd.esUrl,
       log: cmd.verbose ? 'trace' : []
@@ -151,7 +124,7 @@ async function execute(fn) {
         dataDir: resolve(cmd.dir),
         kibanaUrl: cmd.kibanaUrl
       });
-      await fn(esArchiver, cmd);
+      await esArchiver[operation](...args);
     } finally {
       await client.close();
     }

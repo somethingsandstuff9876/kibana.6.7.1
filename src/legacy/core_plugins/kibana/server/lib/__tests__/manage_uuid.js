@@ -17,30 +17,25 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
-import { createTestServers } from '../../../../../../test_utils/kbn_server';
+import { startTestServers } from '../../../../../../test_utils/kbn_server';
 import manageUuid from '../manage_uuid';
 
 describe('legacy/core_plugins/kibana/server/lib', function () {
   describe('manage_uuid', function () {
     const testUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
-    let kbn;
     let kbnServer;
-    let esServer;
     let config;
     let servers;
 
     before(async function () {
-      servers = createTestServers({
+      servers = await startTestServers({
         adjustTimeout: (t) => {
           this.timeout(t);
         },
       });
-      esServer = await servers.startES();
-
-      kbn = await servers.startKibana();
-      kbnServer = kbn.kbnServer;
+      kbnServer = servers.kbnServer;
     });
 
     // Clear uuid stuff from previous test runs
@@ -49,10 +44,7 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
       config = kbnServer.server.config();
     });
 
-    after(() => {
-      esServer.stop();
-      kbn.stop();
-    });
+    after(() => servers.stop());
 
     it('ensure config uuid is validated as a guid', async function () {
       config.set('server.uuid', testUuid);

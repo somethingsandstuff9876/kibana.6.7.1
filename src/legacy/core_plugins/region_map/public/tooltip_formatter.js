@@ -18,18 +18,14 @@
  */
 
 import $ from 'jquery';
-import template from './tooltip.html';
-
-export const TileMapTooltipFormatter = ($injector) => {
-  const $rootScope = $injector.get('$rootScope');
-  const $compile = $injector.get('$compile');
+export default function TileMapTooltipFormatter($compile, $rootScope) {
 
   const $tooltipScope = $rootScope.$new();
-  const $el = $('<div>').html(template);
-
+  const $el = $('<div>').html(require('./tooltip.html'));
   $compile($el)($tooltipScope);
 
-  return function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {
+  return function tooltipFormatter(metricAgg, metric, fieldName) {
+
     if (!metric) {
       return '';
     }
@@ -38,18 +34,18 @@ export const TileMapTooltipFormatter = ($injector) => {
     if (fieldName && metric) {
       $tooltipScope.details.push({
         label: fieldName,
-        value: metric.term,
+        value: metric.term
       });
     }
 
     if (metric) {
       $tooltipScope.details.push({
-        label: metricName,
-        value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
+        label: metricAgg.makeLabel(),
+        value: metricAgg.fieldFormatter()(metric.value)
       });
     }
 
     $tooltipScope.$apply();
     return $el.html();
   };
-};
+}

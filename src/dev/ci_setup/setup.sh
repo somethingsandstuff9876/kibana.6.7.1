@@ -16,6 +16,10 @@ C_RESET='\033[0m' # Reset color
 ###
 export FORCE_COLOR=1
 
+### To run the test suite against a different version of Elasticsearch than
+### the default, uncomment this line, and change the version.
+# export ES_SNAPSHOT_VERSION=7.0.0
+
 ###
 ### check that we seem to be in a kibana project
 ###
@@ -29,6 +33,7 @@ fi
 
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
+export NODE_OPTIONS="--max_old_space_size=2048"
 
 parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
@@ -39,8 +44,8 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 echo " -- KIBANA_DIR='$KIBANA_DIR'"
 echo " -- XPACK_DIR='$XPACK_DIR'"
 echo " -- PARENT_DIR='$PARENT_DIR'"
+echo " -- NODE_OPTIONS='$NODE_OPTIONS'"
 echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
-echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
 ###
 ### download node
@@ -90,6 +95,7 @@ fi
 ### "install" node into this shell
 ###
 export PATH="$nodeBin:$PATH"
+hash -r
 
 ###
 ### downloading yarn
@@ -107,10 +113,7 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 ###
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
-
-# use a proxy to fetch chromedriver/geckodriver asset
-export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+hash -r
 
 ###
 ### install dependencies
@@ -143,44 +146,3 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
-
-###
-### rebuild kbn-pm distributable to ensure it's not out of date
-###
-echo " -- building renovate config"
-node scripts/build_renovate_config
-
-###
-### verify no git modifications
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'node scripts/build_renovate_config' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  exit 1
-fi
-
-###
-### github-checks-reporter kill switch. Remove to disable
-###
-export CHECKS_REPORTER_ACTIVE=true
-
-### only run on pr jobs
-if [[ "$JOB_NAME" != "elastic+kibana+pull-request"* ]] ; then
-  export CHECKS_REPORTER_ACTIVE=false
-fi
-
-###
-### Implements github-checks-reporter kill switch when scripts are called from the command line
-### $@ - all arguments
-###
-function checks-reporter-with-killswitch() {
-  if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
-    yarn run github-checks-reporter "$@"
-  else
-    arguments=("$@");
-    "${arguments[@]:1}";
-  fi
-}
-
-export -f checks-reporter-with-killswitch

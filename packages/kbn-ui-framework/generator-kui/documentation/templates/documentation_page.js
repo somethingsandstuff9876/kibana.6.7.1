@@ -1,5 +1,3 @@
-/* eslint-disable import/no-duplicates */
-
 import React from 'react';
 
 import { renderToHtml } from '../../services';
@@ -14,7 +12,7 @@ import {
 } from '../../components';
 
 import <%= componentExampleName %> from './<%= fileName %>';
-import <%= componentExamplePrefix %>Source from '!!raw-loader!./<%= fileName %>'; // eslint-disable-line import/default
+const <%= componentExamplePrefix %>Source = require('!!raw-loader!./<%= fileName %>');
 const <%= componentExamplePrefix %>Html = renderToHtml(<%= componentExampleName %>);
 
 export default props => (

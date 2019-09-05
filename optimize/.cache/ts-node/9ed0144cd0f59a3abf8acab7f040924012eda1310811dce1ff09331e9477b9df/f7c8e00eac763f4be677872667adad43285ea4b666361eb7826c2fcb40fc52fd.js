@@ -1,0 +1,26 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const schema_gql_1 = require("../../common/graphql/root/schema.gql");
+const schema_gql_2 = require("../../common/graphql/shared/schema.gql");
+const schema_gql_3 = require("./log_entries/schema.gql");
+const schema_gql_4 = require("./metadata/schema.gql");
+const schema_gql_5 = require("./metrics/schema.gql");
+const schema_gql_6 = require("./nodes/schema.gql");
+const schema_gql_7 = require("./source_status/schema.gql");
+const schema_gql_8 = require("./sources/schema.gql");
+exports.schemas = [
+    schema_gql_1.rootSchema,
+    schema_gql_2.sharedSchema,
+    schema_gql_4.metadataSchema,
+    schema_gql_3.logEntriesSchema,
+    schema_gql_6.nodesSchema,
+    schema_gql_8.sourcesSchema,
+    schema_gql_7.sourceStatusSchema,
+    schema_gql_5.metricsSchema,
+];
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvaW5mcmEvc2VydmVyL2dyYXBocWwvaW5kZXgudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3gtcGFjay9wbHVnaW5zL2luZnJhL3NlcnZlci9ncmFwaHFsL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7OztHQUlHOztBQUVILHFFQUFrRTtBQUNsRSx1RUFBc0U7QUFDdEUseURBQTREO0FBQzVELHNEQUF1RDtBQUN2RCxxREFBcUQ7QUFDckQsbURBQWlEO0FBQ2pELDJEQUFnRTtBQUNoRSxxREFBcUQ7QUFFeEMsUUFBQSxPQUFPLEdBQUc7SUFDckIsdUJBQVU7SUFDVix5QkFBWTtJQUNaLDJCQUFjO0lBQ2QsNkJBQWdCO0lBQ2hCLHdCQUFXO0lBQ1gsMEJBQWE7SUFDYiwrQkFBa0I7SUFDbEIsMEJBQWE7Q0FDZCxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIENvcHlyaWdodCBFbGFzdGljc2VhcmNoIEIuVi4gYW5kL29yIGxpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmVcbiAqIG9yIG1vcmUgY29udHJpYnV0b3IgbGljZW5zZSBhZ3JlZW1lbnRzLiBMaWNlbnNlZCB1bmRlciB0aGUgRWxhc3RpYyBMaWNlbnNlO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBFbGFzdGljIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgcm9vdFNjaGVtYSB9IGZyb20gJy4uLy4uL2NvbW1vbi9ncmFwaHFsL3Jvb3Qvc2NoZW1hLmdxbCc7XG5pbXBvcnQgeyBzaGFyZWRTY2hlbWEgfSBmcm9tICcuLi8uLi9jb21tb24vZ3JhcGhxbC9zaGFyZWQvc2NoZW1hLmdxbCc7XG5pbXBvcnQgeyBsb2dFbnRyaWVzU2NoZW1hIH0gZnJvbSAnLi9sb2dfZW50cmllcy9zY2hlbWEuZ3FsJztcbmltcG9ydCB7IG1ldGFkYXRhU2NoZW1hIH0gZnJvbSAnLi9tZXRhZGF0YS9zY2hlbWEuZ3FsJztcbmltcG9ydCB7IG1ldHJpY3NTY2hlbWEgfSBmcm9tICcuL21ldHJpY3Mvc2NoZW1hLmdxbCc7XG5pbXBvcnQgeyBub2Rlc1NjaGVtYSB9IGZyb20gJy4vbm9kZXMvc2NoZW1hLmdxbCc7XG5pbXBvcnQgeyBzb3VyY2VTdGF0dXNTY2hlbWEgfSBmcm9tICcuL3NvdXJjZV9zdGF0dXMvc2NoZW1hLmdxbCc7XG5pbXBvcnQgeyBzb3VyY2VzU2NoZW1hIH0gZnJvbSAnLi9zb3VyY2VzL3NjaGVtYS5ncWwnO1xuXG5leHBvcnQgY29uc3Qgc2NoZW1hcyA9IFtcbiAgcm9vdFNjaGVtYSxcbiAgc2hhcmVkU2NoZW1hLFxuICBtZXRhZGF0YVNjaGVtYSxcbiAgbG9nRW50cmllc1NjaGVtYSxcbiAgbm9kZXNTY2hlbWEsXG4gIHNvdXJjZXNTY2hlbWEsXG4gIHNvdXJjZVN0YXR1c1NjaGVtYSxcbiAgbWV0cmljc1NjaGVtYSxcbl07XG4iXX0=

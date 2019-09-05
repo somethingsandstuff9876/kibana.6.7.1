@@ -31,7 +31,7 @@ const asyncPipeline = promisify(pipeline);
 const V1_VERSIONS_API = 'https://artifacts-api.elastic.co/v1/versions';
 
 const { cache } = require('./utils');
-const { createCliError, isCliError } = require('./errors');
+const { createCliError } = require('./errors');
 
 const TEST_ES_SNAPSHOT_VERSION = process.env.TEST_ES_SNAPSHOT_VERSION
   ? process.env.TEST_ES_SNAPSHOT_VERSION
@@ -66,25 +66,6 @@ function headersToString(headers, indent = '') {
   );
 }
 
-async function retry(log, fn) {
-  async function doAttempt(attempt) {
-    try {
-      return await fn();
-    } catch (error) {
-      if (isCliError(error) || attempt >= 5) {
-        throw error;
-      }
-
-      log.warning('...failure, retrying in 5 seconds:', error.message);
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      log.info('...retrying');
-      return await doAttempt(attempt + 1);
-    }
-  }
-
-  return await doAttempt(1);
-}
-
 exports.Artifact = class Artifact {
   /**
    * Fetch an Artifact from the Artifact API for a license level and version
@@ -94,50 +75,25 @@ exports.Artifact = class Artifact {
    */
   static async getSnapshot(license, version, log) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
-
-    if (process.env.KBN_ES_SNAPSHOT_URL) {
-      const ext = process.platform === 'win32' ? 'zip' : 'tar.gz';
-      const os = process.platform === 'win32' ? 'windows' : process.platform;
-      const name = license === 'oss' ? 'elasticsearch-oss' : 'elasticsearch';
-      const overrideUrl = process.env.KBN_ES_SNAPSHOT_URL.replace('{name}', name)
-        .replace('{ext}', ext)
-        .replace('{os}', os);
-
-      return new Artifact(
-        {
-          url: overrideUrl,
-          checksumUrl: overrideUrl + '.sha512',
-          checksumType: 'sha512',
-          filename: path.basename(overrideUrl),
-        },
-        log
-      );
-    }
-
     const urlBuild = encodeURIComponent(TEST_ES_SNAPSHOT_VERSION);
     const url = `${V1_VERSIONS_API}/${urlVersion}/builds/${urlBuild}/projects/elasticsearch`;
 
-    const json = await retry(log, async () => {
-      log.info('downloading artifact info from %s', chalk.bold(url));
+    log.info('downloading artifact info from %s', chalk.bold(url));
+    const abc = new AbortController();
+    const resp = await fetch(url, { signal: abc.signal });
+    const json = await resp.text();
 
-      const abc = new AbortController();
-      const resp = await fetch(url, { signal: abc.signal });
-      const json = await resp.text();
+    if (resp.status === 404) {
+      abc.abort();
+      throw createCliError(
+        `Snapshots for ${version}/${TEST_ES_SNAPSHOT_VERSION} are not available`
+      );
+    }
 
-      if (resp.status === 404) {
-        abc.abort();
-        throw createCliError(
-          `Snapshots for ${version}/${TEST_ES_SNAPSHOT_VERSION} are not available`
-        );
-      }
-
-      if (!resp.ok) {
-        abc.abort();
-        throw new Error(`Unable to read artifact info from ${url}: ${resp.statusText}\n  ${json}`);
-      }
-
-      return json;
-    });
+    if (!resp.ok) {
+      abc.abort();
+      throw new Error(`Unable to read artifact info from ${url}: ${resp.statusText}\n  ${json}`);
+    }
 
     // parse the api response into an array of Artifact objects
     const {
@@ -228,23 +184,21 @@ exports.Artifact = class Artifact {
    * @return {Promise<void>}
    */
   async download(dest) {
-    await retry(this._log, async () => {
-      const cacheMeta = cache.readMeta(dest);
-      const tmpPath = `${dest}.tmp`;
+    const cacheMeta = cache.readMeta(dest);
+    const tmpPath = `${dest}.tmp`;
 
-      const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
-      if (artifactResp.cached) {
-        return;
-      }
+    const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
+    if (artifactResp.cached) {
+      return;
+    }
 
-      await this._verifyChecksum(artifactResp);
+    await this._verifyChecksum(artifactResp);
 
-      // cache the etag for future downloads
-      cache.writeMeta(dest, { etag: artifactResp.etag });
+    // cache the etag for future downloads
+    cache.writeMeta(dest, { etag: artifactResp.etag });
 
-      // rename temp download to the destination location
-      fs.renameSync(tmpPath, dest);
-    });
+    // rename temp download to the destination location
+    fs.renameSync(tmpPath, dest);
   }
 
   /**

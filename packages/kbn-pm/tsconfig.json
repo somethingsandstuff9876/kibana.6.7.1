@@ -5,11 +5,6 @@
   ],
   "include": [
     "./src/**/*.ts",
-  ],
-  "compilerOptions": {
-    "types": [
-      "jest",
-      "node"
-    ]
-  }
+    "./types/**/*.ts"
+  ]
 }

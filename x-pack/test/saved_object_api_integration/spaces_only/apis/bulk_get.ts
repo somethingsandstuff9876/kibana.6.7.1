@@ -5,19 +5,18 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { bulkGetTestSuiteFactory } from '../../common/suites/bulk_get';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const {
-    bulkGetTest,
-    createExpectResults,
-    createExpectNotFoundResults,
-    expectBadRequestForHiddenType,
-  } = bulkGetTestSuiteFactory(esArchiver, supertest);
+  const { bulkGetTest, createExpectResults, createExpectNotFoundResults } = bulkGetTestSuiteFactory(
+    esArchiver,
+    supertest
+  );
 
   describe('_bulk_get', () => {
     bulkGetTest(`objects within the current space (space_1)`, {
@@ -26,10 +25,6 @@ export default function({ getService }: FtrProviderContext) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
-        },
-        includingHiddenType: {
-          statusCode: 200,
-          response: expectBadRequestForHiddenType,
         },
       },
     });
@@ -41,10 +36,6 @@ export default function({ getService }: FtrProviderContext) {
         default: {
           statusCode: 200,
           response: createExpectNotFoundResults(SPACES.SPACE_2.spaceId),
-        },
-        includingHiddenType: {
-          statusCode: 200,
-          response: expectBadRequestForHiddenType,
         },
       },
     });

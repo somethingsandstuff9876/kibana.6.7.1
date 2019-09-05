@@ -18,9 +18,7 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import angular from 'angular';
-import 'angular-elastic/elastic';
 import rison from 'rison-node';
 import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectViewHTML from './_view.html';
@@ -28,10 +26,9 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
+import { castEsToKbnFieldTypeName } from '../../../../../../../utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
-import { canViewInApp } from './lib/in_app_url';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 
@@ -40,15 +37,14 @@ const location = 'SavedObject view';
 uiRoutes
   .when('/management/kibana/objects/:service/:id', {
     template: objectViewHTML,
-    k7Breadcrumbs: getViewBreadcrumbs,
-    requireUICapability: 'management.kibana.objects',
+    k7Breadcrumbs: getViewBreadcrumbs
   });
 
-uiModules.get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
+uiModules.get('apps/management')
+  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -91,7 +87,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             field.type = 'boolean';
             field.value = field.value;
           } else if (_.isPlainObject(field.value)) {
-            // do something recursive
+          // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
           }
 
@@ -129,20 +125,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
               value: '{}'
             });
           }
-
-          if (!fieldMap.references) {
-            fields.push({
-              name: 'references',
-              type: 'array',
-              value: '[]',
-            });
-          }
         };
-
-        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement;
-        $scope.canEdit = canEdit;
-        $scope.canDelete = canDelete;
-        $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);
 
         $scope.notFound = $routeParams.notFound;
 
@@ -153,10 +136,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             $scope.obj = obj;
             $scope.link = service.urlFor(obj.id);
 
-            const fields = _.reduce(obj.attributes, createField, []);
-            // Special handling for references which isn't within "attributes"
-            createField(fields, obj.references, 'references');
-
+            const fields =  _.reduce(obj.attributes, createField, []);
             if (service.Class) readObjectClass(fields, service.Class);
 
             // sorts twice since we want numerical sort to prioritize over name,
@@ -222,15 +202,15 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
-            confirmButtonText: i18n.translate('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
+            confirmButtonText: i18n('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
               defaultMessage: 'Delete',
             }),
-            title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
+            title: i18n('kbn.management.objects.confirmModalOptions.modalTitle', {
               defaultMessage: 'Delete saved Kibana object?'
             }),
           };
           confirmModal(
-            i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
+            i18n('kbn.management.objects.confirmModalOptions.modalDescription', {
               defaultMessage: 'You can\'t recover deleted objects',
             }),
             confirmModalOptions
@@ -254,9 +234,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             _.set(source, field.name, value);
           });
 
-          const { references, ...attributes } = source;
-
-          savedObjectsClient.update(service.type, $routeParams.id, attributes, { references })
+          savedObjectsClient.update(service.type, $routeParams.id, source)
             .then(function () {
               return redirectHandler('updated');
             })

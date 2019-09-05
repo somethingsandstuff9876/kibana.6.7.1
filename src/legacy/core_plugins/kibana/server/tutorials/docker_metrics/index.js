@@ -43,7 +43,7 @@ export function dockerMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'AV4REOpp5NkDleZmzKkE-ecs',
+          id: 'AV4REOpp5NkDleZmzKkE',
           linkLabel: i18n.translate('kbn.server.tutorials.dockerMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Docker metrics dashboard',
           }),

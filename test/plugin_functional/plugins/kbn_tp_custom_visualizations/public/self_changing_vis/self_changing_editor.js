@@ -27,14 +27,16 @@ import {
 export class SelfChangingEditor extends React.Component {
 
   onCounterChange = (ev) => {
-    this.props.setValue('counter', parseInt(ev.target.value));
+    this.props.stageEditorParams({
+      counter: parseInt(ev.target.value),
+    });
   }
 
   render() {
     return (
       <EuiFormRow label="Counter">
         <EuiFieldNumber
-          value={this.props.stateParams.counter}
+          value={this.props.editorState.params.counter}
           onChange={this.onCounterChange}
           step={1}
           data-test-subj="counterEditor"

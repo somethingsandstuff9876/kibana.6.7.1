@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }) {
   const pipelineList = getService('pipelineList');
   const pipelineEditor = getService('pipelineEditor');
   const PageObjects = getPageObjects(['logstash']);
-  const retry = getService('retry');
 
   describe('pipeline create new', () => {
     let originalWindowSize;
@@ -66,32 +65,25 @@ export default function ({ getService, getPageObjects }) {
 
         await pipelineEditor.clickSave();
         await pipelineList.assertExists();
-        await pipelineList.setFilter(id);
+        const rows = await pipelineList.getRowsFromTable();
+        const newRow = rows.find(row => row.id === id);
 
-        await retry.try(async () => {
-          const rows = await pipelineList.readRows();
-          const newRow = rows.find(row => row.id === id);
-
-          expect(newRow)
-            .to.have.property('description', description);
-        });
+        expect(newRow)
+          .to.have.property('description', description);
       });
     });
 
     describe('cancel button', () => {
       it('discards the pipeline and redirects to the list', async () => {
         await PageObjects.logstash.gotoPipelineList();
-        await pipelineList.assertExists();
-        const originalRows = await pipelineList.readRows();
+        const originalRows = await pipelineList.getRowsFromTable();
 
         await PageObjects.logstash.gotoNewPipelineEditor();
         await pipelineEditor.clickCancel();
 
-        await retry.try(async () => {
-          await pipelineList.assertExists();
-          const currentRows = await pipelineList.readRows();
-          expect(originalRows).to.eql(currentRows);
-        });
+        await pipelineList.assertExists();
+        const currentRows = await pipelineList.getRowsFromTable();
+        expect(originalRows).to.eql(currentRows);
       });
     });
 

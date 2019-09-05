@@ -22,14 +22,14 @@ import path from 'path';
 import { promisify } from 'util';
 
 import { getProjectPaths } from '../config';
-import { copyDirectory, isSymlink, unlink } from './fs';
+import { copyDirectory, unlink } from './fs';
 import { readPackageJson } from './package_json';
 import { getProjects } from './projects';
 
 const glob = promisify(globSync);
 
 export async function workspacePackagePaths(rootPath: string): Promise<string[]> {
-  const rootPkgJson = await readPackageJson(rootPath);
+  const rootPkgJson = await readPackageJson(path.join(rootPath, 'package.json'));
 
   if (!rootPkgJson.workspaces) {
     return [];
@@ -56,22 +56,29 @@ export async function workspacePackagePaths(rootPath: string): Promise<string[]>
 }
 
 export async function copyWorkspacePackages(rootPath: string): Promise<void> {
-  const projectPaths = getProjectPaths(rootPath, {});
-  const projects = await getProjects(rootPath, projectPaths);
+  const workspaceProjects = await getWorkspaceProjects(rootPath);
 
-  for (const project of projects.values()) {
+  for (const project of workspaceProjects.values()) {
     const dest = path.resolve(rootPath, 'node_modules', project.name);
-
-    if ((await isSymlink(dest)) === false) {
-      continue;
-    }
 
     // Remove the symlink
     await unlink(dest);
-
     // Copy in the package
     await copyDirectory(project.path, dest);
   }
+}
+
+async function getWorkspaceProjects(rootPath: string) {
+  const projectPaths = getProjectPaths(rootPath, {});
+  const projects = await getProjects(rootPath, projectPaths);
+
+  for (const [key, project] of projects.entries()) {
+    if (!project.isWorkspaceProject) {
+      projects.delete(key);
+    }
+  }
+
+  return projects;
 }
 
 function packagesFromGlobPattern({ pattern, rootPath }: { pattern: string; rootPath: string }) {

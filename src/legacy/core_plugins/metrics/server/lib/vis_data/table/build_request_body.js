@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { buildProcessorFunction } from '../build_processor_function';
-import { processors } from '../request_processors/table';
+import buildProcessorFunction from '../build_processor_function';
+import processors from '../request_processors/table';
 
-export function buildRequestBody(...args) {
-  const processor = buildProcessorFunction(processors, ...args);
+function buildRequestBody(req, panel, esQueryConfig, indexPattern) {
+  const processor = buildProcessorFunction(processors, req, panel, esQueryConfig, indexPattern);
   const doc = processor({});
   return doc;
 }
+
+export default buildRequestBody;

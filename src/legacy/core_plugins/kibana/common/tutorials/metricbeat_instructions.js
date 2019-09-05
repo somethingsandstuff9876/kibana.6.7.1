@@ -440,7 +440,7 @@ export function metricbeatStatusCheck(moduleName) {
         bool: {
           filter: {
             term: {
-              'event.module': moduleName,
+              'metricset.module': moduleName,
             },
           },
         },

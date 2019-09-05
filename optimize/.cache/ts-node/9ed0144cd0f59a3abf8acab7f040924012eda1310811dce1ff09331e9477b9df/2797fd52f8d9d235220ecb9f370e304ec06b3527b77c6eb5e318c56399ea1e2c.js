@@ -1,0 +1,35 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const legacy_service_1 = require("./legacy_service");
+/** @internal */
+var legacy_object_to_config_adapter_1 = require("./config/legacy_object_to_config_adapter");
+exports.LegacyObjectToConfigAdapter = legacy_object_to_config_adapter_1.LegacyObjectToConfigAdapter;
+/** @internal */
+var legacy_service_2 = require("./legacy_service");
+exports.LegacyService = legacy_service_2.LegacyService;
+/** @internal */
+class LegacyCompatModule {
+    constructor(coreContext) {
+        this.service = new legacy_service_1.LegacyService(coreContext);
+    }
+}
+exports.LegacyCompatModule = LegacyCompatModule;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL2NvcmUvc2VydmVyL2xlZ2FjeV9jb21wYXQvaW5kZXgudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3NyYy9jb3JlL3NlcnZlci9sZWdhY3lfY29tcGF0L2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FpQkc7O0FBR0gscURBQWlEO0FBRWpELGdCQUFnQjtBQUNoQiw0RkFBdUY7QUFBOUUsd0VBQUEsMkJBQTJCLENBQUE7QUFDcEMsZ0JBQWdCO0FBQ2hCLG1EQUFpRDtBQUF4Qyx5Q0FBQSxhQUFhLENBQUE7QUFFdEIsZ0JBQWdCO0FBQ2hCLE1BQWEsa0JBQWtCO0lBRzdCLFlBQVksV0FBd0I7UUFDbEMsSUFBSSxDQUFDLE9BQU8sR0FBRyxJQUFJLDhCQUFhLENBQUMsV0FBVyxDQUFDLENBQUM7SUFDaEQsQ0FBQztDQUNGO0FBTkQsZ0RBTUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogTGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZSBvciBtb3JlIGNvbnRyaWJ1dG9yXG4gKiBsaWNlbnNlIGFncmVlbWVudHMuIFNlZSB0aGUgTk9USUNFIGZpbGUgZGlzdHJpYnV0ZWQgd2l0aFxuICogdGhpcyB3b3JrIGZvciBhZGRpdGlvbmFsIGluZm9ybWF0aW9uIHJlZ2FyZGluZyBjb3B5cmlnaHRcbiAqIG93bmVyc2hpcC4gRWxhc3RpY3NlYXJjaCBCLlYuIGxpY2Vuc2VzIHRoaXMgZmlsZSB0byB5b3UgdW5kZXJcbiAqIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7IHlvdSBtYXlcbiAqIG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsXG4gKiBzb2Z0d2FyZSBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhblxuICogXCJBUyBJU1wiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTllcbiAqIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuICBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZVxuICogc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZCBsaW1pdGF0aW9uc1xuICogdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgQ29yZUNvbnRleHQgfSBmcm9tICcuLi8uLi90eXBlcyc7XG5pbXBvcnQgeyBMZWdhY3lTZXJ2aWNlIH0gZnJvbSAnLi9sZWdhY3lfc2VydmljZSc7XG5cbi8qKiBAaW50ZXJuYWwgKi9cbmV4cG9ydCB7IExlZ2FjeU9iamVjdFRvQ29uZmlnQWRhcHRlciB9IGZyb20gJy4vY29uZmlnL2xlZ2FjeV9vYmplY3RfdG9fY29uZmlnX2FkYXB0ZXInO1xuLyoqIEBpbnRlcm5hbCAqL1xuZXhwb3J0IHsgTGVnYWN5U2VydmljZSB9IGZyb20gJy4vbGVnYWN5X3NlcnZpY2UnO1xuXG4vKiogQGludGVybmFsICovXG5leHBvcnQgY2xhc3MgTGVnYWN5Q29tcGF0TW9kdWxlIHtcbiAgcHVibGljIHJlYWRvbmx5IHNlcnZpY2U6IExlZ2FjeVNlcnZpY2U7XG5cbiAgY29uc3RydWN0b3IoY29yZUNvbnRleHQ6IENvcmVDb250ZXh0KSB7XG4gICAgdGhpcy5zZXJ2aWNlID0gbmV3IExlZ2FjeVNlcnZpY2UoY29yZUNvbnRleHQpO1xuICB9XG59XG4iXX0=

@@ -2,6 +2,13 @@
   "type": "index",
   "value": {
     "index": ".reporting-2018.05.06",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0"
+      }
+    },
     "mappings": {
       "esqueue": {
         "properties": {
@@ -26,30 +33,30 @@
           "meta": {
             "properties": {
               "layout": {
+                "type": "text",
                 "fields": {
                   "keyword": {
-                    "ignore_above": 256,
-                    "type": "keyword"
+                    "type": "keyword",
+                    "ignore_above": 256
                   }
-                },
-                "type": "text"
+                }
               },
               "objectType": {
+                "type": "text",
                 "fields": {
                   "keyword": {
-                    "ignore_above": 256,
-                    "type": "keyword"
+                    "type": "keyword",
+                    "ignore_above": 256
                   }
-                },
-                "type": "text"
+                }
               }
             }
           },
           "output": {
             "properties": {
               "content": {
-                "enabled": false,
-                "type": "object"
+                "type": "object",
+                "enabled": false
               },
               "content_type": {
                 "type": "keyword"
@@ -60,8 +67,8 @@
             }
           },
           "payload": {
-            "enabled": false,
-            "type": "object"
+            "type": "object",
+            "enabled": false
           },
           "priority": {
             "type": "byte"
@@ -79,13 +86,6 @@
             "type": "long"
           }
         }
-      }
-    },
-    "settings": {
-      "index": {
-        "auto_expand_replicas": "0-1",
-        "number_of_replicas": "0",
-        "number_of_shards": "1"
       }
     }
   }

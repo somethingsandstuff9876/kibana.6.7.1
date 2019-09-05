@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import {
   USERS_PATH,
   EDIT_USERS_PATH,
   ROLES_PATH,
   EDIT_ROLES_PATH,
-  CLONE_ROLES_PATH,
-} from '../../../../legacy/plugins/security/public/views/management/management_urls';
+} from '../../../../plugins/security/public/views/management/management_urls';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -19,9 +18,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', function () {
-    this.tags(['skipFirefox']);
-
+  describe('Management', () => {
     before(async () => {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
@@ -41,8 +38,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
     });
 
-    describe('Security', () => {
-      describe('navigation', () => {
+    describe('Security', async () => {
+      describe('navigation', async () => {
         it('Can navigate to create user section', async () => {
           await PageObjects.security.clickElasticsearchUsers();
           await PageObjects.security.clickCreateNewUser();
@@ -77,9 +74,10 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.settings.clickLinkText('new-user');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
+          const userNameInput = await testSubjects.find('userFormUserNameInput');
           // allow time for user to load
           await PageObjects.common.sleep(500);
-          const userName = await testSubjects.getAttribute('userFormUserNameInput', 'value');
+          const userName = await userNameInput.getProperty('value');
           expect(userName).to.equal('new-user');
         });
 
@@ -105,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
         it('Clicking save in create role section brings user back to listing', async () => {
           await PageObjects.security.clickCreateNewRole();
 
-          await testSubjects.setValue('roleFormNameInput', 'a-my-new-role');
+          await testSubjects.setValue('roleFormNameInput', 'my-new-role');
 
           await PageObjects.security.clickSaveEditRole();
 
@@ -115,20 +113,13 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('Can navigate to edit role section', async () => {
-          await PageObjects.settings.clickLinkText('a-my-new-role');
+          await PageObjects.settings.clickLinkText('my-new-role');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
 
-          const userName = await testSubjects.getAttribute('roleFormNameInput', 'value');
-          expect(userName).to.equal('a-my-new-role');
-        });
-
-        it('Can navigate to clone role section', async () => {
-          await PageObjects.settings.navigateTo();
-          await PageObjects.security.clickElasticsearchRoles();
-          await PageObjects.security.clickCloneRole('a-my-new-role');
-          const currentUrl = await browser.getCurrentUrl();
-          expect(currentUrl).to.contain(CLONE_ROLES_PATH);
+          const userNameInput = await testSubjects.find('roleFormNameInput');
+          const userName = await userNameInput.getProperty('value');
+          expect(userName).to.equal('my-new-role');
         });
 
         it('Can navigate to edit role section from users page', async () => {

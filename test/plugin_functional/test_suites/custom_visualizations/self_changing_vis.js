@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -29,10 +29,11 @@ export default function ({ getService, getPageObjects }) {
   }
 
   async function getEditorValue() {
-    return await testSubjects.getAttribute('counterEditor', 'value');
+    const editor = await testSubjects.find('counterEditor');
+    return await editor.getProperty('value');
   }
 
-  describe.skip('self changing vis', function describeIndexTests() {
+  describe('self changing vis', function describeIndexTests() {
 
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();

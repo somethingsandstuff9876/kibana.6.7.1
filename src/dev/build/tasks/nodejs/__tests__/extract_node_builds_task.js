@@ -19,6 +19,7 @@
 
 import sinon from 'sinon';
 import { resolve } from 'path';
+
 import * as NodeDownloadInfoNS from '../node_download_info';
 import * as FsNS from '../../../lib/fs';
 import { ExtractNodeBuildsTask } from '../extract_node_builds_task';
@@ -36,7 +37,7 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
       extractDir: 'extractDir',
     });
 
-    sandbox.stub(ExtractNodeBuildsTask, 'copyWindows');
+    sandbox.stub(FsNS, 'copy');
     sandbox.stub(FsNS, 'untar');
 
     const platform = {
@@ -52,8 +53,8 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     sinon.assert.calledOnce(NodeDownloadInfoNS.getNodeDownloadInfo);
     sinon.assert.calledWithExactly(NodeDownloadInfoNS.getNodeDownloadInfo, config, platform);
 
-    sinon.assert.calledOnce(ExtractNodeBuildsTask.copyWindows);
-    sinon.assert.calledWithExactly(ExtractNodeBuildsTask.copyWindows, 'downloadPath', resolve('extractDir/node.exe'));
+    sinon.assert.calledOnce(FsNS.copy);
+    sinon.assert.calledWithExactly(FsNS.copy, 'downloadPath', resolve('extractDir/node.exe'));
 
     sinon.assert.notCalled(FsNS.untar);
   });
@@ -64,7 +65,7 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
       extractDir: 'extractDir',
     });
 
-    sandbox.stub(ExtractNodeBuildsTask, 'copyWindows');
+    sandbox.stub(FsNS, 'copy');
     sandbox.stub(FsNS, 'untar');
 
     const platform = {
@@ -80,7 +81,7 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     sinon.assert.calledOnce(NodeDownloadInfoNS.getNodeDownloadInfo);
     sinon.assert.calledWithExactly(NodeDownloadInfoNS.getNodeDownloadInfo, config, platform);
 
-    sinon.assert.notCalled(ExtractNodeBuildsTask.copyWindows);
+    sinon.assert.notCalled(FsNS.copy);
 
     sinon.assert.calledOnce(FsNS.untar);
     sinon.assert.calledWithExactly(FsNS.untar, 'downloadPath', 'extractDir', {

@@ -19,33 +19,30 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { createLegendSeries } from '../lib/create_legend_series';
+import createLegendSeries from '../lib/create_legend_series';
 import reactcss from 'reactcss';
 import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
-export const VerticalLegend = injectI18n(function(props) {
+const VerticalLegend = injectI18n(function (props) {
   const rows = props.series.map(createLegendSeries(props));
   const htmlId = htmlIdGenerator();
   const hideLegend = !props.showLegend;
   const leftLegend = props.legendPosition === 'left';
 
-  const styles = reactcss(
-    {
-      default: {
-        legend: { width: 200 },
-      },
-      leftLegend: {
-        legend: { order: '-1' },
-        control: { order: '2' },
-      },
-      hideLegend: {
-        legend: { width: 24 },
-        series: { display: 'none' },
-      },
+  const styles = reactcss({
+    default: {
+      legend: { width: 200 }
     },
-    { hideLegend, leftLegend }
-  );
+    leftLegend: {
+      legend: { order: '-1' },
+      control: { order: '2' }
+    },
+    hideLegend: {
+      legend: { width: 24 },
+      series: { display: 'none' },
+    }
+  }, { hideLegend, leftLegend });
 
   const openIcon = leftLegend ? 'arrowRight' : 'arrowLeft';
   const closeIcon = leftLegend ? 'arrowLeft' : 'arrowRight';
@@ -60,23 +57,17 @@ export const VerticalLegend = injectI18n(function(props) {
         color="text"
         iconSize="s"
         onClick={props.onClick}
-        aria-label={props.intl.formatMessage({
-          id: 'tsvb.verticalLegend.toggleChartAriaLabel',
-          defaultMessage: 'Toggle chart legend',
-        })}
-        title={props.intl.formatMessage({
-          id: 'tsvb.verticalLegend.toggleChartAriaLabel',
-          defaultMessage: 'Toggle chart legend',
-        })}
+        aria-label={props.intl.formatMessage({ id: 'tsvb.verticalLegend.toggleChartAriaLabel', defaultMessage: 'Toggle chart legend' })}
         aria-expanded={!!props.showLegend}
         aria-controls={htmlId('legend')}
       />
 
       <div className="tvbLegend__series" style={styles.series} id={htmlId('legend')}>
-        {rows}
+        { rows }
       </div>
     </div>
   );
+
 });
 
 VerticalLegend.propTypes = {
@@ -87,5 +78,7 @@ VerticalLegend.propTypes = {
   showLegend: PropTypes.bool,
   seriesValues: PropTypes.object,
   seriesFilter: PropTypes.array,
-  tickFormatter: PropTypes.func,
+  tickFormatter: PropTypes.func
 };
+
+export default VerticalLegend;

@@ -5,10 +5,11 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { updateTestSuiteFactory } from '../../common/suites/update';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -18,7 +19,6 @@ export default function({ getService }: FtrProviderContext) {
       expectSpaceAwareResults,
       createExpectDoesntExistNotFound,
       expectNotSpaceAwareResults,
-      expectSpaceNotFound,
       updateTest,
     } = updateTestSuiteFactory(esArchiver, supertest);
 
@@ -32,10 +32,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectSpaceNotFound,
         },
         doesntExist: {
           statusCode: 404,
@@ -55,10 +51,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
         },
-        hiddenType: {
-          statusCode: 404,
-          response: expectSpaceNotFound,
-        },
         doesntExist: {
           statusCode: 404,
           response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
@@ -77,10 +69,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectSpaceNotFound,
         },
         doesntExist: {
           statusCode: 404,

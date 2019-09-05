@@ -35,16 +35,13 @@ jest.mock('ui/chrome', () => ({
 
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
-  getIndexPatternName: () => 'name',
-  getFetchForWildcardOptions: () => {}
+  getIndexPatternName: () => 'name'
 };
 const noop = () => {};
 const indexPatternsService = {
-  make: async () => ({
-    fieldsFetcher: {
-      fetch: noop
-    }
-  })
+  fieldsFetcher: {
+    fetchForWildcard: noop,
+  }
 };
 
 describe('StepTimeField', () => {
@@ -232,59 +229,5 @@ describe('StepTimeField', () => {
     component.setState({ isCreating: true });
 
     expect(component).toMatchSnapshot();
-  });
-
-  it('should render any error message', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
-    );
-
-    component.setState({ error: 'foobar' });
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render "Custom index pattern ID already exists" when error is "Conflict"', () => {
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={noop}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
-    );
-
-    component.setState({ error: 'Conflict' });
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should remember error thrown by createIndexPatter() prop', async () => {
-    const createIndexPattern = async () => {
-      throw new Error('foobar');
-    };
-    const component = shallowWithIntl(
-      <StepTimeFieldComponent
-        indexPattern="ki*"
-        indexPatternsService={indexPatternsService}
-        goToPreviousStep={noop}
-        createIndexPattern={createIndexPattern}
-        indexPatternCreationType={mockIndexPatternCreationType}
-      />
-    );
-
-    await component.instance().createIndexPattern();
-    component.update();
-
-    expect(component.instance().state).toMatchObject({
-      error: 'foobar'
-    });
   });
 });

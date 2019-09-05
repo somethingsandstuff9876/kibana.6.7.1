@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 import Chance from 'chance';
 
@@ -25,7 +25,7 @@ import {
   createPromiseFromStreams,
   createConcatStream,
   createListStream
-} from '../../../../legacy/utils';
+} from '../../../../utils';
 
 import {
   createCreateIndexStream
@@ -96,30 +96,6 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createStubDocRecord('index', 1),
         createStubDocRecord('index', 2),
       ]);
-    });
-
-    it('creates aliases', async () => {
-      const client = createStubClient();
-      const stats = createStubStats();
-      await createPromiseFromStreams([
-        createListStream([
-          createStubIndexRecord('index', { foo: { } }),
-          createStubDocRecord('index', 1),
-        ]),
-        createCreateIndexStream({ client, stats }),
-        createConcatStream([])
-      ]);
-
-      sinon.assert.calledWith(client.indices.create, {
-        method: 'PUT',
-        index: 'index',
-        include_type_name: false,
-        body: {
-          settings: undefined,
-          mappings: undefined,
-          aliases: { foo: {} },
-        },
-      });
     });
 
     it('passes through records with unknown types', async () => {

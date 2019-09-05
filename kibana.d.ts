@@ -20,22 +20,17 @@
 /**
  * All exports from TS source files (where the implementation is actually done in TS).
  */
-import * as Public from 'src/core/public';
-import * as Server from 'src/core/server';
-
-export { Public, Server };
-
+export * from './target/types/type_exports';
 /**
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
 import * as LegacyElasticsearch from './src/legacy/core_plugins/elasticsearch';
-import * as LegacyKibanaPluginSpec from './src/legacy/plugin_discovery/plugin_spec/plugin_spec_options';
-import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
+import * as LegacyKibanaServer from './src/server/kbn_server';
 
 /**
  *  Re-export legacy types under a namespace.
  */
-// eslint-disable-next-line @typescript/eslint-no-namespace
+// tslint:disable:no-namespace
 export namespace Legacy {
   export type IndexPatternsService = LegacyKibanaServer.IndexPatternsService;
   export type KibanaConfig = LegacyKibanaServer.KibanaConfig;
@@ -44,10 +39,6 @@ export namespace Legacy {
   export type SavedObjectsClient = LegacyKibanaServer.SavedObjectsClient;
   export type SavedObjectsService = LegacyKibanaServer.SavedObjectsService;
   export type Server = LegacyKibanaServer.Server;
-
-  export type InitPluginFunction = LegacyKibanaPluginSpec.InitPluginFunction;
-  export type UiExports = LegacyKibanaPluginSpec.UiExports;
-  export type PluginSpecOptions = LegacyKibanaPluginSpec.PluginSpecOptions;
 
   export namespace Plugins {
     export namespace elasticsearch {

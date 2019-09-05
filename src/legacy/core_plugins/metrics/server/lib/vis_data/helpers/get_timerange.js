@@ -18,18 +18,8 @@
  */
 
 import moment from 'moment';
-
-export const getTimerange = req => {
-  const { min, max } = req.payload.timerange;
-
-  return {
-    from: moment.utc(min),
-    to: moment.utc(max),
-  };
-};
-
-export const getTimerangeDuration = req => {
-  const { from, to } = getTimerange(req);
-
-  return moment.duration(to.valueOf() - from.valueOf(), 'ms');
-};
+export default function getTimerange(req) {
+  const from = moment.utc(req.payload.timerange.min);
+  const to = moment.utc(req.payload.timerange.max);
+  return { from, to };
+}

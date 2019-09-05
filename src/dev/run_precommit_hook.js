@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { run, combineErrors } from '@kbn/dev-utils';
+import { run, combineErrors } from './run';
 import * as Eslint from './eslint';
+import * as Tslint from './tslint';
 import * as Sasslint from './sasslint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
-run(async ({ log, flags }) => {
+run(async ({ log }) => {
   const files = await getFilesForCommit();
   const errors = [];
 
@@ -32,13 +33,11 @@ run(async ({ log, flags }) => {
     errors.push(error);
   }
 
-  for (const Linter of [Eslint, Sasslint]) {
+  for (const Linter of [Eslint, Tslint, Sasslint]) {
     const filesToLint = Linter.pickFilesToLint(log, files);
     if (filesToLint.length > 0) {
       try {
-        await Linter.lintFiles(log, filesToLint, {
-          fix: flags.fix
-        });
+        await Linter.lintFiles(log, filesToLint);
       } catch (error) {
         errors.push(error);
       }
@@ -48,17 +47,4 @@ run(async ({ log, flags }) => {
   if (errors.length) {
     throw combineErrors(errors);
   }
-}, {
-  description: `
-    Run checks on files that are staged for commit
-  `,
-  flags: {
-    boolean: ['fix'],
-    default: {
-      fix: false
-    },
-    help: `
-      --fix              Execute eslint in --fix mode
-    `
-  },
 });

@@ -20,23 +20,16 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Env } from '../config';
 
-export type PluginsConfigType = TypeOf<typeof config.schema>;
+const pluginsSchema = schema.object({
+  initialize: schema.boolean({ defaultValue: true }),
+});
 
-export const config = {
-  path: 'plugins',
-  schema: schema.object({
-    initialize: schema.boolean({ defaultValue: true }),
-
-    /**
-     * Defines an array of directories where another plugin should be loaded from.
-     * Should only be used in a development environment.
-     */
-    paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  }),
-};
+type PluginsConfigType = TypeOf<typeof pluginsSchema>;
 
 /** @internal */
 export class PluginsConfig {
+  public static schema = pluginsSchema;
+
   /**
    * Indicates whether or not plugins should be initialized.
    */
@@ -45,17 +38,10 @@ export class PluginsConfig {
   /**
    * Defines directories that we should scan for the plugin subdirectories.
    */
-  public readonly pluginSearchPaths: readonly string[];
+  public readonly pluginSearchPaths: ReadonlyArray<string>;
 
-  /**
-   * Defines directories where an additional plugin exists.
-   */
-  public readonly additionalPluginPaths: readonly string[];
-
-  constructor(rawConfig: PluginsConfigType, env: Env) {
-    this.initialize = rawConfig.initialize;
+  constructor(config: PluginsConfigType, env: Env) {
+    this.initialize = config.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
-    // Only allow custom plugin paths in dev.
-    this.additionalPluginPaths = env.mode.dev ? rawConfig.paths : [];
   }
 }

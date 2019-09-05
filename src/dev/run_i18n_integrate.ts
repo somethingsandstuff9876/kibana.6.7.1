@@ -18,11 +18,10 @@
  */
 
 import chalk from 'chalk';
-import Listr from 'listr';
 
-import { createFailError, run } from '@kbn/dev-utils';
-import { ErrorReporter, integrateLocaleFiles } from './i18n';
-import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
+import { integrateLocaleFiles, mergeConfigs } from './i18n';
+import { extractDefaultMessages } from './i18n/tasks';
+import { createFailError, run } from './run';
 
 run(
   async ({
@@ -75,52 +74,18 @@ run(
       );
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
+    const config = await mergeConfigs(includeConfig);
+    const defaultMessages = await extractDefaultMessages({ path, config });
 
-    const list = new Listr([
-      {
-        title: 'Merging .i18nrc.json files',
-        task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
-      },
-      {
-        title: 'Extracting Default Messages',
-        task: ({ config }) =>
-          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
-      },
-      {
-        title: 'Intregrating Locale File',
-        task: async ({ messages, config }) => {
-          await integrateLocaleFiles(messages, {
-            sourceFileName: source,
-            targetFileName: target,
-            dryRun,
-            ignoreIncompatible,
-            ignoreUnused,
-            ignoreMissing,
-            config,
-            log,
-          });
-        },
-      },
-    ]);
-
-    try {
-      const reporter = new ErrorReporter();
-      const messages: Map<string, { message: string }> = new Map();
-      await list.run({ messages, reporter });
-    } catch (error) {
-      process.exitCode = 1;
-      if (error instanceof ErrorReporter) {
-        error.errors.forEach((e: string | Error) => log.error(e));
-      } else {
-        log.error('Unhandled exception!');
-        log.error(error);
-      }
-    }
-  },
-  {
-    flags: {
-      allowUnexpected: true,
-    },
+    await integrateLocaleFiles(defaultMessages, {
+      sourceFileName: source,
+      targetFileName: target,
+      dryRun,
+      ignoreIncompatible,
+      ignoreUnused,
+      ignoreMissing,
+      config,
+      log,
+    });
   }
 );

@@ -1,0 +1,32 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const graphql_1 = require("graphql");
+const unsignedIntegerScalar = new graphql_1.GraphQLScalarType({
+    name: 'UnsignedInteger',
+    description: 'Represents an unsigned 32-bit integer',
+    serialize(value) {
+        return parseInt(value, 10);
+    },
+    parseValue(value) {
+        const parsed = parseInt(value, 10);
+        return parsed < 0 ? null : parsed;
+    },
+    parseLiteral(ast) {
+        switch (ast.kind) {
+            case graphql_1.Kind.INT:
+            case graphql_1.Kind.FLOAT:
+            case graphql_1.Kind.STRING:
+                return parseInt(ast.value, 10);
+        }
+        return null;
+    },
+});
+exports.unsignedIntegerResolverFunctions = (libs) => ({
+    UnsignedInteger: unsignedIntegerScalar,
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvdXB0aW1lL3NlcnZlci9ncmFwaHFsL3Vuc2lnbmVkX2ludF9zY2FsYXIvcmVzb2x2ZXJzLnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS94LXBhY2svcGx1Z2lucy91cHRpbWUvc2VydmVyL2dyYXBocWwvdW5zaWduZWRfaW50X3NjYWxhci9yZXNvbHZlcnMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7O0dBSUc7O0FBRUgscUNBQWtEO0FBSWxELE1BQU0scUJBQXFCLEdBQUcsSUFBSSwyQkFBaUIsQ0FBQztJQUNsRCxJQUFJLEVBQUUsaUJBQWlCO0lBQ3ZCLFdBQVcsRUFBRSx1Q0FBdUM7SUFDcEQsU0FBUyxDQUFDLEtBQUs7UUFDYixPQUFPLFFBQVEsQ0FBQyxLQUFLLEVBQUUsRUFBRSxDQUFDLENBQUM7SUFDN0IsQ0FBQztJQUNELFVBQVUsQ0FBQyxLQUFLO1FBQ2QsTUFBTSxNQUFNLEdBQUcsUUFBUSxDQUFDLEtBQUssRUFBRSxFQUFFLENBQUMsQ0FBQztRQUNuQyxPQUFPLE1BQU0sR0FBRyxDQUFDLENBQUMsQ0FBQyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsTUFBTSxDQUFDO0lBQ3BDLENBQUM7SUFDRCxZQUFZLENBQUMsR0FBRztRQUNkLFFBQVEsR0FBRyxDQUFDLElBQUksRUFBRTtZQUNoQixLQUFLLGNBQUksQ0FBQyxHQUFHLENBQUM7WUFDZCxLQUFLLGNBQUksQ0FBQyxLQUFLLENBQUM7WUFDaEIsS0FBSyxjQUFJLENBQUMsTUFBTTtnQkFDZCxPQUFPLFFBQVEsQ0FBQyxHQUFHLENBQUMsS0FBSyxFQUFFLEVBQUUsQ0FBQyxDQUFDO1NBQ2xDO1FBQ0QsT0FBTyxJQUFJLENBQUM7SUFDZCxDQUFDO0NBQ0YsQ0FBQyxDQUFDO0FBRVUsUUFBQSxnQ0FBZ0MsR0FBNkIsQ0FBQyxJQUFrQixFQUFFLEVBQUUsQ0FBQyxDQUFDO0lBQ2pHLGVBQWUsRUFBRSxxQkFBcUI7Q0FDdkMsQ0FBQyxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIENvcHlyaWdodCBFbGFzdGljc2VhcmNoIEIuVi4gYW5kL29yIGxpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmVcbiAqIG9yIG1vcmUgY29udHJpYnV0b3IgbGljZW5zZSBhZ3JlZW1lbnRzLiBMaWNlbnNlZCB1bmRlciB0aGUgRWxhc3RpYyBMaWNlbnNlO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBFbGFzdGljIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgR3JhcGhRTFNjYWxhclR5cGUsIEtpbmQgfSBmcm9tICdncmFwaHFsJztcbmltcG9ydCB7IFVNU2VydmVyTGlicyB9IGZyb20gJy4uLy4uL2xpYi9saWInO1xuaW1wb3J0IHsgQ3JlYXRlVU1HcmFwaFFMUmVzb2x2ZXJzIH0gZnJvbSAnLi4vdHlwZXMnO1xuXG5jb25zdCB1bnNpZ25lZEludGVnZXJTY2FsYXIgPSBuZXcgR3JhcGhRTFNjYWxhclR5cGUoe1xuICBuYW1lOiAnVW5zaWduZWRJbnRlZ2VyJyxcbiAgZGVzY3JpcHRpb246ICdSZXByZXNlbnRzIGFuIHVuc2lnbmVkIDMyLWJpdCBpbnRlZ2VyJyxcbiAgc2VyaWFsaXplKHZhbHVlKTogbnVtYmVyIHtcbiAgICByZXR1cm4gcGFyc2VJbnQodmFsdWUsIDEwKTtcbiAgfSxcbiAgcGFyc2VWYWx1ZSh2YWx1ZSkge1xuICAgIGNvbnN0IHBhcnNlZCA9IHBhcnNlSW50KHZhbHVlLCAxMCk7XG4gICAgcmV0dXJuIHBhcnNlZCA8IDAgPyBudWxsIDogcGFyc2VkO1xuICB9LFxuICBwYXJzZUxpdGVyYWwoYXN0KSB7XG4gICAgc3dpdGNoIChhc3Qua2luZCkge1xuICAgICAgY2FzZSBLaW5kLklOVDpcbiAgICAgIGNhc2UgS2luZC5GTE9BVDpcbiAgICAgIGNhc2UgS2luZC5TVFJJTkc6XG4gICAgICAgIHJldHVybiBwYXJzZUludChhc3QudmFsdWUsIDEwKTtcbiAgICB9XG4gICAgcmV0dXJuIG51bGw7XG4gIH0sXG59KTtcblxuZXhwb3J0IGNvbnN0IHVuc2lnbmVkSW50ZWdlclJlc29sdmVyRnVuY3Rpb25zOiBDcmVhdGVVTUdyYXBoUUxSZXNvbHZlcnMgPSAobGliczogVU1TZXJ2ZXJMaWJzKSA9PiAoe1xuICBVbnNpZ25lZEludGVnZXI6IHVuc2lnbmVkSW50ZWdlclNjYWxhcixcbn0pO1xuIl19

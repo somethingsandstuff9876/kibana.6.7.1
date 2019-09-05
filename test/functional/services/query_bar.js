@@ -22,12 +22,11 @@ export function QueryBarProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['header', 'common']);
-  const find = getService('find');
 
   class QueryBar {
 
     async getQueryString() {
-      return await testSubjects.getAttribute('queryInput', 'value');
+      return await testSubjects.getProperty('queryInput', 'value');
     }
 
     async setQuery(query) {
@@ -35,13 +34,7 @@ export function QueryBarProvider({ getService, getPageObjects }) {
       // Extra caution used because of flaky test here: https://github.com/elastic/kibana/issues/16978 doesn't seem
       // to be actually setting the query in the query input based off
       await retry.try(async () => {
-        await testSubjects.click('queryInput');
-
-        // testSubjects.setValue uses input.clearValue which wasn't working, but input.clearValueWithKeyboard does.
-        // So the following lines do the same thing as input.setValue but with input.clearValueWithKeyboard instead.
-        const input = await find.activeElement();
-        await input.clearValueWithKeyboard();
-        await input.type(query);
+        await testSubjects.setValue('queryInput', query);
         const currentQuery = await this.getQueryString();
         if (currentQuery !== query) {
           throw new Error(`Failed to set query input to ${query}, instead query is ${currentQuery}`);

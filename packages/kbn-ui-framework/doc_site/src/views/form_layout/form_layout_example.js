@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable import/no-duplicates */
-
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -30,7 +28,7 @@ import {
 } from '../../components';
 
 import FieldGroup from './field_group';
-import fieldGroupSource from '!!raw-loader!./field_group';
+const fieldGroupSource = require('!!raw-loader!./field_group');
 const fieldGroupHtml = renderToHtml(FieldGroup);
 
 export default props => (

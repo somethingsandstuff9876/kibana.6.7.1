@@ -21,7 +21,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
-import { EuiPanel } from '@elastic/eui';
 
 export class ParameterForm extends React.Component {
 
@@ -56,9 +55,13 @@ export class ParameterForm extends React.Component {
 
   render() {
     return (
-      <EuiPanel>
-        {this.renderInputs()}
-      </EuiPanel>
+      <div>
+
+        <div className="kuiSideBarSection">
+          {this.renderInputs()}
+        </div>
+
+      </div>
     );
   }
 }

@@ -1,0 +1,63 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+/** @internal */
+var PluginDiscoveryErrorType;
+(function (PluginDiscoveryErrorType) {
+    PluginDiscoveryErrorType["IncompatibleVersion"] = "incompatible-version";
+    PluginDiscoveryErrorType["InvalidSearchPath"] = "invalid-search-path";
+    PluginDiscoveryErrorType["InvalidPluginPath"] = "invalid-plugin-path";
+    PluginDiscoveryErrorType["InvalidManifest"] = "invalid-manifest";
+    PluginDiscoveryErrorType["MissingManifest"] = "missing-manifest";
+})(PluginDiscoveryErrorType = exports.PluginDiscoveryErrorType || (exports.PluginDiscoveryErrorType = {}));
+/** @internal */
+class PluginDiscoveryError extends Error {
+    /**
+     * @param type Type of the discovery error (invalid directory, invalid manifest etc.)
+     * @param path Path at which discovery error occurred.
+     * @param cause "Raw" error object that caused discovery error.
+     */
+    constructor(type, path, cause) {
+        super(`${cause.message} (${type}, ${path})`);
+        this.type = type;
+        this.path = path;
+        this.cause = cause;
+        // Set the prototype explicitly, see:
+        // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+        Object.setPrototypeOf(this, PluginDiscoveryError.prototype);
+    }
+    static incompatibleVersion(path, cause) {
+        return new PluginDiscoveryError(PluginDiscoveryErrorType.IncompatibleVersion, path, cause);
+    }
+    static invalidSearchPath(path, cause) {
+        return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidSearchPath, path, cause);
+    }
+    static invalidPluginPath(path, cause) {
+        return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidPluginPath, path, cause);
+    }
+    static invalidManifest(path, cause) {
+        return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidManifest, path, cause);
+    }
+    static missingManifest(path, cause) {
+        return new PluginDiscoveryError(PluginDiscoveryErrorType.MissingManifest, path, cause);
+    }
+}
+exports.PluginDiscoveryError = PluginDiscoveryError;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL2NvcmUvc2VydmVyL3BsdWdpbnMvZGlzY292ZXJ5L3BsdWdpbl9kaXNjb3ZlcnlfZXJyb3IudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3NyYy9jb3JlL3NlcnZlci9wbHVnaW5zL2Rpc2NvdmVyeS9wbHVnaW5fZGlzY292ZXJ5X2Vycm9yLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FpQkc7O0FBRUgsZ0JBQWdCO0FBQ2hCLElBQVksd0JBTVg7QUFORCxXQUFZLHdCQUF3QjtJQUNsQyx3RUFBNEMsQ0FBQTtJQUM1QyxxRUFBeUMsQ0FBQTtJQUN6QyxxRUFBeUMsQ0FBQTtJQUN6QyxnRUFBb0MsQ0FBQTtJQUNwQyxnRUFBb0MsQ0FBQTtBQUN0QyxDQUFDLEVBTlcsd0JBQXdCLEdBQXhCLGdDQUF3QixLQUF4QixnQ0FBd0IsUUFNbkM7QUFFRCxnQkFBZ0I7QUFDaEIsTUFBYSxvQkFBcUIsU0FBUSxLQUFLO0lBcUI3Qzs7OztPQUlHO0lBQ0gsWUFDa0IsSUFBOEIsRUFDOUIsSUFBWSxFQUNaLEtBQVk7UUFFNUIsS0FBSyxDQUFDLEdBQUcsS0FBSyxDQUFDLE9BQU8sS0FBSyxJQUFJLEtBQUssSUFBSSxHQUFHLENBQUMsQ0FBQztRQUo3QixTQUFJLEdBQUosSUFBSSxDQUEwQjtRQUM5QixTQUFJLEdBQUosSUFBSSxDQUFRO1FBQ1osVUFBSyxHQUFMLEtBQUssQ0FBTztRQUk1QixxQ0FBcUM7UUFDckMsZ0lBQWdJO1FBQ2hJLE1BQU0sQ0FBQyxjQUFjLENBQUMsSUFBSSxFQUFFLG9CQUFvQixDQUFDLFNBQVMsQ0FBQyxDQUFDO0lBQzlELENBQUM7SUFuQ00sTUFBTSxDQUFDLG1CQUFtQixDQUFDLElBQVksRUFBRSxLQUFZO1FBQzFELE9BQU8sSUFBSSxvQkFBb0IsQ0FBQyx3QkFBd0IsQ0FBQyxtQkFBbUIsRUFBRSxJQUFJLEVBQUUsS0FBSyxDQUFDLENBQUM7SUFDN0YsQ0FBQztJQUVNLE1BQU0sQ0FBQyxpQkFBaUIsQ0FBQyxJQUFZLEVBQUUsS0FBWTtRQUN4RCxPQUFPLElBQUksb0JBQW9CLENBQUMsd0JBQXdCLENBQUMsaUJBQWlCLEVBQUUsSUFBSSxFQUFFLEtBQUssQ0FBQyxDQUFDO0lBQzNGLENBQUM7SUFFTSxNQUFNLENBQUMsaUJBQWlCLENBQUMsSUFBWSxFQUFFLEtBQVk7UUFDeEQsT0FBTyxJQUFJLG9CQUFvQixDQUFDLHdCQUF3QixDQUFDLGlCQUFpQixFQUFFLElBQUksRUFBRSxLQUFLLENBQUMsQ0FBQztJQUMzRixDQUFDO0lBRU0sTUFBTSxDQUFDLGVBQWUsQ0FBQyxJQUFZLEVBQUUsS0FBWTtRQUN0RCxPQUFPLElBQUksb0JBQW9CLENBQUMsd0JBQXdCLENBQUMsZUFBZSxFQUFFLElBQUksRUFBRSxLQUFLLENBQUMsQ0FBQztJQUN6RixDQUFDO0lBRU0sTUFBTSxDQUFDLGVBQWUsQ0FBQyxJQUFZLEVBQUUsS0FBWTtRQUN0RCxPQUFPLElBQUksb0JBQW9CLENBQUMsd0JBQXdCLENBQUMsZUFBZSxFQUFFLElBQUksRUFBRSxLQUFLLENBQUMsQ0FBQztJQUN6RixDQUFDO0NBa0JGO0FBckNELG9EQXFDQyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBMaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lIG9yIG1vcmUgY29udHJpYnV0b3JcbiAqIGxpY2Vuc2UgYWdyZWVtZW50cy4gU2VlIHRoZSBOT1RJQ0UgZmlsZSBkaXN0cmlidXRlZCB3aXRoXG4gKiB0aGlzIHdvcmsgZm9yIGFkZGl0aW9uYWwgaW5mb3JtYXRpb24gcmVnYXJkaW5nIGNvcHlyaWdodFxuICogb3duZXJzaGlwLiBFbGFzdGljc2VhcmNoIEIuVi4gbGljZW5zZXMgdGhpcyBmaWxlIHRvIHlvdSB1bmRlclxuICogdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTsgeW91IG1heVxuICogbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZyxcbiAqIHNvZnR3YXJlIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuXG4gKiBcIkFTIElTXCIgQkFTSVMsIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWVxuICogS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC4gIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlXG4gKiBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kIGxpbWl0YXRpb25zXG4gKiB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG4vKiogQGludGVybmFsICovXG5leHBvcnQgZW51bSBQbHVnaW5EaXNjb3ZlcnlFcnJvclR5cGUge1xuICBJbmNvbXBhdGlibGVWZXJzaW9uID0gJ2luY29tcGF0aWJsZS12ZXJzaW9uJyxcbiAgSW52YWxpZFNlYXJjaFBhdGggPSAnaW52YWxpZC1zZWFyY2gtcGF0aCcsXG4gIEludmFsaWRQbHVnaW5QYXRoID0gJ2ludmFsaWQtcGx1Z2luLXBhdGgnLFxuICBJbnZhbGlkTWFuaWZlc3QgPSAnaW52YWxpZC1tYW5pZmVzdCcsXG4gIE1pc3NpbmdNYW5pZmVzdCA9ICdtaXNzaW5nLW1hbmlmZXN0Jyxcbn1cblxuLyoqIEBpbnRlcm5hbCAqL1xuZXhwb3J0IGNsYXNzIFBsdWdpbkRpc2NvdmVyeUVycm9yIGV4dGVuZHMgRXJyb3Ige1xuICBwdWJsaWMgc3RhdGljIGluY29tcGF0aWJsZVZlcnNpb24ocGF0aDogc3RyaW5nLCBjYXVzZTogRXJyb3IpIHtcbiAgICByZXR1cm4gbmV3IFBsdWdpbkRpc2NvdmVyeUVycm9yKFBsdWdpbkRpc2NvdmVyeUVycm9yVHlwZS5JbmNvbXBhdGlibGVWZXJzaW9uLCBwYXRoLCBjYXVzZSk7XG4gIH1cblxuICBwdWJsaWMgc3RhdGljIGludmFsaWRTZWFyY2hQYXRoKHBhdGg6IHN0cmluZywgY2F1c2U6IEVycm9yKSB7XG4gICAgcmV0dXJuIG5ldyBQbHVnaW5EaXNjb3ZlcnlFcnJvcihQbHVnaW5EaXNjb3ZlcnlFcnJvclR5cGUuSW52YWxpZFNlYXJjaFBhdGgsIHBhdGgsIGNhdXNlKTtcbiAgfVxuXG4gIHB1YmxpYyBzdGF0aWMgaW52YWxpZFBsdWdpblBhdGgocGF0aDogc3RyaW5nLCBjYXVzZTogRXJyb3IpIHtcbiAgICByZXR1cm4gbmV3IFBsdWdpbkRpc2NvdmVyeUVycm9yKFBsdWdpbkRpc2NvdmVyeUVycm9yVHlwZS5JbnZhbGlkUGx1Z2luUGF0aCwgcGF0aCwgY2F1c2UpO1xuICB9XG5cbiAgcHVibGljIHN0YXRpYyBpbnZhbGlkTWFuaWZlc3QocGF0aDogc3RyaW5nLCBjYXVzZTogRXJyb3IpIHtcbiAgICByZXR1cm4gbmV3IFBsdWdpbkRpc2NvdmVyeUVycm9yKFBsdWdpbkRpc2NvdmVyeUVycm9yVHlwZS5JbnZhbGlkTWFuaWZlc3QsIHBhdGgsIGNhdXNlKTtcbiAgfVxuXG4gIHB1YmxpYyBzdGF0aWMgbWlzc2luZ01hbmlmZXN0KHBhdGg6IHN0cmluZywgY2F1c2U6IEVycm9yKSB7XG4gICAgcmV0dXJuIG5ldyBQbHVnaW5EaXNjb3ZlcnlFcnJvcihQbHVnaW5EaXNjb3ZlcnlFcnJvclR5cGUuTWlzc2luZ01hbmlmZXN0LCBwYXRoLCBjYXVzZSk7XG4gIH1cblxuICAvKipcbiAgICogQHBhcmFtIHR5cGUgVHlwZSBvZiB0aGUgZGlzY292ZXJ5IGVycm9yIChpbnZhbGlkIGRpcmVjdG9yeSwgaW52YWxpZCBtYW5pZmVzdCBldGMuKVxuICAgKiBAcGFyYW0gcGF0aCBQYXRoIGF0IHdoaWNoIGRpc2NvdmVyeSBlcnJvciBvY2N1cnJlZC5cbiAgICogQHBhcmFtIGNhdXNlIFwiUmF3XCIgZXJyb3Igb2JqZWN0IHRoYXQgY2F1c2VkIGRpc2NvdmVyeSBlcnJvci5cbiAgICovXG4gIGNvbnN0cnVjdG9yKFxuICAgIHB1YmxpYyByZWFkb25seSB0eXBlOiBQbHVnaW5EaXNjb3ZlcnlFcnJvclR5cGUsXG4gICAgcHVibGljIHJlYWRvbmx5IHBhdGg6IHN0cmluZyxcbiAgICBwdWJsaWMgcmVhZG9ubHkgY2F1c2U6IEVycm9yXG4gICkge1xuICAgIHN1cGVyKGAke2NhdXNlLm1lc3NhZ2V9ICgke3R5cGV9LCAke3BhdGh9KWApO1xuXG4gICAgLy8gU2V0IHRoZSBwcm90b3R5cGUgZXhwbGljaXRseSwgc2VlOlxuICAgIC8vIGh0dHBzOi8vZ2l0aHViLmNvbS9NaWNyb3NvZnQvVHlwZVNjcmlwdC93aWtpL0JyZWFraW5nLUNoYW5nZXMjZXh0ZW5kaW5nLWJ1aWx0LWlucy1saWtlLWVycm9yLWFycmF5LWFuZC1tYXAtbWF5LW5vLWxvbmdlci13b3JrXG4gICAgT2JqZWN0LnNldFByb3RvdHlwZU9mKHRoaXMsIFBsdWdpbkRpc2NvdmVyeUVycm9yLnByb3RvdHlwZSk7XG4gIH1cbn1cbiJdfQ==

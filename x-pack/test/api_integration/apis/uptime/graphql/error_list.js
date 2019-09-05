@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { errorListQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import { expectFixtureEql } from './expect_fixture_eql';
+import expect from 'expect.js';
+import { getErrorListQueryString } from '../../../../../plugins/uptime/public/components/queries/error_list/get_error_list';
+import errorList from './fixtures/error_list';
+import errorListFilteredById from './fixtures/error_list_filtered_by_id';
+import errorListFilteredByPort from './fixtures/error_list_filtered_by_port';
+import errorListFilteredBbyPortAndScheme from './fixtures/error_list_filtered_by_port_and_scheme';
 
 export default function ({ getService }) {
   describe('errorList query', () => {
@@ -14,11 +18,8 @@ export default function ({ getService }) {
     it('returns expected error list', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: errorListQueryString,
-        variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-        },
+        query: getErrorListQueryString,
+        variables: { dateRangeStart: 1547805782000, dateRangeEnd: 1547852582000 },
       };
       const {
         body: { data },
@@ -26,17 +27,17 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expectFixtureEql(data, 'error_list');
+      expect(data).to.eql(errorList);
     });
 
     it('returns an error list filtered by monitor id', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: errorListQueryString,
+        query: getErrorListQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          filters: `{"bool":{"must":[{"match":{"monitor.id":{"query":"auto-http-0X3675F89EF0612091","operator":"and"}}}]}}`,
+          dateRangeStart: 1547805782000,
+          dateRangeEnd: 1547852582000,
+          filters: `{"bool":{"must":[{"match":{"monitor.id":{"query":"http@http://localhost:12349/","operator":"and"}}}]}}`,
         },
       };
       const {
@@ -45,17 +46,17 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expectFixtureEql(data, 'error_list_filtered_by_id');
+      expect(data).to.eql(errorListFilteredById);
     });
 
     it('returns an error list filtered by port', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: errorListQueryString,
+        query: getErrorListQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          filters: `{"bool":{"must":[{"match":{"url.port":{"query":"9200","operator":"and"}}}]}}`,
+          dateRangeStart: 1547805782000,
+          dateRangeEnd: 1547852582000,
+          filters: `{"bool":{"must":[{"match":{"tcp.port":{"query":"80","operator":"and"}}}]}}`,
         },
       };
       const {
@@ -64,19 +65,19 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expectFixtureEql(data, 'error_list_filtered_by_port');
+      expect(data).to.eql(errorListFilteredByPort);
     });
 
-    it('returns an error list filtered by port/type', async () => {
+    it('returns an error list filtered by port/scheme', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: errorListQueryString,
+        query: getErrorListQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeStart: 1547805782000,
+          dateRangeEnd: 1547852582000,
           filters:
-            `{"bool":{"must":[{"match":{"url.port":{"query":"12349","operator":"and"}}},` +
-            `{"match":{"monitor.type":{"query":"http","operator":"and"}}}]}}`,
+            `{"bool":{"must":[{"match":{"tcp.port":{"query":"80","operator":"and"}}},` +
+            `{"match":{"monitor.scheme":{"query":"http","operator":"and"}}}]}}`,
         },
       };
       const {
@@ -85,7 +86,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expectFixtureEql(data, 'error_list_filtered_by_port_and_type');
+      expect(data).to.eql(errorListFilteredBbyPortAndScheme);
     });
   });
 }

@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { services } from './services';
+import {
+  KibanaSupertestProvider,
+  ElasticsearchSupertestProvider,
+  ChanceProvider,
+} from './services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
@@ -27,7 +31,14 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       require.resolve('./apis'),
     ],
-    services,
+    services: {
+      es: commonConfig.get('services.es'),
+      esArchiver: commonConfig.get('services.esArchiver'),
+      retry: commonConfig.get('services.retry'),
+      supertest: KibanaSupertestProvider,
+      esSupertest: ElasticsearchSupertestProvider,
+      chance: ChanceProvider,
+    },
     servers: commonConfig.get('servers'),
     junit: {
       reportName: 'API Integration Tests'

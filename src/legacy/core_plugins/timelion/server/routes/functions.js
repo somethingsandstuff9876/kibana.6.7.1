@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-export function functionsRoute(server) {
+export default function (server) {
   server.route({
     method: 'GET',
     path: '/api/timelion/functions',

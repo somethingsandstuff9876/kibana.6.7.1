@@ -1,103 +1,76 @@
 {
   "allPings": {
-    "total": 3373,
-    "locations": [
-      "N/A"
-    ],
+    "total": 798,
     "pings": [
       {
-        "timestamp": "2019-01-28T17:47:06.077Z",
-        "http": null,
+        "timestamp": "2019-01-18T22:02:31.383Z",
+        "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": {
-            "us": 1452
-          },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
+          "duration": { "us": 925862 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
           "status": "up",
-          "type": "tcp"
-        },
-        "observer": null
+          "type": "http"
+        }
       },
       {
-        "timestamp": "2019-01-28T17:47:07.075Z",
-        "http": null,
+        "timestamp": "2019-01-18T22:02:34.383Z",
+        "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": {
-            "us": 1094
-          },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.1.0",
-          "name": "",
-          "scheme": null,
+          "duration": { "us": 738176 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
           "status": "up",
-          "type": "tcp"
-        },
-        "observer": null
+          "type": "http"
+        }
       },
       {
-        "timestamp": "2019-01-28T17:47:07.075Z",
-        "http": null,
-        "error": {
-          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
-          "type": "io"
-        },
+        "timestamp": "2019-01-18T22:02:37.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
         "monitor": {
-          "duration": {
-            "us": 1094
-          },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "down",
-          "type": "tcp"
-        },
-        "observer": null
+          "duration": { "us": 684949 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
       },
       {
-        "timestamp": "2019-01-28T17:47:08.078Z",
-        "http": null,
-        "error": {
-          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
-          "type": "io"
-        },
+        "timestamp": "2019-01-18T22:02:40.384Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
         "monitor": {
-          "duration": {
-            "us": 1430
-          },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "down",
-          "type": "tcp"
-        },
-        "observer": null
+          "duration": { "us": 773959 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
       },
       {
-        "timestamp": "2019-01-28T17:47:09.075Z",
-        "http": null,
-        "error": {
-          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
-          "type": "io"
-        },
+        "timestamp": "2019-01-18T22:02:43.385Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
         "monitor": {
-          "duration": {
-            "us": 1370
-          },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "down",
-          "type": "tcp"
-        },
-        "observer": null
+          "duration": { "us": 483803 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
       }
     ]
   }

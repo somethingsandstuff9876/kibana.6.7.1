@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import MarkdownIt from 'markdown-it';
 import _ from 'lodash';
 import { TMSService } from './tms_service';
 import { FileLayer } from './file_layer';
@@ -26,6 +27,11 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 const extendUrl = (url, props) => (
   modifyUrlLocal(url, parsed => _.merge(parsed, props))
 );
+
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
+});
 
 /**
  * plugins cannot have upstream dependencies on core/*-kibana.
@@ -86,25 +92,14 @@ const unescapeTemplateVars = url => {
 //this is not the default locale from Kibana, but the default locale supported by the Elastic Maps Service
 const DEFAULT_LANGUAGE = 'en';
 
-export class EMSClient {
+export class EMSClientV66 {
 
   EMS_LOAD_TIMEOUT = 32000;
 
-  constructor({
-    kbnVersion,
-    manifestServiceUrl,
-    htmlSanitizer,
-    language,
-    landingPageUrl,
-    fetchFunction,
-    proxyPath
-  }) {
-
+  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language, landingPageUrl }) {
 
     this._queryParams = {
-      elastic_tile_service_tos: 'agree',
-      my_app_name: 'kibana',
-      my_app_version: kbnVersion,
+      my_app_version: kbnVersion
     };
 
     this._sanitizer = htmlSanitizer ? htmlSanitizer : x => x;
@@ -114,14 +109,8 @@ export class EMSClient {
     this._emsLandingPageUrl = typeof landingPageUrl === 'string' ? landingPageUrl : '';
     this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
 
-    this._fetchFunction = typeof fetchFunction === 'function' ? fetchFunction : fetch;
-    this._proxyPath = typeof proxyPath === 'string' ? proxyPath : '';
-
     this._invalidateSettings();
-  }
 
-  getDefaultLocale() {
-    return DEFAULT_LANGUAGE;
   }
 
   getLocale() {
@@ -138,11 +127,11 @@ export class EMSClient {
   /**
    * this internal method is overridden by the tests to simulate custom manifest.
    */
-  async getManifest(manifestUrl) {
+  async _getManifest(manifestUrl) {
+    let result;
     try {
       const url = extendUrl(manifestUrl, { query: this._queryParams });
-      const result = await this._fetchWithTimeout(url);
-      return result ? await result.json() : null;
+      result = await this._fetchWithTimeout(url);
     } catch (e) {
       if (!e) {
         e = new Error('Unknown error');
@@ -151,6 +140,8 @@ export class EMSClient {
         e = new Error(e.data || `status ${e.statusText || e.status}`);
       }
       throw new Error(`Unable to retrieve manifest from ${manifestUrl}: ${e.message}`);
+    } finally {
+      return result ? await result.json() : null;
     }
   }
 
@@ -161,7 +152,7 @@ export class EMSClient {
           () => reject(new Error(`Request to ${url} timed out`)),
           this.EMS_LOAD_TIMEOUT
         );
-        this._fetchFunction(url)
+        fetch(url)
           .then(
             response => {
               clearTimeout(timer);
@@ -193,71 +184,52 @@ export class EMSClient {
     }
   }
 
-  async _getManifestWithParams(url) {
-    const extendedUrl = this.extendUrlWithParams(url);
-    return await this.getManifest(extendedUrl);
-  }
-
   _invalidateSettings() {
 
-    this._getMainCatalog = _.once(async () => {
-      return await this._getManifestWithParams(this._manifestServiceUrl);
-    });
+    this._getManifestWithParams = _.once(
+      async url => this._getManifest(this.extendUrlWithParams(url)));
 
-    this._getDefaultTMSCatalog = _.once(async () => {
-      const catalogue = await this._getMainCatalog();
-      const firstService = catalogue.services.find(service => service.type === 'tms');
-      if (!firstService) {
-        return [];
+    this._getCatalogueService = async serviceType => {
+      const catalogueManifest = await this._getManifestWithParams(this._manifestServiceUrl);
+      let service;
+      if(_.has(catalogueManifest, 'services')) {
+        service = catalogueManifest.services
+          .find(s => s.type === serviceType);
       }
-      const url = this._proxyPath + firstService.manifest;
-      return await this.getManifest(url);
-    });
+      return service || {};
+    };
 
-    this._getDefaultFileCatalog = _.once(async () => {
-      const catalogue = await this._getMainCatalog();
-      const firstService = catalogue.services.find(service => service.type === 'file');
-      if (!firstService) {
-        return [];
+    this._wrapServiceAttribute = async (manifestUrl, attr, WrapperClass) => {
+      const manifest = await this._getManifest(manifestUrl);
+      if (_.has(manifest, attr)) {
+        return manifest[attr].map(config => {
+          return new WrapperClass(config, this);
+        });
       }
-      const url = this._proxyPath + firstService.manifest;
-      return await this.getManifest(url);
-    });
-
-    //Cache the actual instances of TMSService as these in turn cache sub-manifests for the style-files
-    this._loadTMSServices = _.once(async () => {
-      const tmsManifest = await this._getDefaultTMSCatalog();
-      return tmsManifest.services.map(serviceConfig => new TMSService(serviceConfig, this, this._proxyPath));
-    });
+      return [];
+    };
 
     this._loadFileLayers = _.once(async () => {
-      const fileManifest = await this._getDefaultFileCatalog();
-      return fileManifest.layers.map(layerConfig => new FileLayer(layerConfig, this, this._proxyPath));
+      const fileService = await this._getCatalogueService('file');
+      return _.isEmpty(fileService)
+        ? []
+        : this._wrapServiceAttribute(fileService.manifest, 'layers', FileLayer);
     });
-  }
 
-  async getMainManifest() {
-    return await this._getMainCatalog();
-  }
-
-  async getDefaultFileManifest() {
-    return await this._getDefaultFileCatalog();
-  }
-
-  async getDefaultTMSManifest() {
-    return await this._getDefaultTMSCatalog();
-  }
-
-  async getFileLayers() {
-    return await this._loadFileLayers();
-  }
-
-  async getTMSServices() {
-    return await this._loadTMSServices();
+    this._loadTMSServices = _.once(async () => {
+      const tmsService = await this._getCatalogueService('tms');
+      return _.isEmpty(tmsService)
+        ? []
+        : await this._wrapServiceAttribute(tmsService.manifest, 'services', TMSService);
+    });
   }
 
   getLandingPageUrl() {
     return this._emsLandingPageUrl;
+  }
+
+  sanitizeMarkdown(markdown) {
+    return this._sanitizer(markdownIt.render(markdown));
   }
 
   sanitizeHtml(html) {
@@ -268,6 +240,14 @@ export class EMSClient {
     return unescapeTemplateVars(extendUrl(url, {
       query: this._queryParams
     }));
+  }
+
+  async getFileLayers() {
+    return await this._loadFileLayers();
+  }
+
+  async getTMSServices() {
+    return await this._loadTMSServices();
   }
 
   async findFileLayerById(id) {

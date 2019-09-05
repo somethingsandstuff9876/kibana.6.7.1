@@ -24,22 +24,21 @@ jest.mock('fs', () => ({
 }));
 
 const timestamp = new Date(Date.UTC(2012, 1, 1));
-let mockConsoleLog: jest.SpyInstance;
+const mockConsoleLog = jest.spyOn(global.console, 'log').mockImplementation(() => {
+  // noop
+});
+jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
 
 import { createWriteStream } from 'fs';
-const mockCreateWriteStream = (createWriteStream as unknown) as jest.Mock<typeof createWriteStream>;
+const mockCreateWriteStream = createWriteStream as jest.Mock<typeof createWriteStream>;
 
-import { LoggingService, config } from '.';
+import { LoggingConfig, LoggingService } from '.';
 
 let service: LoggingService;
-beforeEach(() => {
-  mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);
-  jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
-  service = new LoggingService();
-});
+beforeEach(() => (service = new LoggingService()));
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  mockConsoleLog.mockClear();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
 });
@@ -68,10 +67,12 @@ test('flushes memory buffer logger and switches to real logger once config is pr
 
   // Switch to console appender with `info` level, so that `trace` message won't go through.
   service.upgrade(
-    config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
-      root: { level: 'info' },
-    })
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+        root: { level: 'info' },
+      })
+    )
   );
 
   expect(mockConsoleLog.mock.calls).toMatchSnapshot('buffered messages');
@@ -97,16 +98,18 @@ test('appends records via multiple appenders.', () => {
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 
   service.upgrade(
-    config.schema.validate({
-      appenders: {
-        default: { kind: 'console', layout: { kind: 'pattern' } },
-        file: { kind: 'file', layout: { kind: 'pattern' }, path: 'path' },
-      },
-      loggers: [
-        { appenders: ['file'], context: 'tests', level: 'warn' },
-        { context: 'tests.child', level: 'error' },
-      ],
-    })
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: {
+          default: { kind: 'console', layout: { kind: 'pattern' } },
+          file: { kind: 'file', layout: { kind: 'pattern' }, path: 'path' },
+        },
+        loggers: [
+          { appenders: ['file'], context: 'tests', level: 'warn' },
+          { context: 'tests.child', level: 'error' },
+        ],
+      })
+    )
   );
 
   // Now all logs should added to configured appenders.
@@ -116,9 +119,11 @@ test('appends records via multiple appenders.', () => {
 
 test('uses `root` logger if context is not specified.', () => {
   service.upgrade(
-    config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'pattern' } } },
-    })
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'pattern' } } },
+      })
+    )
   );
 
   const rootLogger = service.get();
@@ -129,10 +134,12 @@ test('uses `root` logger if context is not specified.', () => {
 
 test('`stop()` disposes all appenders.', async () => {
   service.upgrade(
-    config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
-      root: { level: 'info' },
-    })
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+        root: { level: 'info' },
+      })
+    )
   );
 
   const bufferDisposeSpy = jest.spyOn((service as any).bufferAppender, 'dispose');
@@ -148,10 +155,12 @@ test('asLoggerFactory() only allows to create new loggers.', () => {
   const logger = service.asLoggerFactory().get('test', 'context');
 
   service.upgrade(
-    config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
-      root: { level: 'all' },
-    })
+    new LoggingConfig(
+      LoggingConfig.schema.validate({
+        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+        root: { level: 'all' },
+      })
+    )
   );
 
   logger.trace('buffered trace message');

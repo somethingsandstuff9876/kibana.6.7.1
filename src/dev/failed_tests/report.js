@@ -19,7 +19,7 @@
 
 import xml2js from 'xml2js';
 import vfs from 'vinyl-fs';
-import { createMapStream } from '../../legacy/utils/streams';
+import { createMapStream } from '../../utils/streams';
 import { getGithubClient, markdownMetadata, paginate } from '../github_utils';
 import { find } from 'lodash';
 import stripAnsi from 'strip-ansi';
@@ -29,46 +29,10 @@ const GITHUB_OWNER = 'elastic';
 const GITHUB_REPO = 'kibana';
 const BUILD_URL = process.env.BUILD_URL;
 
-const indent = text => (
-  `  ${text.split('\n').map(l => `  ${l}`).join('\n')}`
-);
-
-const getFailureText = (testCase) => {
-  const [failureNode] = testCase.failure;
-
-  if (failureNode && typeof failureNode === 'object' && typeof failureNode._ === 'string') {
-    return stripAnsi(failureNode._);
-  }
-
-  return stripAnsi(String(failureNode));
-};
-
-const isLikelyIrrelevant = ({ name, failure }) => {
-  if (failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID')) {
-    return true;
-  }
-
-  if (failure.includes('Error: No Living connections')) {
-    return true;
-  }
-
-  if (name.includes('"after all" hook') && failure.includes(`Cannot read property 'shutdown' of undefined`)) {
-    return true;
-  }
-
-  if (failure.includes('Unable to read artifact info') && failure.includes('Service Temporarily Unavailable')) {
-    return true;
-  }
-
-  if (failure.includes('Unable to fetch Kibana status API response from Kibana')) {
-    return true;
-  }
-};
-
 /**
  * Parses junit XML files into JSON
  */
-export const mapXml = () => createMapStream((file) => new Promise((resolve, reject) => {
+const mapXml = createMapStream((file) => new Promise((resolve, reject) => {
   xml2js.parseString(file.contents.toString(), (err, result) => {
     if (err) {
       return reject(err);
@@ -80,34 +44,26 @@ export const mapXml = () => createMapStream((file) => new Promise((resolve, reje
 /**
  * Filters all testsuites to find failed testcases
  */
-export const filterFailures = () => createMapStream((testSuite) => {
+const filterFailures = createMapStream((testSuite) => {
   // Grab the failures. Reporters may report multiple testsuites in a single file.
   const testFiles = testSuite.testsuites
     ? testSuite.testsuites.testsuite
     : [testSuite.testsuite];
 
-  const failures = [];
-  for (const testFile of testFiles) {
+  const failures = testFiles.reduce((failures, testFile) => {
     for (const testCase of testFile.testcase) {
-      if (!testCase.failure) {
-        continue;
+      if (testCase.failure) {
+        // unwrap xml weirdness
+        failures.push({
+          ...testCase.$,
+          // Strip ANSI color characters
+          failure: stripAnsi(testCase.failure[0])
+        });
       }
-
-      // unwrap xml weirdness
-      const failureCase = {
-        ...testCase.$,
-        // Strip ANSI color characters
-        failure: getFailureText(testCase)
-      };
-
-      if (isLikelyIrrelevant(failureCase)) {
-        console.log(`Ignoring likely irrelevant failure: ${failureCase.classname} - ${failureCase.name}\n${indent(failureCase.failure)}`);
-        continue;
-      }
-
-      failures.push(failureCase);
     }
-  }
+
+    return failures;
+  }, []);
 
   console.log(`Found ${failures.length} test failures`);
 
@@ -189,8 +145,8 @@ export async function reportFailedTests() {
 
   vfs
     .src(['./target/junit/**/*.xml'])
-    .pipe(mapXml())
-    .pipe(filterFailures())
+    .pipe(mapXml)
+    .pipe(filterFailures)
     .pipe(updateGithubIssues(githubClient, issues))
     .on('done', () => console.log(`Finished reporting test failures.`));
 }

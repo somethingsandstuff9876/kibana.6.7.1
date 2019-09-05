@@ -6,20 +6,20 @@
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const {
     bulkCreateTest,
+    createExpectLegacyForbidden,
     createExpectResults,
-    createExpectRbacForbidden,
-    expectBadRequestForHiddenType,
-    expectedForbiddenTypesWithHiddenType,
+    expectRbacForbidden,
   } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
@@ -30,6 +30,7 @@ export default function({ getService }: FtrProviderContext) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -45,6 +46,7 @@ export default function({ getService }: FtrProviderContext) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -61,11 +63,7 @@ export default function({ getService }: FtrProviderContext) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectRbacForbidden(),
-          },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
         },
       });
@@ -78,10 +76,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
-          includingSpace: {
-            statusCode: 200,
-            response: expectBadRequestForHiddenType,
-          },
         },
       });
 
@@ -90,12 +84,19 @@ export default function({ getService }: FtrProviderContext) {
         spaceId: scenario.spaceId,
         tests: {
           default: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(),
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
           },
-          includingSpace: {
+        },
+      });
+
+      bulkCreateTest(`legacy readonly user within the ${scenario.spaceId} space`, {
+        user: scenario.users.legacyRead,
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
             statusCode: 403,
-            response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
           },
         },
       });
@@ -108,10 +109,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(['hiddentype']),
-          },
         },
       });
 
@@ -121,11 +118,7 @@ export default function({ getService }: FtrProviderContext) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectRbacForbidden(),
-          },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+            response: expectRbacForbidden,
           },
         },
       });
@@ -138,10 +131,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(['hiddentype']),
-          },
         },
       });
 
@@ -151,11 +140,7 @@ export default function({ getService }: FtrProviderContext) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectRbacForbidden(),
-          },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+            response: expectRbacForbidden,
           },
         },
       });
@@ -168,10 +153,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(['hiddentype']),
-          },
         },
       });
 
@@ -181,11 +162,7 @@ export default function({ getService }: FtrProviderContext) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectRbacForbidden(),
-          },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+            response: expectRbacForbidden,
           },
         },
       });
@@ -196,11 +173,7 @@ export default function({ getService }: FtrProviderContext) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectRbacForbidden(),
-          },
-          includingSpace: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+            response: expectRbacForbidden,
           },
         },
       });

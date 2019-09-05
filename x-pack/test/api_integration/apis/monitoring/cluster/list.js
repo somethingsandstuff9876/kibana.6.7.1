@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import multiclusterFixture from './fixtures/multicluster';
 
 export default function ({ getService }) {
@@ -18,7 +18,6 @@ export default function ({ getService }) {
         min: '2017-08-15T21:00:00Z',
         max: '2017-08-16T00:00:00Z'
       };
-      const codePaths = ['all'];
 
       before('load clusters archive', () => {
         return esArchiver.load(archive);
@@ -32,7 +31,7 @@ export default function ({ getService }) {
         const { body } = await supertest
           .post('/api/monitoring/v1/clusters')
           .set('kbn-xsrf', 'xxx')
-          .send({ timeRange, codePaths })
+          .send({ timeRange })
           .expect(200);
         expect(body).to.eql(multiclusterFixture);
       });

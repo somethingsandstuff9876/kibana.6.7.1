@@ -43,7 +43,7 @@ export function redisMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'AV4YjZ5pux-M-tCAunxK-ecs',
+          id: 'AV4YjZ5pux-M-tCAunxK',
           linkLabel: i18n.translate('kbn.server.tutorials.redisMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Redis metrics dashboard',
           }),

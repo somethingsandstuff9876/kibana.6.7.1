@@ -22,18 +22,17 @@ import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
-import { setup as httpSetup } from '../../../test_utils/public/http_test_setup';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const { http } = httpSetup(injectedMetadata => {
-    injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
-  });
+  const basePath: any = {
+    addToPath: jest.fn(path => `/foo/bar${path}`),
+  };
 
-  const uiSettingsApi = new UiSettingsApi(http);
+  const uiSettingsApi = new UiSettingsApi(basePath, 'v9.9.9');
 
   return {
-    http,
+    basePath,
     uiSettingsApi,
   };
 }
@@ -57,14 +56,14 @@ afterEach(() => {
 });
 
 describe('#batchSet', () => {
-  it('sends a single change immediately', async () => {
+  it('sends a single change immediately', () => {
     fetchMock.mock('*', {
       body: { settings: {} },
     });
 
     const { uiSettingsApi } = setup();
-    await uiSettingsApi.batchSet('foo', 'bar');
-    expect(fetchMock.calls()).toMatchSnapshot('single change');
+    uiSettingsApi.batchSet('foo', 'bar');
+    expect(fetchMock.calls()).toMatchSnapshot('synchronous fetch');
   });
 
   it('buffers changes while first request is in progress, sends buffered changes after first request completes', async () => {
@@ -77,7 +76,7 @@ describe('#batchSet', () => {
     uiSettingsApi.batchSet('foo', 'bar');
     const finalPromise = uiSettingsApi.batchSet('box', 'bar');
 
-    expect(uiSettingsApi.hasPendingChanges()).toBe(true);
+    expect(fetchMock.calls()).toMatchSnapshot('initial, only one request');
     await finalPromise;
     expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
   });

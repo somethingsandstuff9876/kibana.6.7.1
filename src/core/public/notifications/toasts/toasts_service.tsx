@@ -20,59 +20,41 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
-import { I18nStart } from '../../i18n';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { Toast } from '@elastic/eui';
+import { I18nStartContract } from '../../i18n';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsApi } from './toasts_api';
-import { OverlayStart } from '../../overlays';
+import { ToastsStartContract } from './toasts_start_contract';
 
-interface SetupDeps {
-  uiSettings: UiSettingsClientContract;
-}
-
-interface StartDeps {
-  i18n: I18nStart;
-  overlays: OverlayStart;
+interface Params {
   targetDomElement: HTMLElement;
 }
 
-/** @public */
-export type ToastsSetup = Pick<ToastsApi, Exclude<keyof ToastsApi, 'registerOverlays'>>;
-
-/** @public */
-export type ToastsStart = ToastsSetup;
+interface Deps {
+  i18n: I18nStartContract;
+}
 
 export class ToastsService {
-  private api?: ToastsApi;
-  private targetDomElement?: HTMLElement;
+  constructor(private readonly params: Params) {}
 
-  public setup({ uiSettings }: SetupDeps) {
-    this.api = new ToastsApi({ uiSettings });
-    return this.api!;
-  }
-
-  public start({ i18n, overlays, targetDomElement }: StartDeps) {
-    this.api!.registerOverlays(overlays);
-    this.targetDomElement = targetDomElement;
+  public start({ i18n }: Deps) {
+    const toasts = new ToastsStartContract();
 
     render(
       <i18n.Context>
         <GlobalToastList
-          dismissToast={(toast: Toast) => this.api!.remove(toast)}
-          toasts$={this.api!.get$()}
+          dismissToast={(toast: Toast) => toasts.remove(toast)}
+          toasts$={toasts.get$()}
         />
       </i18n.Context>,
-      targetDomElement
+      this.params.targetDomElement
     );
 
-    return this.api!;
+    return toasts;
   }
 
   public stop() {
-    if (this.targetDomElement) {
-      unmountComponentAtNode(this.targetDomElement);
-      this.targetDomElement.textContent = '';
-    }
+    unmountComponentAtNode(this.params.targetDomElement);
+
+    this.params.targetDomElement.textContent = '';
   }
 }

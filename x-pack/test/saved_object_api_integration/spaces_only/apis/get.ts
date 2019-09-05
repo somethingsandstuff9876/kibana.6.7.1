@@ -5,10 +5,11 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { getTestSuiteFactory } from '../../common/suites/get';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -17,7 +18,6 @@ export default function({ getService }: FtrProviderContext) {
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
     createExpectNotSpaceAwareResults,
-    expectHiddenTypeNotFound: expectHiddenTypeNotFound,
     getTest,
   } = getTestSuiteFactory(esArchiver, supertest);
 
@@ -32,10 +32,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.DEFAULT.spaceId),
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectHiddenTypeNotFound,
         },
         doesntExist: {
           statusCode: 404,
@@ -55,10 +51,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
         },
-        hiddenType: {
-          statusCode: 404,
-          response: expectHiddenTypeNotFound,
-        },
         doesntExist: {
           statusCode: 404,
           response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
@@ -77,10 +69,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectHiddenTypeNotFound,
         },
         doesntExist: {
           statusCode: 404,

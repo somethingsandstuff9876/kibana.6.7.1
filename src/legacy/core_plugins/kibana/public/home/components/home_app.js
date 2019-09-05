@@ -30,14 +30,19 @@ import {
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
-import { telemetryOptInProvider, shouldShowTelemetryOptIn } from '../kibana_services';
 import chrome from 'ui/chrome';
+import { recentlyAccessedShape } from './recently_accessed';
 
-export function HomeApp({ directories }) {
+export function HomeApp({
+  directories,
+  recentlyAccessed,
+}) {
+
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const mlEnabled = chrome.getInjected('mlEnabled', false);
   const savedObjectsClient = chrome.getSavedObjectsClient();
+  const isK7Design = chrome.getUiSettingsClient().get('k7design', false);
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -45,6 +50,7 @@ export function HomeApp({ directories }) {
         addBasePath={chrome.addBasePath}
         openTab={props.match.params.tab}
         isCloudEnabled={isCloudEnabled}
+        isK7Design={isK7Design}
       />
     );
   };
@@ -58,6 +64,7 @@ export function HomeApp({ directories }) {
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
         bulkCreate={savedObjectsClient.bulkCreate}
+        isK7Design={isK7Design}
       />
     );
   };
@@ -89,13 +96,10 @@ export function HomeApp({ directories }) {
             directories={directories}
             apmUiEnabled={apmUiEnabled}
             mlEnabled={mlEnabled}
+            recentlyAccessed={recentlyAccessed}
             find={savedObjectsClient.find}
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
-            shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
-            setOptIn={telemetryOptInProvider.setOptIn}
-            fetchTelemetry={telemetryOptInProvider.fetchExample}
-            getTelemetryBannerId={telemetryOptInProvider.getBannerId}
           />
         </Route>
       </Switch>
@@ -113,4 +117,5 @@ HomeApp.propTypes = {
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
   })),
+  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
 };

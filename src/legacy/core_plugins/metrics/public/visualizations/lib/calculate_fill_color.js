@@ -19,7 +19,7 @@
 
 import Color from 'color';
 
-export const calculateFillColor = (color, fill = 1) => {
+export default (color, fill = 1) => {
   const initialColor = new Color(color).rgb();
 
   const opacity = Math.min(Number(fill), 1) * initialColor.valpha;
@@ -27,6 +27,8 @@ export const calculateFillColor = (color, fill = 1) => {
 
   return {
     fill: opacity > 0,
-    fillColor: new Color([r, g, b, Number(opacity.toFixed(2))]).string(),
+    fillColor: new Color([
+      r, g, b, Number(opacity.toFixed(2)),
+    ]).string(),
   };
 };

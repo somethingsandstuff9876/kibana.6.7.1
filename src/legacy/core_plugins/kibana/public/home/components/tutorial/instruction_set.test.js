@@ -25,7 +25,6 @@ import {
 } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
 
-
 const instructions = [
   {
     title: 'step 1',
@@ -51,12 +50,6 @@ const instructionVariants = [
     instructions: instructions,
   }
 ];
-
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown"/>,
-  };
-});
 
 test('render', () => {
   const component = shallowWithIntl(<InstructionSet.WrappedComponent

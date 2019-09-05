@@ -17,25 +17,26 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'header']);
 
   describe('kibana settings', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();
       await PageObjects.settings.navigateTo();
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.removeIndexPattern();
     });
 
@@ -47,16 +48,16 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('state:storeInSessionStorage', () => {
-      it ('defaults to null', async () => {
+      it ('defaults to false', async () => {
         await PageObjects.settings.clickKibanaSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(null);
+        expect(storeInSessionStorage).to.be(false);
       });
 
       it('when false, dashboard state is unhashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+        await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
         const currentUrl = await browser.getCurrentUrl();
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];
@@ -73,13 +74,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be('true');
+        expect(storeInSessionStorage).to.be(true);
       });
 
       it('when true, dashboard state is hashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+        await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
         const currentUrl = await browser.getCurrentUrl();
         const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
         const globalState = urlPieces[2];

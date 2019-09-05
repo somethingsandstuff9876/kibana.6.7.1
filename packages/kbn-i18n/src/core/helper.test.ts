@@ -26,7 +26,7 @@ describe('I18n helper', () => {
     });
 
     test('should return false for string object', () => {
-      // eslint-disable-next-line no-new-wrappers
+      // tslint:disable-next-line:no-construct
       expect(isString(new String('test'))).toBe(false);
     });
 

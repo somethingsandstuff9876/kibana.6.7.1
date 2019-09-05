@@ -5,8 +5,6 @@ experimental["This API is experimental and may be changed or removed completely 
 
 Retrieves all {kib} roles, or a specific role.
 
-NOTE: You cannot access this endpoint via the Console in Kibana.
-
 ==== Authorization
 
 To use this API, you must have at least the `manage_security` cluster privilege.
@@ -45,15 +43,9 @@ representation of the roles.
       "cluster": [ ],
       "run_as": [ ]
     },
-    "kibana": [{
-      "base": [
-        "all"
-      ],
-      "feature": {},
-      "spaces": [
-        "*"
-      ]
-    }]
+    "kibana": [ {
+        "privileges": [ "all" ]
+    } ],
   },
   {
     "name": "my_admin_role",
@@ -88,7 +80,7 @@ the `/api/security/role/<rolename>` endpoint:
 
 [source,js]
 --------------------------------------------------
-GET /api/security/role/my_restricted_kibana_role
+GET /api/security/role/my_kibana_role
 --------------------------------------------------
 // KIBANA
 
@@ -100,7 +92,7 @@ representation of the role.
 [source,js]
 --------------------------------------------------
 {
-  "name": "my_restricted_kibana_role",
+  "name": "my_kibana_role",
   "metadata" : {
     "version" : 1
   },
@@ -112,67 +104,8 @@ representation of the role.
     "indices": [ ],
     "run_as": [ ]
   },
-   "kibana": [
-    {
-      "base": [
-        "read"
-      ],
-      "feature": {},
-      "spaces": [
-        "marketing"
-      ]
-    },
-    {
-      "base": [],
-      "feature": {
-        "discover": [
-          "all"
-        ],
-        "visualize": [
-          "all"
-        ],
-        "dashboard": [
-          "all"
-        ],
-        "dev_tools": [
-          "read"
-        ],
-        "advancedSettings": [
-          "read"
-        ],
-        "indexPatterns": [
-          "read"
-        ],
-        "timelion": [
-          "all"
-        ],
-        "graph": [
-          "all"
-        ],
-        "apm": [
-          "read"
-        ],
-        "maps": [
-          "read"
-        ],
-        "canvas": [
-          "read"
-        ],
-        "infrastructure": [
-          "all"
-        ],
-        "logs": [
-          "all"
-        ],
-        "uptime": [
-          "all"
-        ]
-      },
-      "spaces": [
-        "sales",
-        "default"
-      ]
-    }
-  ]
+  "kibana": [ {
+      "privileges": [ "all" ]
+  } ],
 }
 --------------------------------------------------

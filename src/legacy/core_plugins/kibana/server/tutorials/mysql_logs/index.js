@@ -44,7 +44,7 @@ export function mysqlLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-MySQL-Dashboard-ecs',
+          id: 'Filebeat-MySQL-Dashboard',
           linkLabel: i18n.translate('kbn.server.tutorials.mysqlLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'MySQL logs dashboard',
           }),

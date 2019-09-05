@@ -17,10 +17,8 @@
  * under the License.
  */
 
-jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
-
 import React from 'react';
+import sinon from 'sinon';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
@@ -31,17 +29,15 @@ import {
 const indexPatternsMock = {
   get: getIndexPatternMock
 };
-let props;
-
-beforeEach(() => {
-  props = {
-    vis: {
-      API: {
-        indexPatterns: indexPatternsMock
-      },
+const scopeMock = {
+  vis: {
+    API: {
+      indexPatterns: indexPatternsMock
     },
-    stateParams: {
-      controls: [
+  },
+  editorState: {
+    params: {
+      'controls': [
         {
           'id': '1',
           'indexPattern': 'indexPattern1',
@@ -66,111 +62,138 @@ beforeEach(() => {
           }
         }
       ]
-    },
-    setValue: jest.fn(),
-  };
+    }
+  }
+};
+let stageEditorParams;
+
+beforeEach(() => {
+  stageEditorParams = sinon.spy();
 });
 
 test('renders ControlsTab', () => {
-  const component = shallowWithIntl(<ControlsTab.WrappedComponent {...props}/>);
-
-  expect(component).toMatchSnapshot();
+  const component = shallowWithIntl(<ControlsTab.WrappedComponent
+    scope={scopeMock}
+    editorState={scopeMock.editorState}
+    stageEditorParams={stageEditorParams}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 describe('behavior', () => {
 
   test('add control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
-
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
     findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
-
-    // // Use custom match function since control.id is dynamically generated and never the same.
-    expect(props.setValue).toHaveBeenCalledWith(
-      'controls',
-      expect.arrayContaining(props.stateParams.controls)
-    );
-    expect(props.setValue.mock.calls[0][1].length).toEqual(3);
+    // Use custom match function since control.id is dynamically generated and never the same.
+    sinon.assert.calledWith(stageEditorParams, sinon.match((newParams) => {
+      if (newParams.controls.length !== 3) {
+        return false;
+      }
+      return true;
+    }, 'control not added to editorState.params'));
   });
 
   test('remove control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
     findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
-    const expectedParams = ['controls', [{
-      'id': '2',
-      'indexPattern': 'indexPattern1',
-      'fieldName': 'numberField',
-      'label': '',
-      'type': 'range',
-      'options': {
-        'step': 1
-      }
-    }]];
-
-    expect(props.setValue).toHaveBeenCalledWith(...expectedParams);
+    const expectedParams = {
+      'controls': [
+        {
+          'id': '2',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'numberField',
+          'label': '',
+          'type': 'range',
+          'options': {
+            'step': 1
+          }
+        }
+      ]
+    };
+    sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
   });
 
 
   test('move down control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
     findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
-    const expectedParams = ['controls', [
-      {
-        'id': '2',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'numberField',
-        'label': '',
-        'type': 'range',
-        'options': {
-          'step': 1
+    const expectedParams = {
+      'controls': [
+        {
+          'id': '2',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'numberField',
+          'label': '',
+          'type': 'range',
+          'options': {
+            'step': 1
+          }
+        },
+        {
+          'id': '1',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'keywordField',
+          'label': 'custom label',
+          'type': 'list',
+          'options': {
+            'type': 'terms',
+            'multiselect': true,
+            'size': 5,
+            'order': 'desc'
+          }
         }
-      },
-      {
-        'id': '1',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'keywordField',
-        'label': 'custom label',
-        'type': 'list',
-        'options': {
-          'type': 'terms',
-          'multiselect': true,
-          'size': 5,
-          'order': 'desc'
-        }
-      }
-    ]];
-
-    expect(props.setValue).toHaveBeenCalledWith(...expectedParams);
+      ]
+    };
+    sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
   });
 
   test('move up control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props}/>);
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
+      scope={scopeMock}
+      editorState={scopeMock.editorState}
+      stageEditorParams={stageEditorParams}
+    />);
     findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
-    const expectedParams = ['controls', [
-      {
-        'id': '2',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'numberField',
-        'label': '',
-        'type': 'range',
-        'options': {
-          'step': 1
+    const expectedParams = {
+      'controls': [
+        {
+          'id': '2',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'numberField',
+          'label': '',
+          'type': 'range',
+          'options': {
+            'step': 1
+          }
+        },
+        {
+          'id': '1',
+          'indexPattern': 'indexPattern1',
+          'fieldName': 'keywordField',
+          'label': 'custom label',
+          'type': 'list',
+          'options': {
+            'type': 'terms',
+            'multiselect': true,
+            'size': 5,
+            'order': 'desc'
+          }
         }
-      },
-      {
-        'id': '1',
-        'indexPattern': 'indexPattern1',
-        'fieldName': 'keywordField',
-        'label': 'custom label',
-        'type': 'list',
-        'options': {
-          'type': 'terms',
-          'multiselect': true,
-          'size': 5,
-          'order': 'desc'
-        }
-      }
-    ]];
-
-    expect(props.setValue).toHaveBeenCalledWith(...expectedParams);
+      ]
+    };
+    sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
   });
 });

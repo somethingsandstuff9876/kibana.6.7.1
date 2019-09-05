@@ -20,14 +20,7 @@
 // @ts-ignore
 export { extractMessagesFromPathToMap } from './extract_default_translations';
 // @ts-ignore
-export { matchEntriesWithExctractors } from './extract_default_translations';
-// @ts-ignore
-export { arrayify, writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
+export { writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
 export { serializeToJson, serializeToJson5 } from './serializers';
-export {
-  I18nConfig,
-  filterConfigPaths,
-  assignConfigFromPath,
-  checkConfigNamespacePrefix,
-} from './config';
+export { I18nConfig, filterConfigPaths, mergeConfigs } from './config';
 export { integrateLocaleFiles } from './integrate_locale_files';

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable import/no-duplicates */
-
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -31,32 +29,34 @@ import {
   GuideText,
 } from '../../components';
 
-import assistedInputHtml from './assisted_input.html';
-import searchInputHtml from './search_input.html';
-import staticInputHtml from './static_input.html';
+const assistedInputHtml = require('./assisted_input.html');
 
-import Label from './label';
-import labelSource from '!!raw-loader!./label';
+const searchInputHtml = require('./search_input.html');
+
+const staticInputHtml = require('./static_input.html');
+
+const Label = require('./label');
+const labelSource = require('!!raw-loader!./label');
 const labelHtml = renderToHtml(Label);
 
-import TextInput from './text_input';
-import textInputSource from '!!raw-loader!./text_input';
+const TextInput = require('./text_input');
+const textInputSource = require('!!raw-loader!./text_input');
 const textInputHtml = renderToHtml(TextInput, { id: '1' });
 
-import TextArea from './text_area';
-import textAreaSource from '!!raw-loader!./text_area';
+const TextArea = require('./text_area');
+const textAreaSource = require('!!raw-loader!./text_area');
 const textAreaHtml = renderToHtml(TextArea);
 
-import TextAreaNonResizable from './text_area_non_resizable';
-import textAreaNonResizableSource from '!!raw-loader!./text_area_non_resizable';
+const TextAreaNonResizable = require('./text_area_non_resizable');
+const textAreaNonResizableSource = require('!!raw-loader!./text_area_non_resizable');
 const textAreaNonResizableHtml = renderToHtml(TextAreaNonResizable);
 
-import Select from './select';
-import selectSource from '!!raw-loader!./select';
+const Select = require('./select');
+const selectSource = require('!!raw-loader!./select');
 const selectHtml = renderToHtml(Select);
 
-import CheckBox from './check_box';
-import checkBoxSource from '!!raw-loader!./check_box';
+const CheckBox = require('./check_box');
+const checkBoxSource = require('!!raw-loader!./check_box');
 const checkBoxHtml = renderToHtml(CheckBox);
 
 export default props => (
@@ -103,6 +103,10 @@ export default props => (
       <GuideDemo>
         <TextInput/>
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <TextInput/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -122,6 +126,11 @@ export default props => (
       <GuideDemo
         html={assistedInputHtml}
       />
+
+      <GuideDemo
+        html={assistedInputHtml}
+        isDarkTheme
+      />
     </GuideSection>
 
     <GuideSection
@@ -133,6 +142,11 @@ export default props => (
     >
       <GuideDemo
         html={searchInputHtml}
+      />
+
+      <GuideDemo
+        html={searchInputHtml}
+        isDarkTheme
       />
     </GuideSection>
 
@@ -165,6 +179,10 @@ export default props => (
       <GuideDemo>
         <TextArea/>
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <TextArea/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -195,6 +213,10 @@ export default props => (
       <GuideDemo>
         <CheckBox/>
       </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <CheckBox/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -211,6 +233,9 @@ export default props => (
         <Select/>
       </GuideDemo>
 
+      <GuideDemo isDarkTheme={true}>
+        <Select/>
+      </GuideDemo>
     </GuideSection>
   </GuidePage>
 );

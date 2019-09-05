@@ -5,7 +5,6 @@
     {
       "name": "bytes",
       "type": "number",
-      "esTypes": ["long"],
       "count": 10,
       "scripted": false,
       "searchable": true,
@@ -15,7 +14,6 @@
     {
       "name": "ssl",
       "type": "boolean",
-      "esTypes": ["boolean"],
       "count": 20,
       "scripted": false,
       "searchable": true,
@@ -25,7 +23,6 @@
     {
       "name": "@timestamp",
       "type": "date",
-      "esTypes": ["date"],
       "count": 30,
       "scripted": false,
       "searchable": true,
@@ -35,7 +32,6 @@
     {
       "name": "time",
       "type": "date",
-      "esTypes": ["date"],
       "count": 30,
       "scripted": false,
       "searchable": true,
@@ -45,7 +41,6 @@
     {
       "name": "@tags",
       "type": "string",
-      "esTypes": ["keyword"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -55,7 +50,6 @@
     {
       "name": "utc_time",
       "type": "date",
-      "esTypes": ["date"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -65,7 +59,6 @@
     {
       "name": "phpmemory",
       "type": "number",
-      "esTypes": ["integer"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -75,7 +68,6 @@
     {
       "name": "ip",
       "type": "ip",
-      "esTypes": ["ip"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -85,7 +77,6 @@
     {
       "name": "request_body",
       "type": "attachment",
-      "esTypes": ["attachment"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -95,7 +86,6 @@
     {
       "name": "point",
       "type": "geo_point",
-      "esTypes": ["geo_point"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -105,7 +95,6 @@
     {
       "name": "area",
       "type": "geo_shape",
-      "esTypes": ["geo_shape"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -115,7 +104,6 @@
     {
       "name": "hashed",
       "type": "murmur3",
-      "esTypes": ["murmur3"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -125,7 +113,6 @@
     {
       "name": "geo.coordinates",
       "type": "geo_point",
-      "esTypes": ["geo_point"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -135,7 +122,6 @@
     {
       "name": "extension",
       "type": "string",
-      "esTypes": ["keyword"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -145,7 +131,6 @@
     {
       "name": "machine.os",
       "type": "string",
-      "esTypes": ["text"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -155,19 +140,15 @@
     {
       "name": "machine.os.raw",
       "type": "string",
-      "esTypes": ["keyword"],
       "count": 0,
       "scripted": false,
       "searchable": true,
       "aggregatable": true,
-      "readFromDocValues": true,
-      "parent": "machine.os",
-      "subType": "multi"
+      "readFromDocValues": true
     },
     {
       "name": "geo.src",
       "type": "string",
-      "esTypes": ["keyword"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -177,7 +158,6 @@
     {
       "name": "_id",
       "type": "string",
-      "esTypes": ["_id"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -187,7 +167,6 @@
     {
       "name": "_type",
       "type": "string",
-      "esTypes": ["_type"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -197,7 +176,6 @@
     {
       "name": "_source",
       "type": "_source",
-      "esTypes": ["_source"],
       "count": 0,
       "scripted": false,
       "searchable": true,
@@ -207,7 +185,6 @@
     {
       "name": "non-filterable",
       "type": "string",
-      "esTypes": ["text"],
       "count": 0,
       "scripted": false,
       "searchable": false,
@@ -217,7 +194,6 @@
     {
       "name": "non-sortable",
       "type": "string",
-      "esTypes": ["text"],
       "count": 0,
       "scripted": false,
       "searchable": false,
@@ -227,7 +203,6 @@
     {
       "name": "custom_user_field",
       "type": "conflict",
-      "esTypes": ["long", "text"],
       "count": 0,
       "scripted": false,
       "searchable": true,

@@ -17,33 +17,43 @@
  * under the License.
  */
 
-import { EuiIcon, IconType } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import classnames from 'classnames';
 import React from 'react';
+import { VisType } from 'ui/vis';
 
 interface VisTypeIconProps {
-  icon?: IconType;
-  image?: string;
+  visType: VisType;
 }
 
 /**
  * This renders the icon for a specific visualization type.
  * This currently checks the following:
- * - If image is set, use that as the `src` of an image
- * - Otherwise use the icon as an EuiIcon or the 'empty' icon if that's not set
+ * - If visType.image is set, use that as the `src` of an image
+ * - If legacyIcon is set, use that as a classname for a span with kuiIcon (to be removed in 7.0)
+ * - Otherwise use the visType.icon as an EuiIcon or the 'empty' icon if that's not set
  */
-export const VisTypeIcon = ({ icon, image }: VisTypeIconProps) => {
+export const VisTypeIcon = ({ visType }: VisTypeIconProps) => {
+  const legacyIconClass = classnames(
+    'kuiIcon',
+    'visNewVisDialog__typeLegacyIcon',
+    visType.legacyIcon
+  );
   return (
     <React.Fragment>
-      {image && (
+      {visType.image && (
         <img
-          src={image}
+          src={visType.image}
           aria-hidden="true"
           role="presentation"
           alt=""
           className="visNewVisDialog__typeImage"
         />
       )}
-      {!image && <EuiIcon type={icon || 'empty'} size="l" color="secondary" aria-hidden="true" />}
+      {!visType.image && visType.legacyIcon && <span className={legacyIconClass} />}
+      {!visType.image && !visType.legacyIcon && (
+        <EuiIcon type={visType.icon || 'empty'} size="l" color="secondary" aria-hidden="true" />
+      )}
     </React.Fragment>
   );
 };

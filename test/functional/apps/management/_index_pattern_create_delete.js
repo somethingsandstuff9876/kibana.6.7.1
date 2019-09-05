@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -29,13 +29,13 @@ export default function ({ getService, getPageObjects }) {
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
-      // Delete .kibana index and then wait for Kibana to re-create it
+      // delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})
         .then(function () {
           return PageObjects.settings.navigateTo();
         })
         .then(function () {
-          return PageObjects.settings.clickKibanaIndexPatterns();
+          return PageObjects.settings.clickKibanaIndices();
         });
     });
 
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickKibanaIndices();
       });
     });
 
@@ -121,13 +121,19 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('should return to index pattern list', function indexNotInUrl() {
+      it('should return to index pattern creation page', function returnToPage() {
+        return retry.try(function tryingForTime() {
+          return PageObjects.settings.getCreateIndexPatternGoToStep2Button();
+        });
+      });
+
+      it('should remove index pattern from url', function indexNotInUrl() {
         // give the url time to settle
         return retry.try(function tryingForTime() {
           return browser.getCurrentUrl()
             .then(function (currentUrl) {
               log.debug('currentUrl = ' + currentUrl);
-              expect(currentUrl).to.contain('management/kibana/index_patterns');
+              expect(currentUrl).to.not.contain('logstash-*');
             });
         });
       });

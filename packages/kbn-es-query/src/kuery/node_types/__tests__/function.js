@@ -19,7 +19,7 @@
 
 import * as functionType from '../function';
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import * as isFunction from '../../functions/is';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
@@ -30,6 +30,7 @@ describe('kuery node types', function () {
   describe('function', function () {
 
     let indexPattern;
+
 
     beforeEach(() => {
       indexPattern = indexPatternResponse;

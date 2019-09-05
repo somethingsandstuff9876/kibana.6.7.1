@@ -2,6 +2,7 @@
   "create": {
     "url_params": {
       "wait_for_active_shards": "",
+      "parent": "",
       "refresh": [
         "true",
         "false",
@@ -23,9 +24,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_create/{id}",
       "{indices}/{type}/{id}/_create"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
 }

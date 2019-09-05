@@ -1,7 +1,6 @@
 {
   "indices.put_template": {
     "url_params": {
-      "include_type_name": "__flag__",
       "order": "",
       "create": "__flag__",
       "timeout": "",
@@ -15,6 +14,6 @@
     "patterns": [
       "_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
   }
 }

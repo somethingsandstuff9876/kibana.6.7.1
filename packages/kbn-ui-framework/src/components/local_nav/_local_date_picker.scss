@@ -40,6 +40,22 @@
 
     color: $localNavButtonTextColor; /* 1 */
   }
+
+  @include darkTheme {
+    color: $localNavButtonTextColor--darkTheme;
+
+    &:hover,
+    &:active {
+      color: $localNavButtonTextColor-isHover--darkTheme;
+      background-color: $localDatePickerButtonHoverBackgroundColor--darkTheme;
+    }
+
+    &:focus {
+      @include focus($kuiFocusColor, $localDropdownBackgroundColor--darkTheme);
+
+      color: $localNavButtonTextColor--darkTheme; /* 1 */
+    }
+  }
 }
 
 .kuiDatePickerHeaderCell {
@@ -49,6 +65,10 @@
   font-weight: bold;
   text-align: center;
   line-height: 1.2;
+
+  @include darkTheme {
+    color: $kuiTextColor--darkTheme;
+  }
 }
 
 .kuiDatePickerRowCell {
@@ -113,5 +133,27 @@
     cursor: pointer;
     color: $localNavButtonTextColor-isHover;
     background-color: $localDatePickerButtonHoverBackgroundColor;
+  }
+
+  @include darkTheme {
+    color: $kuiTextColor--darkTheme;
+
+    &:focus {
+      @include focus($kuiFocusColor, $localDropdownBackgroundColor--darkTheme);
+    }
+
+    &.kuiDatePickerRowCellContent-isCurrent {
+      color: $kuiLinkColor--darkTheme;
+    }
+
+    &.kuiDatePickerRowCellContent-isSelected {
+      color: $localDatePickerCellSelectedTextColor--darkTheme;
+    }
+
+    &:hover,
+    &:active {
+      color: $localNavButtonTextColor-isHover--darkTheme;
+      background-color: $localDatePickerButtonHoverBackgroundColor--darkTheme;
+    }
   }
 }

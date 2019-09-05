@@ -18,21 +18,18 @@
  */
 
 import { configModel } from './dll_config_model';
-import { notInNodeModulesOrWebpackShims, notInNodeModules, inDllPluginPublic } from './dll_allowed_modules';
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
 import webpack from 'webpack';
 import { promisify } from 'util';
 import path from 'path';
-import rimraf from 'rimraf';
 
 const readFileAsync = promisify(fs.readFile);
 const mkdirpAsync = promisify(mkdirp);
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
-const rimrafAsync = promisify(rimraf);
 
 export class DllCompiler {
   static getRawDllConfig(uiBundles = {}, babelLoaderCacheDir = '', threadLoaderPoolConfig = {}) {
@@ -166,26 +163,7 @@ export class DllCompiler {
   async run(dllEntries) {
     const dllConfig = this.dllConfigGenerator(this.rawDllConfig);
     await this.upsertEntryFile(dllEntries);
-
-    try {
-      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
-
-      await this.runWebpack(dllConfig());
-
-      this.logWithMetadata(
-        ['info', 'optimize:dynamic_dll_plugin'],
-        `Client vendors dll compilation finished with success`
-      );
-    } catch (e) {
-      this.logWithMetadata(
-        ['fatal', 'optimize:dynamic_dll_plugin'],
-        `Client vendors dll compilation failed`
-      );
-
-      // Still throw the original error has here we just want
-      // log the fail message
-      throw e;
-    }
+    await this.runWebpack(dllConfig());
 
     // Style dll file isn't always created but we are
     // expecting it to exist always as we are referencing
@@ -204,7 +182,9 @@ export class DllCompiler {
 
   async runWebpack(config) {
     return new Promise((resolve, reject) => {
-      webpack(config, async (err, stats) => {
+      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
+
+      webpack(config, (err, stats) => {
         // If a critical error occurs or we have
         // errors in the stats compilation,
         // reject the promise and logs the errors
@@ -217,66 +197,18 @@ export class DllCompiler {
         }));
 
         if (webpackErrors) {
-          // Reject with webpack fatal errors
+          this.logWithMetadata(
+            ['fatal', 'optimize:dynamic_dll_plugin'],
+            `Client vendors dll compilation failed`
+          );
           return reject(webpackErrors);
         }
 
-        // Identify if we have not allowed modules
-        // bundled inside the dll bundle
-        const notAllowedModules = [];
-
-        stats.compilation.modules.forEach((module) => {
-          // ignore if no module or userRequest are defined
-          if (!module || !module.resource) {
-            return;
-          }
-
-          // ignore if this module represents the
-          // dll entry file
-          if (module.resource === this.getEntryPath()) {
-            return;
-          }
-
-          // ignore if this module is part of the
-          // files inside dynamic dll plugin public folder
-          if (inDllPluginPublic(module.resource)) {
-            return;
-          }
-
-          // A module is not allowed if it's not a node_module, a webpackShim
-          // or the reasons from being bundled into the dll are not node_modules
-          if(notInNodeModulesOrWebpackShims(module.resource)) {
-            const reasons = module.reasons || [];
-
-            reasons.forEach((reason) => {
-              // Skip if we can't read the reason info
-              if (!reason || !reason.module || !reason.module.resource) {
-                return;
-              }
-
-              // Is the reason for this module being bundle a
-              // node_module or no?
-              if (notInNodeModules(reason.module.resource)) {
-                notAllowedModules.push(module.resource);
-                return;
-              }
-            });
-          }
-        });
-
-        if (notAllowedModules.length) {
-          // Delete the built dll, as it contains invalid modules, and reject listing
-          // all the not allowed modules
-          try {
-            await rimrafAsync(this.rawDllConfig.outputPath);
-          } catch (e) {
-            return reject(e);
-          }
-
-          return reject(`The following modules are not allowed to be bundled into the dll: \n${notAllowedModules.join('\n')}`);
-        }
-
-        // Otherwise it has succeed
+        // Otherwise let it proceed
+        this.logWithMetadata(
+          ['info', 'optimize:dynamic_dll_plugin'],
+          `Client vendors dll compilation finished with success`
+        );
         return resolve(stats);
       });
     });

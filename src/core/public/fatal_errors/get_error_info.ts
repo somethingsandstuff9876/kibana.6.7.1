@@ -22,7 +22,7 @@ import { inspect } from 'util';
 /**
  * Produce a string version of an error,
  */
-function formatErrorMessage(error: any): string {
+function formatMessage(error: any) {
   if (typeof error === 'string') {
     return error;
   }
@@ -52,7 +52,7 @@ function formatErrorMessage(error: any): string {
 }
 
 /**
- * Format the stack trace from a message so that it setups with the message, which
+ * Format the stack trace from a message so that it starts with the message, which
  * some browsers do automatically and some don't
  */
 function formatStack(err: Error) {
@@ -64,23 +64,15 @@ function formatStack(err: Error) {
 }
 
 /**
- * Produce a simple FatalErrorInfo object from some error and optional source, used for
+ * Produce a simple ErrorInfo object from some error and optional source, used for
  * displaying error information on the fatal error screen
  */
-export function getErrorInfo(error: any, source?: string): FatalErrorInfo {
+export function getErrorInfo(error: any, source?: string) {
   const prefix = source ? source + ': ' : '';
   return {
-    message: prefix + formatErrorMessage(error),
+    message: prefix + formatMessage(error),
     stack: formatStack(error),
   };
 }
 
-/**
- * Represents the `message` and `stack` of a fatal Error
- *
- * @public
- * */
-export interface FatalErrorInfo {
-  message: string;
-  stack: string | undefined;
-}
+export type ErrorInfo = ReturnType<typeof getErrorInfo>;

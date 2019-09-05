@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export default function Panel(name, config) {
+export default function Panel(name, config, i18n) {
 
   this.name = name;
 
@@ -29,7 +27,7 @@ export default function Panel(name, config) {
 
   if (!config.render) {
     throw new Error (
-      i18n.translate('timelion.panels.noRenderFunctionErrorMessage', {
+      i18n('timelion.panels.noRenderFunctionErrorMessage', {
         defaultMessage: 'Panel must have a rendering function'
       })
     );

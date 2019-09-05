@@ -23,191 +23,202 @@ jest.mock('fs', () => ({
   readFileSync: jest.fn(),
 }));
 
+import Chance from 'chance';
 import supertest from 'supertest';
 
-import { ByteSizeValue, schema } from '@kbn/config-schema';
-import { HttpConfig } from './http_config';
-import { Router } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { HttpConfig, Router } from '.';
+import { logger } from '../logging/__mocks__';
 import { HttpServer } from './http_server';
 
-const cookieOptions = {
-  name: 'sid',
-  encryptionKey: 'something_at_least_32_characters',
-  validate: () => true,
-  isSecure: false,
-};
+const chance = new Chance();
 
 let server: HttpServer;
 let config: HttpConfig;
-let configWithSSL: HttpConfig;
-
-const loggingService = loggingServiceMock.create();
-const logger = loggingService.get();
-const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
-    port: 10002,
-    ssl: { enabled: false },
+    port: chance.integer({ min: 10000, max: 15000 }),
+    ssl: {},
   } as HttpConfig;
 
-  configWithSSL = {
-    ...config,
-    ssl: {
-      enabled: true,
-      certificate: '/certificate',
-      cipherSuites: ['cipherSuite'],
-      getSecureOptions: () => 0,
-      key: '/key',
-      redirectHttpFromPort: config.port + 1,
-    },
-  } as HttpConfig;
-
-  server = new HttpServer(loggingService, 'tests');
+  server = new HttpServer(logger.get());
 });
 
 afterEach(async () => {
   await server.stop();
-  jest.clearAllMocks();
+  logger.mockClear();
 });
 
-test('log listening address after started', async () => {
+test('listening after started', async () => {
   expect(server.isListening()).toBe(false);
 
-  await server.setup(config);
-  await server.start();
+  await server.start(config);
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "http server running at http://127.0.0.1:10002",
-      ],
-    ]
-  `);
 });
 
-test('log listening address after started when configured with BasePath and rewriteBasePath = false', async () => {
-  expect(server.isListening()).toBe(false);
+test('200 OK with body', async () => {
+  const router = new Router('/foo');
 
-  await server.setup({ ...config, basePath: '/bar', rewriteBasePath: false });
-  await server.start();
+  router.get({ path: '/', validate: false }, async (req, res) => {
+    return res.ok({ key: 'value' });
+  });
 
-  expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "http server running at http://127.0.0.1:10002",
-      ],
-    ]
-  `);
+  server.registerRouter(router);
+
+  const { server: innerServer } = await server.start(config);
+
+  await supertest(innerServer.listener)
+    .get('/foo/')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: 'value' });
+    });
 });
 
-test('log listening address after started when configured with BasePath and rewriteBasePath = true', async () => {
-  expect(server.isListening()).toBe(false);
+test('202 Accepted with body', async () => {
+  const router = new Router('/foo');
 
-  await server.setup({ ...config, basePath: '/bar', rewriteBasePath: true });
-  await server.start();
+  router.get({ path: '/', validate: false }, async (req, res) => {
+    return res.accepted({ location: 'somewhere' });
+  });
 
-  expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "http server running at http://127.0.0.1:10002/bar",
-      ],
-    ]
-  `);
+  server.registerRouter(router);
+
+  const { server: innerServer } = await server.start(config);
+
+  await supertest(innerServer.listener)
+    .get('/foo/')
+    .expect(202)
+    .then(res => {
+      expect(res.body).toEqual({ location: 'somewhere' });
+    });
+});
+
+test('204 No content', async () => {
+  const router = new Router('/foo');
+
+  router.get({ path: '/', validate: false }, async (req, res) => {
+    return res.noContent();
+  });
+
+  server.registerRouter(router);
+
+  const { server: innerServer } = await server.start(config);
+
+  await supertest(innerServer.listener)
+    .get('/foo/')
+    .expect(204)
+    .then(res => {
+      expect(res.body).toEqual({});
+      // TODO Is ^ wrong or just a result of supertest, I expect `null` or `undefined`
+    });
+});
+
+test('400 Bad request with error', async () => {
+  const router = new Router('/foo');
+
+  router.get({ path: '/', validate: false }, async (req, res) => {
+    const err = new Error('some message');
+    return res.badRequest(err);
+  });
+
+  server.registerRouter(router);
+
+  const { server: innerServer } = await server.start(config);
+
+  await supertest(innerServer.listener)
+    .get('/foo/')
+    .expect(400)
+    .then(res => {
+      expect(res.body).toEqual({ error: 'some message' });
+    });
 });
 
 test('valid params', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.get(
     {
       path: '/{test}',
-      validate: {
+      validate: schema => ({
         params: schema.object({
           test: schema.string(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: req.params.test });
+    async (req, res) => {
+      return res.ok({ key: req.params.test });
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(200)
     .then(res => {
-      expect(res.text).toBe('some-string');
+      expect(res.body).toEqual({ key: 'some-string' });
     });
 });
 
 test('invalid params', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.get(
     {
       path: '/{test}',
-      validate: {
+      validate: schema => ({
         params: schema.object({
           test: schema.number(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: String(req.params.test) });
+    async (req, res) => {
+      return res.ok({ key: req.params.test });
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: 'Bad Request',
-        statusCode: 400,
-        message: '[request params.test]: expected value of type [number] but got [string]',
+        error: '[test]: expected value of type [number] but got [string]',
       });
     });
 });
 
 test('valid query', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.get(
     {
       path: '/',
-      validate: {
+      validate: schema => ({
         query: schema.object({
           bar: schema.string(),
           quux: schema.number(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: req.query });
+    async (req, res) => {
+      return res.ok(req.query);
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
@@ -218,61 +229,57 @@ test('valid query', async () => {
 });
 
 test('invalid query', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.get(
     {
       path: '/',
-      validate: {
+      validate: schema => ({
         query: schema.object({
           bar: schema.number(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: req.query });
+    async (req, res) => {
+      return res.ok(req.query);
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/?bar=test')
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: 'Bad Request',
-        statusCode: 400,
-        message: '[request query.bar]: expected value of type [number] but got [string]',
+        error: '[bar]: expected value of type [number] but got [string]',
       });
     });
 });
 
 test('valid body', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.post(
     {
       path: '/',
-      validate: {
+      validate: schema => ({
         body: schema.object({
           bar: schema.string(),
           baz: schema.number(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: req.body });
+    async (req, res) => {
+      return res.ok(req.body);
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -287,26 +294,25 @@ test('valid body', async () => {
 });
 
 test('invalid body', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.post(
     {
       path: '/',
-      validate: {
+      validate: schema => ({
         body: schema.object({
           bar: schema.number(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: req.body });
+    async (req, res) => {
+      return res.ok(req.body);
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -314,34 +320,31 @@ test('invalid body', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: 'Bad Request',
-        statusCode: 400,
-        message: '[request body.bar]: expected value of type [number] but got [string]',
+        error: '[bar]: expected value of type [number] but got [string]',
       });
     });
 });
 
 test('handles putting', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.put(
     {
       path: '/',
-      validate: {
+      validate: schema => ({
         body: schema.object({
           key: schema.string(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: req.body });
+    async (req, res) => {
+      return res.ok(req.body);
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .put('/foo/')
@@ -353,26 +356,25 @@ test('handles putting', async () => {
 });
 
 test('handles deleting', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo');
 
   router.delete(
     {
       path: '/{id}',
-      validate: {
+      validate: schema => ({
         params: schema.object({
           id: schema.number(),
         }),
-      },
+      }),
     },
-    (context, req, res) => {
-      return res.ok({ body: { key: req.params.id } });
+    async (req, res) => {
+      return res.ok({ key: req.params.id });
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
-  registerRouter(router);
+  server.registerRouter(router);
 
-  await server.start();
+  const { server: innerServer } = await server.start(config);
 
   await supertest(innerServer.listener)
     .delete('/foo/3')
@@ -380,6 +382,34 @@ test('handles deleting', async () => {
     .then(res => {
       expect(res.body).toEqual({ key: 3 });
     });
+});
+
+test('filtered headers', async () => {
+  expect.assertions(1);
+
+  const router = new Router('/foo');
+
+  let filteredHeaders: any;
+
+  router.get({ path: '/', validate: false }, async (req, res) => {
+    filteredHeaders = req.getFilteredHeaders(['x-kibana-foo', 'host']);
+
+    return res.noContent();
+  });
+
+  server.registerRouter(router);
+
+  const { server: innerServer } = await server.start(config);
+
+  await supertest(innerServer.listener)
+    .get('/foo/?bar=quux')
+    .set('x-kibana-foo', 'bar')
+    .set('x-kibana-bar', 'quux');
+
+  expect(filteredHeaders).toEqual({
+    host: `127.0.0.1:${config.port}`,
+    'x-kibana-foo': 'bar',
+  });
 });
 
 describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
@@ -393,16 +423,15 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
       rewriteBasePath: false,
     } as HttpConfig;
 
-    const router = new Router('/', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ body: 'value:/foo' })
+    const router = new Router('/');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ key: 'value:/' }));
+    router.get({ path: '/foo', validate: false }, async (req, res) =>
+      res.ok({ key: 'value:/foo' })
     );
 
-    const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
-    registerRouter(router);
+    server.registerRouter(router);
 
-    await server.start();
+    const { server: innerServer } = await server.start(configWithBasePath);
     innerServerListener = innerServer.listener;
   });
 
@@ -429,7 +458,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
       .get('/')
       .expect(200)
       .then(res => {
-        expect(res.text).toBe('value:/');
+        expect(res.body).toEqual({ key: 'value:/' });
       });
   });
 
@@ -438,7 +467,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
       .get('/foo')
       .expect(200)
       .then(res => {
-        expect(res.text).toBe('value:/foo');
+        expect(res.body).toEqual({ key: 'value:/foo' });
       });
   });
 });
@@ -454,16 +483,15 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       rewriteBasePath: true,
     } as HttpConfig;
 
-    const router = new Router('/', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ body: 'value:/foo' })
+    const router = new Router('/');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ key: 'value:/' }));
+    router.get({ path: '/foo', validate: false }, async (req, res) =>
+      res.ok({ key: 'value:/foo' })
     );
 
-    const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
-    registerRouter(router);
+    server.registerRouter(router);
 
-    await server.start();
+    const { server: innerServer } = await server.start(configWithBasePath);
     innerServerListener = innerServer.listener;
   });
 
@@ -472,7 +500,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       .get('/bar')
       .expect(200)
       .then(res => {
-        expect(res.text).toBe('value:/');
+        expect(res.body).toEqual({ key: 'value:/' });
       });
   });
 
@@ -481,7 +509,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       .get('/bar/')
       .expect(200)
       .then(res => {
-        expect(res.text).toBe('value:/');
+        expect(res.body).toEqual({ key: 'value:/' });
       });
   });
 
@@ -490,7 +518,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       .get('/bar/foo')
       .expect(200)
       .then(res => {
-        expect(res.text).toBe('value:/foo');
+        expect(res.body).toEqual({ key: 'value:/foo' });
       });
   });
 
@@ -507,225 +535,38 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
   });
 });
 
-test('with defined `redirectHttpFromPort`', async () => {
-  const router = new Router('/', logger, enhanceWithContext);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
+describe('with defined `redirectHttpFromPort`', () => {
+  let configWithSSL: HttpConfig;
 
-  const { registerRouter } = await server.setup(configWithSSL);
-  registerRouter(router);
+  beforeEach(async () => {
+    configWithSSL = {
+      ...config,
+      ssl: {
+        certificate: '/certificate',
+        cipherSuites: ['cipherSuite'],
+        enabled: true,
+        getSecureOptions: () => 0,
+        key: '/key',
+        redirectHttpFromPort: config.port + 1,
+      },
+    } as HttpConfig;
 
-  await server.start();
+    const router = new Router('/');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ key: 'value:/' }));
+
+    server.registerRouter(router);
+
+    await server.start(configWithSSL);
+  });
 });
 
 test('returns server and connection options on start', async () => {
-  const configWithPort = {
+  const { server: innerServer, options } = await server.start({
     ...config,
     port: 12345,
-  };
-  const { server: innerServer } = await server.setup(configWithPort);
+  });
 
   expect(innerServer).toBeDefined();
   expect(innerServer).toBe((server as any).server);
-});
-
-test('throws an error if starts without set up', async () => {
-  await expect(server.start()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Http server is not setup up yet"`
-  );
-});
-
-test('allows attaching metadata to attach meta-data tag strings to a route', async () => {
-  const tags = ['my:tag'];
-  const { registerRouter, server: innerServer } = await server.setup(config);
-
-  const router = new Router('', logger, enhanceWithContext);
-  router.get({ path: '/with-tags', validate: false, options: { tags } }, (context, req, res) =>
-    res.ok({ body: { tags: req.route.options.tags } })
-  );
-  router.get({ path: '/without-tags', validate: false }, (context, req, res) =>
-    res.ok({ body: { tags: req.route.options.tags } })
-  );
-  registerRouter(router);
-
-  await server.start();
-  await supertest(innerServer.listener)
-    .get('/with-tags')
-    .expect(200, { tags });
-
-  await supertest(innerServer.listener)
-    .get('/without-tags')
-    .expect(200, { tags: [] });
-});
-
-test('exposes route details of incoming request to a route handler', async () => {
-  const { registerRouter, server: innerServer } = await server.setup(config);
-
-  const router = new Router('', logger, enhanceWithContext);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
-  registerRouter(router);
-
-  await server.start();
-  await supertest(innerServer.listener)
-    .get('/')
-    .expect(200, {
-      method: 'get',
-      path: '/',
-      options: {
-        authRequired: true,
-        tags: [],
-      },
-    });
-});
-
-describe('setup contract', () => {
-  describe('#createSessionStorage', () => {
-    it('creates session storage factory', async () => {
-      const { createCookieSessionStorageFactory } = await server.setup(config);
-      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
-
-      expect(sessionStorageFactory.asScoped).toBeDefined();
-    });
-    it('creates session storage factory only once', async () => {
-      const { createCookieSessionStorageFactory } = await server.setup(config);
-      const create = async () => await createCookieSessionStorageFactory(cookieOptions);
-
-      await create();
-      expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
-    });
-  });
-
-  describe('#auth.isAuthenticated()', () => {
-    it('returns true if has been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: true });
-    });
-
-    it('returns false if has not been authorized', async () => {
-      const { registerAuth, registerRouter, server: innerServer, auth } = await server.setup(
-        config
-      );
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-
-    it('returns false if no authorization mechanism has been registered', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-      );
-      registerRouter(router);
-
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { isAuthenticated: false });
-    });
-  });
-
-  describe('#auth.get()', () => {
-    it('returns authenticated status and allow associate auth state with request', async () => {
-      const user = { id: '42' };
-      const {
-        createCookieSessionStorageFactory,
-        registerRouter,
-        registerAuth,
-        server: innerServer,
-        auth,
-      } = await server.setup(config);
-      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
-      registerAuth((req, res, toolkit) => {
-        sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
-        return toolkit.authenticated({ state: user });
-      });
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { state: user, status: 'authenticated' });
-    });
-
-    it('returns correct authentication unknown status', async () => {
-      const { registerRouter, server: innerServer, auth } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unknown' });
-    });
-
-    it('returns correct unauthenticated status', async () => {
-      const authenticate = jest.fn();
-
-      const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(
-        config
-      );
-      await registerAuth(authenticate);
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ body: auth.get(req) })
-      );
-
-      registerRouter(router);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { status: 'unauthenticated' });
-
-      expect(authenticate).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('#isTlsEnabled', () => {
-    it('returns "true" if TLS enabled', async () => {
-      const { isTlsEnabled } = await server.setup(configWithSSL);
-      expect(isTlsEnabled).toBe(true);
-    });
-    it('returns "false" if TLS not enabled', async () => {
-      const { isTlsEnabled } = await server.setup(config);
-      expect(isTlsEnabled).toBe(false);
-    });
-  });
+  expect(options).toMatchSnapshot();
 });

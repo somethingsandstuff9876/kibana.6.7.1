@@ -13,6 +13,3 @@ bluebird.Promise.setScheduler(function (fn) { global.setImmediate.call(global, f
 
 const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
-
-const URL = { createObjectURL: () => '' };
-Object.defineProperty(window, 'URL', { value: URL });

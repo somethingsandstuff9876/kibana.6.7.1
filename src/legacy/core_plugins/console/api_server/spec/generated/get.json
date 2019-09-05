@@ -1,14 +1,16 @@
 {
   "get": {
     "url_params": {
+      "include_type_name": "",
       "stored_fields": [],
+      "parent": "",
       "preference": "random",
       "realtime": "__flag__",
       "refresh": "__flag__",
       "routing": "",
       "_source": [],
-      "_source_excludes": [],
-      "_source_includes": [],
+      "_source_exclude": [],
+      "_source_include": [],
       "version": "",
       "version_type": [
         "internal",
@@ -21,9 +23,9 @@
       "GET"
     ],
     "patterns": [
-      "{indices}/_doc/{id}",
-      "{indices}/{type}/{id}"
+      "{indices}/{type}/{id}",
+      "{indices}/_doc/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
   }
 }

@@ -19,10 +19,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-
 import {
-  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+  EuiTextColor,
   EuiIcon,
 } from '@elastic/eui';
 
@@ -30,38 +33,75 @@ export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPan
   let optionalImg;
   if (iconUrl) {
     optionalImg = (
-      <img
-        className="synopsisIcon"
-        src={iconUrl}
-        alt=""
-      />
+      <EuiFlexItem grow={false}>
+        <img
+          className="synopsisIcon"
+          src={iconUrl}
+          alt=""
+        />
+      </EuiFlexItem>
     );
   } else if (iconType) {
     optionalImg = (
-      <EuiIcon
-        type={iconType}
-        // color="primary"
-        size="l"
-      />
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type={iconType}
+          color="primary"
+          size="xl"
+        />
+      </EuiFlexItem>
     );
   }
 
-  const classes = classNames('homSynopsis__card', {
-    'homSynopsis__card--noPanel': !wrapInPanel,
-  });
+  const content = (
+    <EuiFlexGroup>
+      {optionalImg}
+      <EuiFlexItem className="synopsisContent">
+        <EuiTitle size="s" className="synopsisTitle">
+          <h4>
+            {title}
+          </h4>
+        </EuiTitle>
+        <EuiText className="synopsisBody">
+          <p>
+            <EuiTextColor color="subdued">
+              {description}
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  let synopsisDisplay = content;
+  if (wrapInPanel) {
+    synopsisDisplay = (
+      <EuiPanel className="synopsisPanel" betaBadgeLabel={isBeta ? 'BETA' : null}>
+        {content}
+      </EuiPanel>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <span
+        onClick={onClick}
+        className="euiLink synopsis"
+        data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
+      >
+        {synopsisDisplay}
+      </span>
+    );
+  }
 
   return (
-    <EuiCard
-      className={classes}
-      layout="horizontal"
-      icon={optionalImg}
-      title={title}
-      description={description}
-      onClick={onClick}
+    <a
       href={url}
+      className="euiLink synopsis"
       data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
-      betaBadgeLabel={isBeta ? 'Beta' : null}
-    />
+    >
+      {synopsisDisplay}
+    </a>
   );
 }
 

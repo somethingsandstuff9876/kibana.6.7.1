@@ -1,0 +1,41 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const crypto_1 = require("crypto");
+const util_1 = require("util");
+const randomBytesAsync = util_1.promisify(crypto_1.randomBytes);
+exports.DEFAULT_CSP_RULES = Object.freeze([
+    `script-src 'unsafe-eval' 'self'`,
+    'worker-src blob:',
+    'child-src blob:',
+]);
+async function generateCSPNonce() {
+    return (await randomBytesAsync(12)).toString('base64');
+}
+exports.generateCSPNonce = generateCSPNonce;
+function createCSPRuleString(rules, nonce) {
+    let ruleString = rules.join('; ');
+    if (nonce) {
+        ruleString = ruleString.replace(/\{nonce\}/g, nonce);
+    }
+    return ruleString;
+}
+exports.createCSPRuleString = createCSPRuleString;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL3NlcnZlci9jc3AvaW5kZXgudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3NyYy9zZXJ2ZXIvY3NwL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FpQkc7O0FBRUgsbUNBQXFDO0FBQ3JDLCtCQUFpQztBQUVqQyxNQUFNLGdCQUFnQixHQUFHLGdCQUFTLENBQUMsb0JBQVcsQ0FBQyxDQUFDO0FBRW5DLFFBQUEsaUJBQWlCLEdBQUcsTUFBTSxDQUFDLE1BQU0sQ0FBQztJQUM3QyxpQ0FBaUM7SUFDakMsa0JBQWtCO0lBQ2xCLGlCQUFpQjtDQUNsQixDQUFDLENBQUM7QUFFSSxLQUFLLFVBQVUsZ0JBQWdCO0lBQ3BDLE9BQU8sQ0FBQyxNQUFNLGdCQUFnQixDQUFDLEVBQUUsQ0FBQyxDQUFDLENBQUMsUUFBUSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0FBQ3pELENBQUM7QUFGRCw0Q0FFQztBQUVELFNBQWdCLG1CQUFtQixDQUFDLEtBQWUsRUFBRSxLQUFjO0lBQ2pFLElBQUksVUFBVSxHQUFHLEtBQUssQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUM7SUFDbEMsSUFBSSxLQUFLLEVBQUU7UUFDVCxVQUFVLEdBQUcsVUFBVSxDQUFDLE9BQU8sQ0FBQyxZQUFZLEVBQUUsS0FBSyxDQUFDLENBQUM7S0FDdEQ7SUFDRCxPQUFPLFVBQVUsQ0FBQztBQUNwQixDQUFDO0FBTkQsa0RBTUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogTGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZSBvciBtb3JlIGNvbnRyaWJ1dG9yXG4gKiBsaWNlbnNlIGFncmVlbWVudHMuIFNlZSB0aGUgTk9USUNFIGZpbGUgZGlzdHJpYnV0ZWQgd2l0aFxuICogdGhpcyB3b3JrIGZvciBhZGRpdGlvbmFsIGluZm9ybWF0aW9uIHJlZ2FyZGluZyBjb3B5cmlnaHRcbiAqIG93bmVyc2hpcC4gRWxhc3RpY3NlYXJjaCBCLlYuIGxpY2Vuc2VzIHRoaXMgZmlsZSB0byB5b3UgdW5kZXJcbiAqIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7IHlvdSBtYXlcbiAqIG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsXG4gKiBzb2Z0d2FyZSBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhblxuICogXCJBUyBJU1wiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTllcbiAqIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuICBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZVxuICogc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZCBsaW1pdGF0aW9uc1xuICogdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgcmFuZG9tQnl0ZXMgfSBmcm9tICdjcnlwdG8nO1xuaW1wb3J0IHsgcHJvbWlzaWZ5IH0gZnJvbSAndXRpbCc7XG5cbmNvbnN0IHJhbmRvbUJ5dGVzQXN5bmMgPSBwcm9taXNpZnkocmFuZG9tQnl0ZXMpO1xuXG5leHBvcnQgY29uc3QgREVGQVVMVF9DU1BfUlVMRVMgPSBPYmplY3QuZnJlZXplKFtcbiAgYHNjcmlwdC1zcmMgJ3Vuc2FmZS1ldmFsJyAnc2VsZidgLFxuICAnd29ya2VyLXNyYyBibG9iOicsXG4gICdjaGlsZC1zcmMgYmxvYjonLFxuXSk7XG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBnZW5lcmF0ZUNTUE5vbmNlKCkge1xuICByZXR1cm4gKGF3YWl0IHJhbmRvbUJ5dGVzQXN5bmMoMTIpKS50b1N0cmluZygnYmFzZTY0Jyk7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBjcmVhdGVDU1BSdWxlU3RyaW5nKHJ1bGVzOiBzdHJpbmdbXSwgbm9uY2U/OiBzdHJpbmcpIHtcbiAgbGV0IHJ1bGVTdHJpbmcgPSBydWxlcy5qb2luKCc7ICcpO1xuICBpZiAobm9uY2UpIHtcbiAgICBydWxlU3RyaW5nID0gcnVsZVN0cmluZy5yZXBsYWNlKC9cXHtub25jZVxcfS9nLCBub25jZSk7XG4gIH1cbiAgcmV0dXJuIHJ1bGVTdHJpbmc7XG59XG4iXX0=

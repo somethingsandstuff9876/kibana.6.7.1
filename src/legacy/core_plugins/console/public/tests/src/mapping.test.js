@@ -44,23 +44,58 @@ describe('Mappings', () => {
     return { name: name, type: type || 'string' };
   }
 
+  test('Multi fields', function () {
+    mappings.loadMappings({
+      index: {
+        tweet: {
+          properties: {
+            first_name: {
+              type: 'multi_field',
+              path: 'just_name',
+              fields: {
+                first_name: { type: 'string', index: 'analyzed' },
+                any_name: { type: 'string', index: 'analyzed' },
+              },
+            },
+            last_name: {
+              type: 'multi_field',
+              path: 'just_name',
+              fields: {
+                last_name: { type: 'string', index: 'analyzed' },
+                any_name: { type: 'string', index: 'analyzed' },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(mappings.getFields('index').sort(fc)).toEqual([
+      f('any_name', 'string'),
+      f('first_name', 'string'),
+      f('last_name', 'string'),
+    ]);
+  });
+
   test('Multi fields 1.0 style', function () {
     mappings.loadMappings({
       index: {
-        properties: {
-          first_name: {
-            type: 'string',
-            index: 'analyzed',
-            path: 'just_name',
-            fields: {
-              any_name: { type: 'string', index: 'analyzed' },
+        tweet: {
+          properties: {
+            first_name: {
+              type: 'string',
+              index: 'analyzed',
+              path: 'just_name',
+              fields: {
+                any_name: { type: 'string', index: 'analyzed' },
+              },
             },
-          },
-          last_name: {
-            type: 'string',
-            index: 'no',
-            fields: {
-              raw: { type: 'string', index: 'analyzed' },
+            last_name: {
+              type: 'string',
+              index: 'no',
+              fields: {
+                raw: { type: 'string', index: 'analyzed' },
+              },
             },
           },
         },
@@ -78,27 +113,7 @@ describe('Mappings', () => {
   test('Simple fields', function () {
     mappings.loadMappings({
       index: {
-        properties: {
-          str: {
-            type: 'string',
-          },
-          number: {
-            type: 'int',
-          },
-        },
-      },
-    });
-
-    expect(mappings.getFields('index').sort(fc)).toEqual([
-      f('number', 'int'),
-      f('str', 'string'),
-    ]);
-  });
-
-  test('Simple fields - 1.0 style', function () {
-    mappings.loadMappings({
-      index: {
-        mappings: {
+        tweet: {
           properties: {
             str: {
               type: 'string',
@@ -117,28 +132,54 @@ describe('Mappings', () => {
     ]);
   });
 
-  test('Nested fields', function () {
+  test('Simple fields - 1.0 style', function () {
     mappings.loadMappings({
       index: {
-        properties: {
-          person: {
-            type: 'object',
+        mappings: {
+          tweet: {
             properties: {
-              name: {
-                properties: {
-                  first_name: { type: 'string' },
-                  last_name: { type: 'string' },
-                },
+              str: {
+                type: 'string',
               },
-              sid: { type: 'string', index: 'not_analyzed' },
+              number: {
+                type: 'int',
+              },
             },
           },
-          message: { type: 'string' },
         },
       },
     });
 
-    expect(mappings.getFields('index', []).sort(fc)).toEqual([
+    expect(mappings.getFields('index').sort(fc)).toEqual([
+      f('number', 'int'),
+      f('str', 'string'),
+    ]);
+  });
+
+  test('Nested fields', function () {
+    mappings.loadMappings({
+      index: {
+        tweet: {
+          properties: {
+            person: {
+              type: 'object',
+              properties: {
+                name: {
+                  properties: {
+                    first_name: { type: 'string' },
+                    last_name: { type: 'string' },
+                  },
+                },
+                sid: { type: 'string', index: 'not_analyzed' },
+              },
+            },
+            message: { type: 'string' },
+          },
+        },
+      },
+    });
+
+    expect(mappings.getFields('index', ['tweet']).sort(fc)).toEqual([
       f('message'),
       f('person.name.first_name'),
       f('person.name.last_name'),
@@ -149,23 +190,25 @@ describe('Mappings', () => {
   test('Enabled fields', function () {
     mappings.loadMappings({
       index: {
-        properties: {
-          person: {
-            type: 'object',
-            properties: {
-              name: {
-                type: 'object',
-                enabled: false,
+        tweet: {
+          properties: {
+            person: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'object',
+                  enabled: false,
+                },
+                sid: { type: 'string', index: 'not_analyzed' },
               },
-              sid: { type: 'string', index: 'not_analyzed' },
             },
+            message: { type: 'string' },
           },
-          message: { type: 'string' },
         },
       },
     });
 
-    expect(mappings.getFields('index', []).sort(fc)).toEqual([
+    expect(mappings.getFields('index', ['tweet']).sort(fc)).toEqual([
       f('message'),
       f('person.sid'),
     ]);
@@ -174,21 +217,23 @@ describe('Mappings', () => {
   test('Path tests', function () {
     mappings.loadMappings({
       index: {
-        properties: {
-          name1: {
-            type: 'object',
-            path: 'just_name',
-            properties: {
-              first1: { type: 'string' },
-              last1: { type: 'string', index_name: 'i_last_1' },
+        person: {
+          properties: {
+            name1: {
+              type: 'object',
+              path: 'just_name',
+              properties: {
+                first1: { type: 'string' },
+                last1: { type: 'string', index_name: 'i_last_1' },
+              },
             },
-          },
-          name2: {
-            type: 'object',
-            path: 'full',
-            properties: {
-              first2: { type: 'string' },
-              last2: { type: 'string', index_name: 'i_last_2' },
+            name2: {
+              type: 'object',
+              path: 'full',
+              properties: {
+                first2: { type: 'string' },
+                last2: { type: 'string', index_name: 'i_last_2' },
+              },
             },
           },
         },
@@ -206,8 +251,10 @@ describe('Mappings', () => {
   test('Use index_name tests', function () {
     mappings.loadMappings({
       index: {
-        properties: {
-          last1: { type: 'string', index_name: 'i_last_1' },
+        person: {
+          properties: {
+            last1: { type: 'string', index_name: 'i_last_1' },
+          },
         },
       },
     });
@@ -237,13 +284,17 @@ describe('Mappings', () => {
     });
     mappings.loadMappings({
       test_index1: {
-        properties: {
-          last1: { type: 'string', index_name: 'i_last_1' },
+        type1: {
+          properties: {
+            last1: { type: 'string', index_name: 'i_last_1' },
+          },
         },
       },
       test_index2: {
-        properties: {
-          last1: { type: 'string', index_name: 'i_last_1' },
+        type2: {
+          properties: {
+            last1: { type: 'string', index_name: 'i_last_1' },
+          },
         },
       },
     });

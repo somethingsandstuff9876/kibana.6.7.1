@@ -1,0 +1,40 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Applies the specified migration function to every saved object document in the list
+ * of raw docs. Any raw docs that are not valid saved objects will simply be passed through.
+ *
+ * @param {TransformFn} migrateDoc
+ * @param {RawDoc[]} rawDocs
+ * @returns {RawDoc[]}
+ */
+function migrateRawDocs(serializer, migrateDoc, rawDocs) {
+    return rawDocs.map(raw => {
+        if (serializer.isRawSavedObject(raw)) {
+            const savedObject = serializer.rawToSavedObject(raw);
+            savedObject.migrationVersion = savedObject.migrationVersion || {};
+            return serializer.savedObjectToRaw(migrateDoc(savedObject));
+        }
+        return raw;
+    });
+}
+exports.migrateRawDocs = migrateRawDocs;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL3NlcnZlci9zYXZlZF9vYmplY3RzL21pZ3JhdGlvbnMvY29yZS9taWdyYXRlX3Jhd19kb2NzLnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS9zcmMvc2VydmVyL3NhdmVkX29iamVjdHMvbWlncmF0aW9ucy9jb3JlL21pZ3JhdGVfcmF3X2RvY3MudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7OztHQWlCRzs7QUFTSDs7Ozs7OztHQU9HO0FBQ0gsU0FBZ0IsY0FBYyxDQUM1QixVQUFrQyxFQUNsQyxVQUF1QixFQUN2QixPQUFpQjtJQUVqQixPQUFPLE9BQU8sQ0FBQyxHQUFHLENBQUMsR0FBRyxDQUFDLEVBQUU7UUFDdkIsSUFBSSxVQUFVLENBQUMsZ0JBQWdCLENBQUMsR0FBRyxDQUFDLEVBQUU7WUFDcEMsTUFBTSxXQUFXLEdBQUcsVUFBVSxDQUFDLGdCQUFnQixDQUFDLEdBQUcsQ0FBQyxDQUFDO1lBQ3JELFdBQVcsQ0FBQyxnQkFBZ0IsR0FBRyxXQUFXLENBQUMsZ0JBQWdCLElBQUksRUFBRSxDQUFDO1lBQ2xFLE9BQU8sVUFBVSxDQUFDLGdCQUFnQixDQUFDLFVBQVUsQ0FBQyxXQUFXLENBQUMsQ0FBQyxDQUFDO1NBQzdEO1FBRUQsT0FBTyxHQUFHLENBQUM7SUFDYixDQUFDLENBQUMsQ0FBQztBQUNMLENBQUM7QUFkRCx3Q0FjQyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBMaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lIG9yIG1vcmUgY29udHJpYnV0b3JcbiAqIGxpY2Vuc2UgYWdyZWVtZW50cy4gU2VlIHRoZSBOT1RJQ0UgZmlsZSBkaXN0cmlidXRlZCB3aXRoXG4gKiB0aGlzIHdvcmsgZm9yIGFkZGl0aW9uYWwgaW5mb3JtYXRpb24gcmVnYXJkaW5nIGNvcHlyaWdodFxuICogb3duZXJzaGlwLiBFbGFzdGljc2VhcmNoIEIuVi4gbGljZW5zZXMgdGhpcyBmaWxlIHRvIHlvdSB1bmRlclxuICogdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTsgeW91IG1heVxuICogbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZyxcbiAqIHNvZnR3YXJlIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuXG4gKiBcIkFTIElTXCIgQkFTSVMsIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWVxuICogS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC4gIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlXG4gKiBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kIGxpbWl0YXRpb25zXG4gKiB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG4vKlxuICogVGhpcyBmaWxlIHByb3ZpZGVzIGxvZ2ljIGZvciBtaWdyYXRpbmcgcmF3IGRvY3VtZW50cy5cbiAqL1xuXG5pbXBvcnQgeyBSYXdEb2MsIFNhdmVkT2JqZWN0c1NlcmlhbGl6ZXIgfSBmcm9tICcuLi8uLi9zZXJpYWxpemF0aW9uJztcbmltcG9ydCB7IFRyYW5zZm9ybUZuIH0gZnJvbSAnLi9kb2N1bWVudF9taWdyYXRvcic7XG5cbi8qKlxuICogQXBwbGllcyB0aGUgc3BlY2lmaWVkIG1pZ3JhdGlvbiBmdW5jdGlvbiB0byBldmVyeSBzYXZlZCBvYmplY3QgZG9jdW1lbnQgaW4gdGhlIGxpc3RcbiAqIG9mIHJhdyBkb2NzLiBBbnkgcmF3IGRvY3MgdGhhdCBhcmUgbm90IHZhbGlkIHNhdmVkIG9iamVjdHMgd2lsbCBzaW1wbHkgYmUgcGFzc2VkIHRocm91Z2guXG4gKlxuICogQHBhcmFtIHtUcmFuc2Zvcm1Gbn0gbWlncmF0ZURvY1xuICogQHBhcmFtIHtSYXdEb2NbXX0gcmF3RG9jc1xuICogQHJldHVybnMge1Jhd0RvY1tdfVxuICovXG5leHBvcnQgZnVuY3Rpb24gbWlncmF0ZVJhd0RvY3MoXG4gIHNlcmlhbGl6ZXI6IFNhdmVkT2JqZWN0c1NlcmlhbGl6ZXIsXG4gIG1pZ3JhdGVEb2M6IFRyYW5zZm9ybUZuLFxuICByYXdEb2NzOiBSYXdEb2NbXVxuKTogUmF3RG9jW10ge1xuICByZXR1cm4gcmF3RG9jcy5tYXAocmF3ID0+IHtcbiAgICBpZiAoc2VyaWFsaXplci5pc1Jhd1NhdmVkT2JqZWN0KHJhdykpIHtcbiAgICAgIGNvbnN0IHNhdmVkT2JqZWN0ID0gc2VyaWFsaXplci5yYXdUb1NhdmVkT2JqZWN0KHJhdyk7XG4gICAgICBzYXZlZE9iamVjdC5taWdyYXRpb25WZXJzaW9uID0gc2F2ZWRPYmplY3QubWlncmF0aW9uVmVyc2lvbiB8fCB7fTtcbiAgICAgIHJldHVybiBzZXJpYWxpemVyLnNhdmVkT2JqZWN0VG9SYXcobWlncmF0ZURvYyhzYXZlZE9iamVjdCkpO1xuICAgIH1cblxuICAgIHJldHVybiByYXc7XG4gIH0pO1xufVxuIl19

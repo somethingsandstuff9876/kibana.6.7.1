@@ -6,9 +6,15 @@
 
 .dshStartScreen {
   text-align: center;
-  padding: $euiSize;
+  margin: $euiSize auto;
+  max-width: 800px;
+  width: 100%;
+  background: $euiColorEmptyShade;
+  padding: $euiSizeXXL;
+  border-radius: $euiBorderRadius;
+}
 
-  > * {
-    max-width: 36em !important;
-  }
+.dshSaveModal,
+.dshCloneModal {
+  max-width: 450px;
 }

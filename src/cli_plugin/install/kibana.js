@@ -18,7 +18,9 @@
  */
 
 import path from 'path';
-import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
+import execa from 'execa';
+import { fromRoot, watchStdioForLine } from '../../utils';
+import { versionSatisfies, cleanVersion } from '../../utils/version';
 import { statSync } from 'fs';
 
 export function existingInstall(settings, logger) {
@@ -26,15 +28,34 @@ export function existingInstall(settings, logger) {
     statSync(path.join(settings.pluginDir, settings.plugins[0].name));
 
     logger.error(`Plugin ${settings.plugins[0].name} already exists, please remove before installing a new version`);
-    process.exit(70);
+    process.exit(70); // eslint-disable-line no-process-exit
   } catch (e) {
     if (e.code !== 'ENOENT') throw e;
   }
 }
 
+export async function rebuildCache(settings, logger) {
+  logger.log('Optimizing and caching browser bundles...');
+
+  const kibanaArgs = [
+    fromRoot('./src/cli'),
+    '--env.name=production',
+    '--optimize.useBundleCache=false',
+    '--server.autoListen=false',
+    '--plugins.initialize=false'
+  ];
+
+  const proc = execa(process.execPath, kibanaArgs, {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: fromRoot('.'),
+  });
+
+  await watchStdioForLine(proc, () => {}, /Optimization .+ complete/);
+}
+
 export function assertVersion(settings) {
   if (!settings.plugins[0].kibanaVersion) {
-    throw new Error(`Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`);
+    throw new Error (`Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`);
   }
 
   const actual = cleanVersion(settings.plugins[0].kibanaVersion);

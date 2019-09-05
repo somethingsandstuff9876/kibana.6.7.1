@@ -1,34 +1,20 @@
+
 {
   "type": "doc",
   "value": {
+    "index": "geo_shapes",
+    "type": "doc",
     "id": "1",
-    "index": "geo_shapes",
     "source": {
       "geometry": {
+        "type" : "polygon",
         "coordinates": [
           [
-            [
-              100,
-              5
-            ],
-            [
-              95,
-              -5
-            ],
-            [
-              105,
-              -5
-            ],
-            [
-              100,
-              5
-            ]
+            [100.0, 5.0], [95.0, -5.0], [105.0, -5.0], [100.0, 5.0]
           ]
-        ],
-        "type": "polygon"
+        ]
       },
-      "name": "alpha",
-      "prop1": 1
+      "name": "alpha"
     }
   }
 }
@@ -36,34 +22,19 @@
 {
   "type": "doc",
   "value": {
+    "index": "geo_shapes",
+    "type": "doc",
     "id": "2",
-    "index": "geo_shapes",
     "source": {
       "geometry": {
+        "type" : "polygon",
         "coordinates": [
           [
-            [
-              80,
-              5
-            ],
-            [
-              75,
-              -5
-            ],
-            [
-              85,
-              -5
-            ],
-            [
-              80,
-              5
-            ]
+            [80.0, 5.0], [75.0, -5.0], [85.0, -5.0], [80.0, 5.0]
           ]
-        ],
-        "type": "polygon"
+        ]
       },
-      "name": "bravo",
-      "prop1": 2
+      "name": "bravo"
     }
   }
 }
@@ -71,33 +42,104 @@
 {
   "type": "doc",
   "value": {
-    "id": "3",
     "index": "geo_shapes",
+    "type": "doc",
+    "id": "3",
     "source": {
       "geometry": {
+        "type" : "polygon",
         "coordinates": [
           [
-            [
-              60,
-              5
-            ],
-            [
-              55,
-              -5
-            ],
-            [
-              65,
-              -5
-            ],
-            [
-              60,
-              5
-            ]
+            [60.0, 5.0], [55.0, -5.0], [65.0, -5.0], [60.0, 5.0]
           ]
-        ],
-        "type": "polygon"
+        ]
       },
-      "name": "charlie",
+      "name": "charlie"
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "index": "geo_shapes",
+    "type": "doc",
+    "id": "4",
+    "source": {
+      "geometry": {
+        "type": "linestring",
+        "coordinates": [
+          [
+            40,
+            5
+          ],
+          [
+            35,
+            -5
+          ],
+          [
+            45,
+            -5
+          ],
+          [
+            40,
+            5
+          ]
+        ]
+      },
+      "name": "tango"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "1",
+    "source": {
+      "shape_name": "alpha",
+      "prop1": 7
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "2",
+    "source": {
+      "shape_name": "alpha",
+      "prop1": 8
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "3",
+    "source": {
+      "shape_name": "alpha",
+      "prop1": 10
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "4",
+    "source": {
+      "shape_name": "bravo",
       "prop1": 3
     }
   }
@@ -106,93 +148,12 @@
 {
   "type": "doc",
   "value": {
-    "id": "4",
-    "index": "geo_shapes",
-    "source": {
-      "geometry": {
-        "coordinates": [
-            [
-              40,
-              5
-            ],
-            [
-              35,
-              -5
-            ],
-            [
-              45,
-              -5
-            ],
-            [
-              40,
-              5
-            ]
-          ],
-        "type": "linestring"
-      },
-      "name": "tango",
-      "prop1": 4
-    }
-  }
-}
-
-
-{
-  "type": "doc",
-  "value": {
-    "id": "1",
     "index": "meta_for_geo_shapes",
-    "source": {
-      "prop1": 7,
-      "shape_name": "alpha"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "2",
-    "index": "meta_for_geo_shapes",
-    "source": {
-      "prop1": 8,
-      "shape_name": "alpha"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "3",
-    "index": "meta_for_geo_shapes",
-    "source": {
-      "prop1": 10,
-      "shape_name": "alpha"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "4",
-    "index": "meta_for_geo_shapes",
-    "source": {
-      "prop1": 3,
-      "shape_name": "bravo"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
+    "type": "doc",
     "id": "5",
-    "index": "meta_for_geo_shapes",
     "source": {
-      "prop1": 11,
-      "shape_name": "charlie"
+      "shape_name": "charlie",
+      "prop1": 11
     }
   }
 }
@@ -200,11 +161,12 @@
 {
   "type": "doc",
   "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
     "id": "6",
-    "index": "meta_for_geo_shapes",
     "source": {
-      "prop1": 12,
-      "shape_name": "charlie"
+      "shape_name": "charlie",
+      "prop1": 12
     }
   }
 }
@@ -212,11 +174,12 @@
 {
   "type": "doc",
   "value": {
-    "id": "1",
     "index": "antimeridian_points",
+    "type": "doc",
+    "id": "1",
     "source": {
       "location": {
-        "lat": 0,
+        "lat": 0.0,
         "lon": 179.5
       }
     }
@@ -226,11 +189,12 @@
 {
   "type": "doc",
   "value": {
-    "id": "2",
     "index": "antimeridian_points",
+    "type": "doc",
+    "id": "2",
     "source": {
       "location": {
-        "lat": 0,
+        "lat": 0.0,
         "lon": -179.5
       }
     }
@@ -240,12 +204,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "3",
     "index": "antimeridian_points",
+    "type": "doc",
+    "id": "3",
     "source": {
       "location": {
-        "lat": 0,
-        "lon": 0
+        "lat": 0.0,
+        "lon": 0.0
       }
     }
   }
@@ -254,31 +219,17 @@
 {
   "type": "doc",
   "value": {
-    "id": "1",
     "index": "antimeridian_shapes",
+    "type": "doc",
+    "id": "1",
     "source": {
       "location": {
+        "type" : "polygon",
         "coordinates": [
           [
-            [
-              179,
-              5
-            ],
-            [
-              178.5,
-              -5
-            ],
-            [
-              179.5,
-              -5
-            ],
-            [
-              179,
-              5
-            ]
+            [179, 5.0], [178.5, -5.0], [179.5, -5.0], [179, 5.0]
           ]
-        ],
-        "type": "polygon"
+        ]
       }
     }
   }
@@ -287,31 +238,17 @@
 {
   "type": "doc",
   "value": {
-    "id": "2",
     "index": "antimeridian_shapes",
+    "type": "doc",
+    "id": "2",
     "source": {
       "location": {
+        "type" : "polygon",
         "coordinates": [
           [
-            [
-              -179,
-              5
-            ],
-            [
-              -178.5,
-              -5
-            ],
-            [
-              -179.5,
-              -5
-            ],
-            [
-              -179,
-              5
-            ]
+            [-179, 5.0], [-178.5, -5.0], [-179.5, -5.0], [-179, 5.0]
           ]
-        ],
-        "type": "polygon"
+        ]
       }
     }
   }
@@ -320,119 +257,18 @@
 {
   "type": "doc",
   "value": {
-    "id": "3",
     "index": "antimeridian_shapes",
+    "type": "doc",
+    "id": "3",
     "source": {
       "location": {
+        "type" : "polygon",
         "coordinates": [
           [
-            [
-              0,
-              5
-            ],
-            [
-              -0.5,
-              -5
-            ],
-            [
-              0.5,
-              -5
-            ],
-            [
-              0,
-              5
-            ]
+            [0, 5.0], [-0.5, -5.0], [0.5, -5.0], [0, 5.0]
           ]
-        ],
-        "type": "polygon"
+        ]
       }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "1",
-    "index": "flights",
-    "source": {
-      "location" : [-5, 5],
-      "heading" : 45,
-      "altitude" : 1000
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "2",
-    "index": "flights",
-    "source": {
-      "location" : [5, 5],
-      "heading" : 180,
-      "altitude" : 5000
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "3",
-    "index": "flights",
-    "source": {
-      "location" : [0,-5],
-      "heading" : 270,
-      "altitude" : 3000
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "1",
-    "index": "connections",
-    "source": {
-      "source" : [-65, 40],
-      "destination" : "drm3btev3e86"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "2",
-    "index": "connections",
-    "source": {
-      "source" : [-75.00001, 41],
-      "destination" : { "lon": -71, "lat": 40 }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "3",
-    "index": "connections",
-    "source": {
-      "source" : [-75, 41.00003],
-      "destination" : [ -71.000000000000000, 40 ]
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "4",
-    "index": "connections",
-    "source": {
-      "source" : [-75, 41.00004],
-      "destination" : "40.000,-71"
     }
   }
 }

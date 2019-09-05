@@ -19,7 +19,12 @@
 
 import { format as formatUrl } from 'url';
 import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig } from '@kbn/test';
-import { services } from './services';
+import {
+  KibanaServerProvider,
+  EsProvider,
+  EsArchiverProvider,
+  RetryProvider,
+} from './services';
 
 export default function () {
   const servers = {
@@ -41,10 +46,10 @@ export default function () {
       buildArgs: [ '--optimize.useBundleCache=true' ],
       sourceArgs: [
         '--no-base-path',
-        '--env.name=development',
         `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
       ],
       serverArgs: [
+        '--env.name=development',
         '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
         `--optimize.watchPort=${kbnTestConfig.getPort() + 10}`,
@@ -55,10 +60,14 @@ export default function () {
         `--elasticsearch.username=${servers.elasticsearch.username}`,
         `--elasticsearch.password=${servers.elasticsearch.password}`,
         `--kibana.disableWelcomeScreen=true`,
-        `--server.maxPayloadBytes=1679958`,
       ],
     },
 
-    services
+    services: {
+      kibanaServer: KibanaServerProvider,
+      retry: RetryProvider,
+      es: EsProvider,
+      esArchiver: EsArchiverProvider,
+    }
   };
 }

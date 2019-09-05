@@ -77,18 +77,23 @@
             </button>
           </div>
         </div>
-        <string-field-progress-bar
-          percent="{{bucket.percent}}"
-          count="{{::bucket.count}}"        
-        ></string-field-progress-bar>
+        <kbn-tooltip text="{{::bucket.count}}" placement="right" append-to-body="1">
+          <progressbar
+            value="bucket.percent"
+            max="100"
+            animate="false"
+          >
+            <span class="dscFieldDetails__progress">{{bucket.percent}}%</span>
+          </progressbar>
+        </kbn-tooltip>
       </div>
     </div>
   </div>
 
   <a
     ng-href="{{field.details.visualizeUrl}}"
-    ng-show="field.visualizable && canVisualize"
-    class="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
+    ng-show="field.visualizable"
+    class="kuiButton kuiButton--secondary kuiButton--small kuiButton--fullWidth kuiVerticalRhythmSmall"
     data-test-subj="fieldVisualize-{{::field.name}}"
   >
     <span

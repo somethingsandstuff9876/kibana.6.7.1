@@ -19,7 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { HttpSetup } from '../http';
+import { BasePathStartContract } from '../base_path';
 import { UiSettingsState } from './types';
 
 export interface UiSettingsApiResponse {
@@ -47,7 +47,10 @@ export class UiSettingsApi {
 
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: HttpSetup) {}
+  constructor(
+    private readonly basePath: BasePathStartContract,
+    private readonly kibanaVersion: string
+  ) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is
@@ -94,13 +97,6 @@ export class UiSettingsApi {
   }
 
   /**
-   * Report back if there are pending changes waiting to be sent.
-   */
-  public hasPendingChanges() {
-    return !!(this.pendingChanges && this.sendInProgress);
-  }
-
-  /**
    * If there are changes that need to be sent to the server and there is not already a
    * request in progress, this method will start a request sending those changes. Once
    * the request is complete `flushPendingChanges()` will be called again, and if the
@@ -122,7 +118,6 @@ export class UiSettingsApi {
 
     try {
       this.sendInProgress = true;
-
       changes.callback(
         undefined,
         await this.sendRequest('POST', '/api/kibana/settings', {
@@ -139,24 +134,28 @@ export class UiSettingsApi {
 
   /**
    * Calls window.fetch() with the proper headers and error handling logic.
+   *
+   * TODO: migrate this to kfetch or whatever the new platform equivalent is once it exists
    */
-  private async sendRequest(method: string, path: string, body: any): Promise<any> {
+  private async sendRequest(method: string, path: string, body: any) {
     try {
       this.loadingCount$.next(this.loadingCount$.getValue() + 1);
-
-      return await this.http.fetch(path, {
+      const response = await fetch(this.basePath.addToPath(path), {
         method,
         body: JSON.stringify(body),
         headers: {
           accept: 'application/json',
+          'content-type': 'application/json',
+          'kbn-version': this.kibanaVersion,
         },
+        credentials: 'same-origin',
       });
-    } catch (err) {
-      if (err.response && err.response.status >= 300) {
-        throw new Error(`Request failed with status code: ${err.response.status}`);
+
+      if (response.status >= 300) {
+        throw new Error(`Request failed with status code: ${response.status}`);
       }
 
-      throw err;
+      return await response.json();
     } finally {
       this.loadingCount$.next(this.loadingCount$.getValue() - 1);
     }

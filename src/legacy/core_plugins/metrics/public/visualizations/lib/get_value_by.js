@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-
-export const getValueBy = (fn, data) => {
+export default (fn, data) => {
   if (_.isNumber(data)) return data;
   if (!Array.isArray(data)) return 0;
   const values = data.map(v => v[1]);

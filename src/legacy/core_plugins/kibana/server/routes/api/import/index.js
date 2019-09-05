@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import Joi from 'joi';
 import { importDashboards } from '../../../lib/import/import_dashboards';
 
@@ -39,7 +40,11 @@ export function importApi(server) {
     },
 
     handler: async (req) => {
-      return await importDashboards(req);
+      try {
+        return await importDashboards(req);
+      } catch (err) {
+        throw Boom.boomify(err, { statusCode: 400 });
+      }
     }
   });
 }

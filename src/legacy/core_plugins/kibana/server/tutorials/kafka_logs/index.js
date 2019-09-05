@@ -44,7 +44,7 @@ export function kafkaLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '943caca0-87ee-11e7-ad9c-db80de0bf8d3-ecs',
+          id: '943caca0-87ee-11e7-ad9c-db80de0bf8d3',
           linkLabel: i18n.translate('kbn.server.tutorials.kafkaLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Kafka logs dashboard',
           }),

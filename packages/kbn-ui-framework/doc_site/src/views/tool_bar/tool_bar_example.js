@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable import/no-duplicates */
-
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -31,11 +29,11 @@ import {
 } from '../../components';
 
 import { ToolBar } from './tool_bar';
-import toolBarSource from '!!raw-loader!./tool_bar'; // eslint-disable-line import/default
+const toolBarSource = require('!!raw-loader!./tool_bar');
 const toolBarHtml = renderToHtml(ToolBar);
 
 import { ToolBarFooter } from './tool_bar_footer';
-import toolBarFooterSource from '!!raw-loader!./tool_bar_footer'; // eslint-disable-line import/default
+const toolBarFooterSource = require('!!raw-loader!./tool_bar_footer');
 const toolBarFooterHtml = renderToHtml(ToolBarFooter);
 
 export default props => (

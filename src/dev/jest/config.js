@@ -17,26 +17,22 @@
  * under the License.
  */
 
-import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
-
 export default {
   rootDir: '../../..',
   roots: [
-    '<rootDir>/src/plugins',
-    '<rootDir>/src/legacy/ui',
+    '<rootDir>/src/ui',
     '<rootDir>/src/core',
     '<rootDir>/src/legacy/core_plugins',
-    '<rootDir>/src/legacy/server',
+    '<rootDir>/src/server',
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
-    '<rootDir>/packages/kbn-test/target/functional_test_runner',
+    '<rootDir>/src/functional_test_runner',
     '<rootDir>/src/dev',
-    '<rootDir>/src/legacy/utils',
+    '<rootDir>/src/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
     '<rootDir>/src/test_utils',
-    '<rootDir>/test/functional/services/remote',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',
@@ -45,15 +41,9 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
-    'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
-    '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
-    'src/legacy/ui/public/{agg_types,vis}/**/*.{ts,tsx}',
-    '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
-    '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
-    '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
-    '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
+    '^ui/(.*)': '<rootDir>/src/ui/public/$1',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
@@ -62,15 +52,17 @@ export default {
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
+    '<rootDir>/src/dev/jest/setup/throw_on_console_error.js',
   ],
-  setupFilesAfterEnv: [
-    '<rootDir>/src/dev/jest/setup/mocks.js',
-  ],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
+  coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: [
     'html',
-    'text',
   ],
+  globals: {
+    'ts-jest': {
+      skipBabel: true,
+    },
+  },
   moduleFileExtensions: [
     'js',
     'json',
@@ -87,16 +79,16 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
-    `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
+    'integration_tests/'
   ],
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
+    '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
+    '^.+\\.tsx?$': '<rootDir>/src/dev/jest/ts_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
-    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [

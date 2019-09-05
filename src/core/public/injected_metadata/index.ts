@@ -20,7 +20,5 @@
 export {
   InjectedMetadataService,
   InjectedMetadataParams,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-  LegacyNavLink,
+  InjectedMetadataStartContract,
 } from './injected_metadata_service';

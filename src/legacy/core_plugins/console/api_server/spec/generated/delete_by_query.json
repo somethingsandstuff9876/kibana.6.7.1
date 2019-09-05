@@ -31,11 +31,11 @@
         "dfs_query_then_fetch"
       ],
       "search_timeout": "",
-      "max_docs": "all documents",
+      "size": "10",
       "sort": [],
       "_source": [],
-      "_source_excludes": [],
-      "_source_includes": [],
+      "_source_exclude": [],
+      "_source_include": [],
       "terminate_after": "",
       "stats": [],
       "version": "__flag__",
@@ -52,7 +52,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_delete_by_query"
+      "{indices}/_delete_by_query",
+      "{indices}/{type}/_delete_by_query"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html"
   }

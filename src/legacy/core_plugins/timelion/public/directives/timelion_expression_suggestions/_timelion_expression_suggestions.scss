@@ -1,13 +1,12 @@
 .timSuggestions {
-  @include euiBottomShadowMedium;
   background-color: $euiColorLightestShade;
   color: $euiTextColor;
   border: $euiBorderThin;
-  // sass-lint:disable-block no-important
-  border-radius: 0 0 $euiBorderRadius $euiBorderRadius !important;
+  border-radius: 0px 0px $euiBorderRadius $euiBorderRadius !important;
   z-index: $euiZLevel9;
   max-height: $euiSizeXL * 10;
   overflow-y: auto;
+  @include euiBottomShadowMedium;
 
   &.timSuggestions-isPopover {
     position: absolute;
@@ -31,6 +30,6 @@
   border-radius: $euiBorderRadius;
 
   > table {
-    margin-bottom: 0;
+    margin-bottom: 0px;
   }
 }

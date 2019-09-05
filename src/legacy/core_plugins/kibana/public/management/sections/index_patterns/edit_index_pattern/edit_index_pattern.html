@@ -1,18 +1,18 @@
-<kbn-management-app section="kibana/index_patterns" omit-breadcrumb-pages="['index_patterns']">
-  <div class="euiPanel euiPanel--paddingLarge">
+<kbn-management-app section="kibana/indices" omit-breadcrumb-pages="['indices']">
+  <kbn-management-indices>
     <div
-      ng-controller="managementIndexPatternsEdit"
+      ng-controller="managementIndicesEdit"
       data-test-subj="editIndexPattern"
       role="region"
       aria-label="{{::'kbn.management.editIndexPattern.detailsAria' | i18n: { defaultMessage: 'Index pattern details' } }}"
     >
       <!-- Header -->
-      <kbn-management-index-patterns-header
+      <kbn-management-index-header
         index-pattern="indexPattern"
         set-default="setDefaultPattern()"
         refresh-fields="refreshFields()"
         delete="removePattern()"
-      ></kbn-management-index-patterns-header>
+      ></kbn-management-index-header>
 
       <div class="euiSpacer euiSpacer--s"></div>
       <p ng-if="::(indexPattern.timeFieldName || (indexPattern.tags && indexPattern.tags.length))">
@@ -28,6 +28,7 @@
               </span>
             </span>
           </span>
+          &nbsp;
         </span>
         <span ng-repeat="tag in indexPattern.tags">
           <span class="euiBadge euiBadge--hollow">
@@ -47,7 +48,7 @@
           <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
             i18n-default-message="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
             i18n-values="{ html_indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
-          <a target="_blank" class="euiLink euiLink--primary" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
+          <a target="_window" class="euiLink euiLink--primary" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
             <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.mappingAPILink"
                   i18n-default-message="Mapping API"></span>
             <i aria-hidden="true" class="fa-link fa"></i>
@@ -58,6 +59,26 @@
       <div class="euiSpacer euiSpacer--m"></div>
 
       <!-- Alerts -->
+      <div
+        ng-if="indexPattern.isUnsupportedTimePattern()"
+        class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm"
+      >
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+          <span class="kuiInfoPanelHeader__title"
+                i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternHeader"
+                i18n-default-message="Support for repeating index patterns removed">
+          </span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            <span i18n-id="kbn.management.editIndexPattern.unsupportedTimePatternLabel"
+                  i18n-default-message="Support for time-interval based index patterns has been removed! In the next major version of Kibana this index patterns will stop working. Migrate saved objects that use this index pattern to a wildcard pattern and delete this one."></span>
+          </div>
+        </div>
+      </div>
+
       <div
         ng-if="conflictFields.length"
         class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
@@ -92,12 +113,7 @@
             data-test-subj="tab-count-{{ editSection.index }}"
             aria-label="{{:: editSection.count + ' ' + editSection.title}}"
           >
-            <span ng-if="editSection.count != editSection.totalCount">
-              ({{ editSection.count }} / {{ editSection.totalCount }})
-            </span>
-            <span ng-if="editSection.count == editSection.totalCount">
-              ({{ editSection.count }})
-            </span>
+            ({{ editSection.count }})
           </span>
         </button>
       </div>
@@ -162,5 +178,5 @@
         <div id="reactSourceFiltersTable"></div>
       </div>
     </div>
-  </div>
+  </kbn-management-indices>
 </kbn-management-app>

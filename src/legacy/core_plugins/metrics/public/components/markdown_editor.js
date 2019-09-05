@@ -24,24 +24,49 @@
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
-import { tickFormatter } from './lib/tick_formatter';
-import { convertSeriesToVars } from './lib/convert_series_to_vars';
+import tickFormatter from './lib/tick_formatter';
+import convertSeriesToVars from './lib/convert_series_to_vars';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
 
-import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle, EuiCodeEditor } from '@elastic/eui';
+import {
+  EuiText,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiTitle,
+  EuiCodeEditor,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class MarkdownEditor extends Component {
-  handleChange = value => {
-    this.props.onChange({ markdown: value });
+class MarkdownEditor extends Component {
+  state = {
+    visData: null,
   };
+  subscription = null;
 
-  handleOnLoad = ace => {
+  componentDidMount() {
+    if(this.props.visData$) {
+      this.subscription = this.props.visData$.subscribe((data) => {
+        this.setState({ visData: data });
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    if(this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  handleChange = (value) => {
+    this.props.onChange({ markdown: value });
+  }
+
+  handleOnLoad = (ace) => {
     this.ace = ace;
-  };
+  }
 
   handleVarClick(snippet) {
     return () => {
@@ -50,12 +75,11 @@ export class MarkdownEditor extends Component {
   }
 
   render() {
-    const { visData, model, dateFormat } = this.props;
-
+    const { visData } = this.state;
     if (!visData) {
       return null;
     }
-
+    const { model, dateFormat } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
     const rows = [];
@@ -134,29 +158,31 @@ export class MarkdownEditor extends Component {
                 {handlebarLink} on the available expressions."
                 values={{
                   handlebarLink: (
-                    <a
-                      href="http://handlebarsjs.com/expressions.html"
-                      target="_BLANK"
-                      rel="noreferrer noopener"
-                    >
+                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
                       <FormattedMessage
                         id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.documentationLinkText"
                         defaultMessage="Click here for documentation"
                       />
                     </a>
-                  ),
+                  )
                 }}
               />
             </p>
           </EuiText>
-          <table className="table" data-test-subj="tsvbMarkdownVariablesTable">
+          <table className="table">
             <thead>
               <tr>
                 <th scope="col">
-                  <FormattedMessage id="tsvb.markdownEditor.nameLabel" defaultMessage="Name" />
+                  <FormattedMessage
+                    id="tsvb.markdownEditor.nameLabel"
+                    defaultMessage="Name"
+                  />
                 </th>
                 <th scope="col">
-                  <FormattedMessage id="tsvb.markdownEditor.valueLabel" defaultMessage="Value" />
+                  <FormattedMessage
+                    id="tsvb.markdownEditor.valueLabel"
+                    defaultMessage="Value"
+                  />
                 </th>
               </tr>
             </thead>
@@ -164,11 +190,7 @@ export class MarkdownEditor extends Component {
           </table>
 
           {rows.length === 0 && (
-            <EuiTitle
-              size="xxs"
-              className="tsvbMarkdownVariablesTable__noVariables"
-              data-test-subj="tvbMarkdownEditor__noVariables"
-            >
+            <EuiTitle size="xxs" className="tvbMarkdownEditor__noVariables">
               <span>
                 <FormattedMessage
                   id="tsvb.markdownEditor.noVariablesAvailableDescription"
@@ -185,8 +207,8 @@ export class MarkdownEditor extends Component {
               <FormattedMessage
                 id="tsvb.markdownEditor.howToAccessEntireTreeDescription"
                 defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
-                creating lists with data from a group by:"
-                values={{ all: <code>_all</code> }}
+                creating lists with data from a group by…"
+                values={{ all: (<code>_all</code>) }}
               />
             </p>
           </EuiText>
@@ -210,5 +232,7 @@ MarkdownEditor.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
   dateFormat: PropTypes.string,
-  visData: PropTypes.object,
+  visData$: PropTypes.object,
 };
+
+export default MarkdownEditor;

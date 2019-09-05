@@ -17,39 +17,47 @@
  * under the License.
  */
 
-import { offsetTime } from '../../offset_time';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
+import offsetTime from '../../offset_time';
+import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import { buildEsQuery } from '@kbn/es-query';
 
-export function query(req, panel, series, esQueryConfig, indexPatternObject) {
+export default function query(req, panel, series, esQueryConfig, indexPattern) {
   return next => doc => {
-    const { timeField } = getIntervalAndTimefield(panel, series, indexPatternObject);
+    const { timeField } = getIntervalAndTimefield(panel, series);
     const { from, to } = offsetTime(req, series.offset_time);
 
     doc.size = 0;
     const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
-    doc.query = buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
+    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
         [timeField]: {
-          gte: from.toISOString(),
-          lte: to.toISOString(),
-          format: 'strict_date_optional_time',
+          gte: from.valueOf(),
+          lte: to.valueOf(),
+          format: 'epoch_millis',
         },
       },
     };
     doc.query.bool.must.push(timerange);
 
     if (panel.filter) {
-      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
+      doc.query.bool.must.push({
+        query_string: {
+          query: panel.filter,
+          analyze_wildcard: true,
+        },
+      });
     }
 
     if (series.filter) {
-      doc.query.bool.must.push(
-        buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
-      );
+      doc.query.bool.must.push({
+        query_string: {
+          query: series.filter,
+          analyze_wildcard: true,
+        },
+      });
     }
 
     return next(doc);

@@ -1,11 +1,5 @@
-@import 'node_modules/@elastic/eui/src/components/panel/mixins';
-
 discover-app {
-  flex-grow: 1;
-
-  .sidebar-container {
-    background-color: transparent;
-  }
+  background-color: $euiColorEmptyShade;
 }
 
 // SASSTODO: replace the margin-top value with a variable
@@ -20,20 +14,14 @@ discover-app {
 
 // SASSTODO: replace the z-index value with a variable
 .dscWrapper {
-  padding-right: $euiSizeS;
+  padding-right: 0;
   padding-left: 21px;
-  z-index: 1;
+  z-index: 1
 }
 
-@include euiPanel('dscWrapper__content');
-
 .dscWrapper__content {
-  padding-top: $euiSizeXS;
-  background-color: $euiColorEmptyShade;
-
-  .kbn-table {
-    margin-bottom: 0;
-  }
+  padding-right: $euiSize;
+  clear: both;
 }
 
 .dscTimechart {
@@ -44,20 +32,6 @@ discover-app {
   .series > rect {
     fill-opacity: 0.5;
     stroke-width: 1;
-  }
-}
-
-.dscResultCount {
-  text-align: center;
-  padding-top: $euiSizeXS;
-  padding-left: $euiSizeM;
-
-  .dscResultHits {
-    padding-left: $euiSizeXS;
-  }
-
-  > .kuiLink {
-    padding-left: $euiSizeM;
   }
 }
 
@@ -148,15 +122,17 @@ discover-app {
 // SASSTODO: replace the padding value with a variable
 .dscFieldDetails {
   padding: 10px;
-  background-color: $euiColorLightestShade;
-  color: $euiTextColor;
+  background-color: shade($euiColorLightestShade, 5%);
+  color: shade($euiColorEmptyShade, 65%);
 }
 
 // SASSTODO: replace the padding and margin values with variables
 .dscFieldDetails__progress {
-  background-color: $euiColorEmptyShade;
-  color: $euiColorDarkShade;
-  padding: $euiSizeXS;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 3px;
+  border-radius: $euiBorderRadius;
+  margin-left: 3px;
+  margin-right: 3px;
 }
 
 // SASSTODO: replace the margin-top value with a variable
@@ -193,8 +169,9 @@ discover-app {
   color: $euiColorDarkShade;
 }
 
+// SASSTODO: replace the margin-right value with a variables
 .dscField__icon {
-  margin-right: $euiSizeS;
+  margin-right: 5px;
   text-align: center;
   display: inline-block;
   width: $euiSizeM;

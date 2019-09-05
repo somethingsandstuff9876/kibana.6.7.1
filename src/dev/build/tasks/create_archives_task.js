@@ -24,8 +24,7 @@ export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
 
   async run(config, log, build) {
-    // archive one at a time, parallel causes OOM sometimes
-    for (const platform of config.getTargetPlatforms()) {
+    await Promise.all(config.getTargetPlatforms().map(async platform => {
       const source = build.resolvePathForPlatform(platform, '.');
       const destination = build.getPlatformArchivePath(platform);
 
@@ -35,41 +34,16 @@ export const CreateArchivesTask = {
 
       switch (path.extname(destination)) {
         case '.zip':
-          await compress(
-            'zip',
-            {
-              archiverOptions: {
-                zlib: {
-                  level: 9
-                }
-              },
-              createRootDirectory: true
-            },
-            source,
-            destination
-          );
+          await compress('zip', { zlib: { level: 9 } }, source, destination);
           break;
 
         case '.gz':
-          await compress(
-            'tar',
-            {
-              archiverOptions: {
-                gzip: true,
-                gzipOptions: {
-                  level: 9
-                }
-              },
-              createRootDirectory: true
-            },
-            source,
-            destination
-          );
+          await compress('tar', { gzip: true, gzipOptions: { level: 9 } }, source, destination);
           break;
 
         default:
           throw new Error(`Unexpected extension for archive destination: ${destination}`);
       }
-    }
+    }));
   }
 };

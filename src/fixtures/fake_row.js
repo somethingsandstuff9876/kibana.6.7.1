@@ -20,18 +20,21 @@
 import _ from 'lodash';
 const longString = Array(200).join('_');
 
-export function getFakeRowVals(type, id, mapping) {
-  return _.mapValues(mapping, function (f, c) {
-    return c + '_' + type + '_' + id + longString;
-  });
-}
+export default function (id, mapping) {
+  function fakeVals(type) {
+    return _.mapValues(mapping, function (f, c) {
+      return c + '_' + type + '_' + id + longString;
+    });
+  }
 
-export function getFakeRow(id, mapping) {
   return {
     _id: id,
     _index: 'test',
-    _source: getFakeRowVals('original', id, mapping),
+    _source: fakeVals('original'),
     _type: 'doc',
     sort: [id],
+    $$_formatted: fakeVals('formatted'),
+    $$_partialFormatted: fakeVals('formatted'),
+    $$_flattened: fakeVals('_flattened')
   };
 }

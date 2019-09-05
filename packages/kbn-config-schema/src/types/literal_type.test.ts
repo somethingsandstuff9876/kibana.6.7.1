@@ -33,10 +33,6 @@ test('handles number', () => {
   expect(literal(123).validate(123)).toBe(123);
 });
 
-test('handles null', () => {
-  expect(literal(null).validate(null)).toBe(null);
-});
-
 test('returns error when not correct', () => {
   expect(() => literal('test').validate('foo')).toThrowErrorMatchingSnapshot();
 
@@ -45,8 +41,6 @@ test('returns error when not correct', () => {
   expect(() => literal('test').validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => literal(123).validate('abc')).toThrowErrorMatchingSnapshot();
-
-  expect(() => literal(null).validate(42)).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure', () => {

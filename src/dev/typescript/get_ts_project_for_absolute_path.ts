@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { relative, resolve } from 'path';
+import { relative } from 'path';
+
 import { REPO_ROOT } from '../constants';
-import { File } from '../file';
-import { Project } from './project';
 import { PROJECTS } from './projects';
 
 /**
@@ -32,9 +31,8 @@ import { PROJECTS } from './projects';
  *
  * @param path Absolute path to a .ts file
  */
-export function getTsProjectForAbsolutePath(path: string): Project {
+export function getTsProjectForAbsolutePath(path: string) {
   const relPath = relative(REPO_ROOT, path);
-  const file = new File(resolve(REPO_ROOT, path));
   const projects = PROJECTS.filter(p => p.isAbsolutePathSelected(path));
 
   if (!projects.length) {
@@ -43,7 +41,7 @@ export function getTsProjectForAbsolutePath(path: string): Project {
     );
   }
 
-  if (projects.length !== 1 && !file.isTypescriptAmbient()) {
+  if (projects.length !== 1) {
     const configPaths = projects.map(p => `"${relative(REPO_ROOT, p.tsConfigPath)}"`);
 
     const pathsMsg = `${configPaths.slice(0, -1).join(', ')} or ${

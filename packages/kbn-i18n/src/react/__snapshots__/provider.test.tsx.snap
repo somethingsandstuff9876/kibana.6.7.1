@@ -103,8 +103,4 @@ Object {
 }
 `;
 
-exports[`I18nProvider renders children 1`] = `
-<PseudoLocaleWrapper>
-  <ChildrenMock />
-</PseudoLocaleWrapper>
-`;
+exports[`I18nProvider renders children 1`] = `<ChildrenMock />`;

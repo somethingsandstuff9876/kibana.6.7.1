@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable import/no-duplicates */
-
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -31,31 +29,31 @@ import {
 } from '../../components';
 
 import { Table } from './table';
-import tableSource from '!!raw-loader!./table'; // eslint-disable-line import/default
+const tableSource = require('!!raw-loader!./table');
 const tableHtml = renderToHtml(Table);
 
 import { TableWithMenuButtons } from './table_with_menu_buttons';
-import tableWithMenuButtonsSource from '!!raw-loader!./table_with_menu_buttons'; // eslint-disable-line import/default
+const tableWithMenuButtonsSource = require('!!raw-loader!./table_with_menu_buttons');
 const tableWithMenuButtonsHtml = renderToHtml(TableWithMenuButtons);
 
 import { FluidTable } from './fluid_table';
-import fluidTableSource from '!!raw-loader!./fluid_table'; // eslint-disable-line import/default
+const fluidTableSource = require('!!raw-loader!./fluid_table');
 const fluidTableHtml = renderToHtml(FluidTable);
 
 import { ListingTable } from './listing_table';
-import listingTableSource from '!!raw-loader!./listing_table'; // eslint-disable-line import/default
+const listingTableSource = require('!!raw-loader!./listing_table');
 const listingTableHtml = renderToHtml(ListingTable);
 
 import { ListingTableWithEmptyPrompt } from './listing_table_with_empty_prompt';
-import listingTableWithEmptyPromptSource from '!!raw-loader!./listing_table_with_empty_prompt'; // eslint-disable-line import/default
+const listingTableWithEmptyPromptSource = require('!!raw-loader!./listing_table_with_empty_prompt');
 const listingTableWithEmptyPromptHtml = renderToHtml(ListingTableWithEmptyPrompt);
 
 import { ListingTableWithNoItems } from './listing_table_with_no_items';
-import listingTableWithNoItemsSource from '!!raw-loader!./listing_table_with_no_items'; // eslint-disable-line import/default
+const listingTableWithNoItemsSource = require('!!raw-loader!./listing_table_with_no_items');
 const listingTableWithNoItemsHtml = renderToHtml(ListingTableWithNoItems);
 
 import { ListingTableLoadingItems } from './listing_table_loading_items';
-import listingTableLoadingItemsSource from '!!raw-loader!./listing_table_loading_items'; // eslint-disable-line import/default
+const listingTableLoadingItemsSource = require('!!raw-loader!./listing_table_loading_items');
 const listingTableLoadingItemsHtml = renderToHtml(ListingTableLoadingItems);
 
 export default props => (

@@ -1,0 +1,26 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+// @ts-ignore
+const boom_1 = tslib_1.__importDefault(require("boom"));
+/**
+ * Wraps ES errors into a Boom error response and returns it
+ * This also handles the permissions issue gracefully
+ *
+ * @param err Object ES error
+ * @return Object Boom error response
+ */
+function wrapEsError(err) {
+    const statusCode = err.statusCode;
+    if (statusCode === 403) {
+        return boom_1.default.forbidden('Insufficient user permissions for managing Beats configuration');
+    }
+    return boom_1.default.boomify(err, { statusCode: err.statusCode });
+}
+exports.wrapEsError = wrapEsError;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvYmVhdHNfbWFuYWdlbWVudC9zZXJ2ZXIvdXRpbHMvZXJyb3Jfd3JhcHBlcnMvd3JhcF9lc19lcnJvci50cyIsInNvdXJjZXMiOlsiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvYmVhdHNfbWFuYWdlbWVudC9zZXJ2ZXIvdXRpbHMvZXJyb3Jfd3JhcHBlcnMvd3JhcF9lc19lcnJvci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7R0FJRzs7O0FBRUgsYUFBYTtBQUNiLHdEQUF3QjtBQUV4Qjs7Ozs7O0dBTUc7QUFDSCxTQUFnQixXQUFXLENBQUMsR0FBUTtJQUNsQyxNQUFNLFVBQVUsR0FBRyxHQUFHLENBQUMsVUFBVSxDQUFDO0lBQ2xDLElBQUksVUFBVSxLQUFLLEdBQUcsRUFBRTtRQUN0QixPQUFPLGNBQUksQ0FBQyxTQUFTLENBQUMsZ0VBQWdFLENBQUMsQ0FBQztLQUN6RjtJQUVELE9BQU8sY0FBSSxDQUFDLE9BQU8sQ0FBQyxHQUFHLEVBQUUsRUFBRSxVQUFVLEVBQUUsR0FBRyxDQUFDLFVBQVUsRUFBRSxDQUFDLENBQUM7QUFDM0QsQ0FBQztBQVBELGtDQU9DIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIENvcHlyaWdodCBFbGFzdGljc2VhcmNoIEIuVi4gYW5kL29yIGxpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmVcbiAqIG9yIG1vcmUgY29udHJpYnV0b3IgbGljZW5zZSBhZ3JlZW1lbnRzLiBMaWNlbnNlZCB1bmRlciB0aGUgRWxhc3RpYyBMaWNlbnNlO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBFbGFzdGljIExpY2Vuc2UuXG4gKi9cblxuLy8gQHRzLWlnbm9yZVxuaW1wb3J0IEJvb20gZnJvbSAnYm9vbSc7XG5cbi8qKlxuICogV3JhcHMgRVMgZXJyb3JzIGludG8gYSBCb29tIGVycm9yIHJlc3BvbnNlIGFuZCByZXR1cm5zIGl0XG4gKiBUaGlzIGFsc28gaGFuZGxlcyB0aGUgcGVybWlzc2lvbnMgaXNzdWUgZ3JhY2VmdWxseVxuICpcbiAqIEBwYXJhbSBlcnIgT2JqZWN0IEVTIGVycm9yXG4gKiBAcmV0dXJuIE9iamVjdCBCb29tIGVycm9yIHJlc3BvbnNlXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiB3cmFwRXNFcnJvcihlcnI6IGFueSkge1xuICBjb25zdCBzdGF0dXNDb2RlID0gZXJyLnN0YXR1c0NvZGU7XG4gIGlmIChzdGF0dXNDb2RlID09PSA0MDMpIHtcbiAgICByZXR1cm4gQm9vbS5mb3JiaWRkZW4oJ0luc3VmZmljaWVudCB1c2VyIHBlcm1pc3Npb25zIGZvciBtYW5hZ2luZyBCZWF0cyBjb25maWd1cmF0aW9uJyk7XG4gIH1cblxuICByZXR1cm4gQm9vbS5ib29taWZ5KGVyciwgeyBzdGF0dXNDb2RlOiBlcnIuc3RhdHVzQ29kZSB9KTtcbn1cbiJdfQ==

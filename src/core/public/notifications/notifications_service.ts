@@ -17,78 +17,42 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { I18nStartContract } from '../i18n';
+import { ToastsService } from './toasts';
 
-import { Subscription } from 'rxjs';
-import { I18nStart } from '../i18n';
-import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { UiSettingsClientContract } from '../ui_settings';
-import { OverlayStart } from '../overlays';
-
-interface SetupDeps {
-  uiSettings: UiSettingsClientContract;
-}
-
-interface StartDeps {
-  i18n: I18nStart;
-  overlays: OverlayStart;
+interface Params {
   targetDomElement: HTMLElement;
 }
 
-/** @public */
+interface Deps {
+  i18n: I18nStartContract;
+}
+
 export class NotificationsService {
   private readonly toasts: ToastsService;
-  private uiSettingsErrorSubscription?: Subscription;
-  private targetDomElement?: HTMLElement;
 
-  constructor() {
-    this.toasts = new ToastsService();
-  }
+  private readonly toastsContainer: HTMLElement;
 
-  public setup({ uiSettings }: SetupDeps): NotificationsSetup {
-    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
-
-    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
-      notificationSetup.toasts.addDanger({
-        title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {
-          defaultMessage: 'Unable to update UI setting',
-        }),
-        text: error.message,
-      });
+  constructor(private readonly params: Params) {
+    this.toastsContainer = document.createElement('div');
+    this.toasts = new ToastsService({
+      targetDomElement: this.toastsContainer,
     });
-
-    return notificationSetup;
   }
 
-  public start({ i18n: i18nDep, overlays, targetDomElement }: StartDeps): NotificationsStart {
-    this.targetDomElement = targetDomElement;
-    const toastsContainer = document.createElement('div');
-    targetDomElement.appendChild(toastsContainer);
+  public start({ i18n }: Deps) {
+    this.params.targetDomElement.appendChild(this.toastsContainer);
 
     return {
-      toasts: this.toasts.start({ i18n: i18nDep, overlays, targetDomElement: toastsContainer }),
+      toasts: this.toasts.start({ i18n }),
     };
   }
 
   public stop() {
     this.toasts.stop();
 
-    if (this.targetDomElement) {
-      this.targetDomElement.textContent = '';
-    }
-
-    if (this.uiSettingsErrorSubscription) {
-      this.uiSettingsErrorSubscription.unsubscribe();
-    }
+    this.params.targetDomElement.textContent = '';
   }
 }
 
-/** @public */
-export interface NotificationsSetup {
-  toasts: ToastsSetup;
-}
-
-/** @public */
-export interface NotificationsStart {
-  toasts: ToastsStart;
-}
+export type NotificationsStartContract = ReturnType<NotificationsService['start']>;

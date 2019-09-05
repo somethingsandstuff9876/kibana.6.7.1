@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import Joi from 'joi';
 import { findRelationships } from '../../../../lib/management/saved_objects/relationships';
+import { isNotFoundError } from '../../../../../../../../server/saved_objects/service/lib/errors';
 
 export function registerRelationships(server) {
   server.route({
@@ -31,8 +33,7 @@ export function registerRelationships(server) {
           id: Joi.string(),
         }),
         query: Joi.object().keys({
-          size: Joi.number().default(10000),
-          savedObjectTypes: Joi.array().single().items(Joi.string()).required()
+          size: Joi.number(),
         }),
       },
     },
@@ -40,17 +41,17 @@ export function registerRelationships(server) {
     handler: async (req) => {
       const type = req.params.type;
       const id = req.params.id;
-      const size = req.query.size;
-      const savedObjectTypes = req.query.savedObjectTypes;
-      const savedObjectsClient = req.getSavedObjectsClient();
-      const savedObjectsManagement = req.server.getSavedObjectsManagement();
+      const size = req.query.size || 10;
 
-      return await findRelationships(type, id, {
-        size,
-        savedObjectsClient,
-        savedObjectsManagement,
-        savedObjectTypes,
-      });
+      try {
+        return await findRelationships(type, id, size, req.getSavedObjectsClient());
+      } catch (err) {
+        if (isNotFoundError(err)) {
+          throw Boom.boomify(new Error('Resource not found'), { statusCode: 404 });
+        }
+
+        throw Boom.boomify(err, { statusCode: 500 });
+      }
     },
   });
 }

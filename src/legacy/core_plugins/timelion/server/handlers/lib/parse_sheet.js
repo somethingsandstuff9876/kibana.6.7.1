@@ -23,7 +23,7 @@ import path from 'path';
 import _ from 'lodash';
 const grammar = fs.readFileSync(path.resolve(__dirname, '../../../public/chain.peg'), 'utf8');
 import PEG from 'pegjs';
-const Parser = PEG.generate(grammar);
+const Parser = PEG.buildParser(grammar);
 
 export default function parseSheet(sheet) {
   return _.map(sheet, function (plot) {
@@ -33,8 +33,7 @@ export default function parseSheet(sheet) {
       if (e.expected) {
         throw new Error(
           i18n.translate('timelion.serverSideErrors.sheetParseErrorMessage', {
-            defaultMessage: 'Expected: {expectedDescription} at character {column}',
-            description: 'This would be for example: "Expected: a quote at character 5"',
+            defaultMessage: 'Expected: {expectedDescription} @ character {column}',
             values: {
               expectedDescription: e.expected[0].description,
               column: e.column,

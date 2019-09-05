@@ -6,22 +6,22 @@
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { getTestSuiteFactory } from '../../common/suites/get';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
   const {
     createExpectDoesntExistNotFound,
+    createExpectLegacyForbidden,
     createExpectSpaceAwareResults,
     createExpectNotSpaceAwareResults,
     expectSpaceAwareRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectDoesntExistRbacForbidden,
-    expectHiddenTypeRbacForbidden,
-    expectHiddenTypeNotFound,
     getTest,
   } = getTestSuiteFactory(esArchiver, supertest);
 
@@ -33,6 +33,7 @@ export default function({ getService }: FtrProviderContext) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -48,6 +49,7 @@ export default function({ getService }: FtrProviderContext) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -64,19 +66,15 @@ export default function({ getService }: FtrProviderContext) {
         tests: {
           spaceAware: {
             statusCode: 403,
-            response: expectSpaceAwareRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
           notSpaceAware: {
             statusCode: 403,
-            response: expectNotSpaceAwareRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
           doesntExist: {
             statusCode: 403,
-            response: expectDoesntExistRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
         },
       });
@@ -93,10 +91,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
-          hiddenType: {
-            statusCode: 404,
-            response: expectHiddenTypeNotFound,
-          },
           doesntExist: {
             statusCode: 404,
             response: createExpectDoesntExistNotFound(scenario.spaceId),
@@ -109,20 +103,35 @@ export default function({ getService }: FtrProviderContext) {
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
-            statusCode: 403,
-            response: expectSpaceAwareRbacForbidden,
+            statusCode: 200,
+            response: createExpectSpaceAwareResults(scenario.spaceId),
           },
           notSpaceAware: {
-            statusCode: 403,
-            response: expectNotSpaceAwareRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
+            statusCode: 200,
+            response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
           doesntExist: {
-            statusCode: 403,
-            response: expectDoesntExistRbacForbidden,
+            statusCode: 404,
+            response: createExpectDoesntExistNotFound(scenario.spaceId),
+          },
+        },
+      });
+
+      getTest(`legacy readonly user within the ${scenario.spaceId} space`, {
+        user: scenario.users.legacyRead,
+        spaceId: scenario.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 200,
+            response: createExpectSpaceAwareResults(scenario.spaceId),
+          },
+          notSpaceAware: {
+            statusCode: 200,
+            response: createExpectNotSpaceAwareResults(scenario.spaceId),
+          },
+          doesntExist: {
+            statusCode: 404,
+            response: createExpectDoesntExistNotFound(scenario.spaceId),
           },
         },
       });
@@ -138,10 +147,6 @@ export default function({ getService }: FtrProviderContext) {
           notSpaceAware: {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 404,
@@ -162,10 +167,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
-          },
           doesntExist: {
             statusCode: 404,
             response: createExpectDoesntExistNotFound(scenario.spaceId),
@@ -184,10 +185,6 @@ export default function({ getService }: FtrProviderContext) {
           notSpaceAware: {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 404,
@@ -208,10 +205,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
-          },
           doesntExist: {
             statusCode: 404,
             response: createExpectDoesntExistNotFound(scenario.spaceId),
@@ -230,10 +223,6 @@ export default function({ getService }: FtrProviderContext) {
           notSpaceAware: {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 404,
@@ -254,10 +243,6 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 200,
             response: createExpectNotSpaceAwareResults(scenario.spaceId),
           },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
-          },
           doesntExist: {
             statusCode: 404,
             response: createExpectDoesntExistNotFound(scenario.spaceId),
@@ -276,10 +261,6 @@ export default function({ getService }: FtrProviderContext) {
           notSpaceAware: {
             statusCode: 403,
             response: expectNotSpaceAwareRbacForbidden,
-          },
-          hiddenType: {
-            statusCode: 403,
-            response: expectHiddenTypeRbacForbidden,
           },
           doesntExist: {
             statusCode: 403,

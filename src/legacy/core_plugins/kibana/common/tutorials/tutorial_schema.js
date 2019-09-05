@@ -51,9 +51,7 @@ const statusCheckSchema = Joi.object({
   success: Joi.string(),
   error: Joi.string(),
   esHitsCheck: Joi.object({
-    index: Joi.alternatives()
-      .try(Joi.string(), Joi.array().items(Joi.string()))
-      .required(),
+    index: Joi.string().required(),
     query: Joi.object().required(),
   }).required(),
 });
@@ -72,11 +70,6 @@ const instructionVariantSchema = Joi.object({
 
 const instructionSetSchema = Joi.object({
   title: Joi.string(),
-  callOut: Joi.object({
-    title: Joi.string().required(),
-    message: Joi.string(),
-    iconType: Joi.string()
-  }),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
   instructionVariants: Joi.array().items(instructionVariantSchema).required(),
   statusCheck: statusCheckSchema,

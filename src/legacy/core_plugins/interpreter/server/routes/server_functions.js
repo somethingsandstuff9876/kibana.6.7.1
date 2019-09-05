@@ -18,7 +18,8 @@
  */
 
 import Boom from 'boom';
-import { serializeProvider, API_ROUTE } from '../../common';
+import { serializeProvider } from '@kbn/interpreter/common';
+import { API_ROUTE } from '../../common/constants';
 import { createHandlers } from '../lib/create_handlers';
 import Joi from 'joi';
 
@@ -54,7 +55,7 @@ function runServerFunctions(server) {
                 id: Joi.number().required(),
                 functionName: Joi.string().required(),
                 args: Joi.object().default({}),
-                context: Joi.any().default(null),
+                context: Joi.object().allow(null).default({}),
               }),
           ).required(),
         }).required(),
@@ -64,66 +65,39 @@ function runServerFunctions(server) {
       const handlers = await createHandlers(req, server);
       const { functions } = req.payload;
 
-      // Grab the raw Node response object.
-      const res = req.raw.res;
+      // Process each function individually, and bundle up respones / errors into
+      // the format expected by the front-end batcher.
+      const results = await Promise.all(functions.map(async ({ id, ...fnCall }) => {
+        const result = await runFunction(server, handlers, fnCall)
+          .catch(err => {
+            if (Boom.isBoom(err)) {
+              return { err, statusCode: err.statusCode, message: err.output.payload };
+            } else if (err instanceof Error) {
+              return { err, statusCode: 500, message: err.message };
+            }
 
-      // Tell Hapi not to manage the response https://github.com/hapijs/hapi/issues/3884
-      req._isReplied = true;
+            server.log(['interpreter', 'error'], err);
+            return { err: 'Internal Server Error', statusCode: 500, message: 'See server logs for details.' };
+          });
 
-      // Send the initial headers.
-      res.writeHead(200, {
-        'Content-Type': 'text/plain',
-        'Connection': 'keep-alive',
-        'Transfer-Encoding': 'chunked',
-        'Cache-Control': 'no-cache',
-      });
-
-      // Write a length-delimited response
-      const streamResult = (result) => {
-        const payload = JSON.stringify(result) + '\n';
-        res.write(`${payload.length}:${payload}`);
-      };
-
-      // Tries to run an interpreter function, and ensures a consistent error payload on failure.
-      const tryFunction = async (id, fnCall) => {
-        try {
-          const result = await runFunction(server, handlers, fnCall);
-
-          if (typeof result === 'undefined') {
-            return batchError(id, `Function ${fnCall.functionName} did not return anything.`);
-          }
-
-          return { id, statusCode: 200, result };
-        } catch (err) {
-          if (Boom.isBoom(err)) {
-            return batchError(id, err.output.payload, err.statusCode);
-          } else if (err instanceof Error) {
-            return batchError(id, err.message);
-          }
-
-          server.log(['interpreter', 'error'], err);
-          return batchError(id, 'See server logs for details.');
+        if (typeof result === 'undefined') {
+          const { functionName } = fnCall;
+          return {
+            id,
+            result: {
+              err: `No result from '${functionName}'`,
+              statusCode: 500,
+              message: `Function '${functionName}' did not return anything`
+            }
+          };
         }
-      };
 
-      // Process each function individually, and stream the responses back to the client
-      await Promise.all(functions.map(({ id, ...fnCall }) => tryFunction(id, fnCall).then(streamResult)));
+        return { id, result };
+      }));
 
-      // All of the responses have been written, so we can close the response.
-      res.end();
+      return { results };
     },
   });
-}
-
-/**
- * A helper function for bundling up errors.
- */
-function batchError(id, message, statusCode = 500) {
-  return {
-    id,
-    statusCode,
-    result: { statusCode, message },
-  };
 }
 
 /**

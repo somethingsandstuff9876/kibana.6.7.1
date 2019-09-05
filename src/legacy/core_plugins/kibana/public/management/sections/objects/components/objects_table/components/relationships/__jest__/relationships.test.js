@@ -20,8 +20,6 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
-
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -39,64 +37,28 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
 }));
 
-jest.mock('../../../../../lib/fetch_export_by_type', () => ({
-  fetchExportByType: jest.fn(),
-}));
-
-jest.mock('../../../../../lib/fetch_export_objects', () => ({
-  fetchExportObjects: jest.fn(),
-}));
-
 import { Relationships } from '../relationships';
 
 describe('Relationships', () => {
-
   it('should render index patterns normally', async () => {
     const props = {
-      goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
-        {
-          type: 'search',
-          id: '1',
-          relationship: 'parent',
-          meta: {
-            editUrl: '/management/kibana/objects/savedSearches/1',
-            icon: 'search',
-            inAppUrl: {
-              path: '/app/kibana#/discover/1',
-              uiCapabilitiesPath: 'discover.show',
-            },
-            title: 'My Search Title',
-          },
-        },
-        {
-          type: 'visualization',
-          id: '2',
-          relationship: 'parent',
-          meta: {
-            editUrl: '/management/kibana/objects/savedVisualizations/2',
-            icon: 'visualizeApp',
-            inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
-              uiCapabilitiesPath: 'visualize.show',
-            },
-            title: 'My Visualization Title',
-          },
-        },
-      ])),
-      savedObject: {
-        id: '1',
-        type: 'index-pattern',
-        meta: {
-          title: 'MyIndexPattern*',
-          icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: {
-            path: '/management/kibana/index_patterns/1',
-            uiCapabilitiesPath: 'management.kibana.index_patterns',
-          },
-        },
-      },
+      getRelationships: jest.fn().mockImplementation(() => ({
+        searches: [
+          {
+            id: '1',
+          }
+        ],
+        visualizations: [
+          {
+            id: '2',
+          }
+        ],
+      })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
+      id: '1',
+      type: 'index-pattern',
+      title: 'MyIndexPattern*',
       close: jest.fn(),
     };
 
@@ -120,50 +82,23 @@ describe('Relationships', () => {
 
   it('should render searches normally', async () => {
     const props = {
-      goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
-        {
-          type: 'index-pattern',
-          id: '1',
-          relationship: 'child',
-          meta: {
-            editUrl: '/management/kibana/index_patterns/1',
-            icon: 'indexPatternApp',
-            inAppUrl: {
-              path: '/app/kibana#/management/kibana/index_patterns/1',
-              uiCapabilitiesPath: 'management.kibana.index_patterns',
-            },
-            title: 'My Index Pattern',
-          },
-        },
-        {
-          type: 'visualization',
-          id: '2',
-          relationship: 'parent',
-          meta: {
-            editUrl: '/management/kibana/objects/savedVisualizations/2',
-            icon: 'visualizeApp',
-            inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
-              uiCapabilitiesPath: 'visualize.show',
-            },
-            title: 'My Visualization Title',
-          },
-        },
-      ])),
-      savedObject: {
-        id: '1',
-        type: 'search',
-        meta: {
-          title: 'MySearch',
-          icon: 'search',
-          editUrl: '#/management/kibana/objects/savedSearches/1',
-          inAppUrl: {
-            path: '/discover/1',
-            uiCapabilitiesPath: 'discover.show',
-          },
-        },
-      },
+      getRelationships: jest.fn().mockImplementation(() => ({
+        indexPatterns: [
+          {
+            id: '1',
+          }
+        ],
+        visualizations: [
+          {
+            id: '2',
+          }
+        ],
+      })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
+      id: '1',
+      type: 'search',
+      title: 'MySearch',
       close: jest.fn(),
     };
 
@@ -187,50 +122,21 @@ describe('Relationships', () => {
 
   it('should render visualizations normally', async () => {
     const props = {
-      goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
-        {
-          type: 'dashboard',
-          id: '1',
-          relationship: 'parent',
-          meta: {
-            editUrl: '/management/kibana/objects/savedDashboards/1',
-            icon: 'dashboardApp',
-            inAppUrl: {
-              path: '/app/kibana#/dashboard/1',
-              uiCapabilitiesPath: 'dashboard.show',
-            },
-            title: 'My Dashboard 1',
+      getRelationships: jest.fn().mockImplementation(() => ({
+        dashboards: [
+          {
+            id: '1',
           },
-        },
-        {
-          type: 'dashboard',
-          id: '2',
-          relationship: 'parent',
-          meta: {
-            editUrl: '/management/kibana/objects/savedDashboards/2',
-            icon: 'dashboardApp',
-            inAppUrl: {
-              path: '/app/kibana#/dashboard/2',
-              uiCapabilitiesPath: 'dashboard.show',
-            },
-            title: 'My Dashboard 2',
-          },
-        },
-      ])),
-      savedObject: {
-        id: '1',
-        type: 'visualization',
-        meta: {
-          title: 'MyViz',
-          icon: 'visualizeApp',
-          editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: {
-            path: '/visualize/edit/1',
-            uiCapabilitiesPath: 'visualize.show',
-          },
-        },
-      },
+          {
+            id: '2',
+          }
+        ],
+      })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
+      id: '1',
+      type: 'visualization',
+      title: 'MyViz',
       close: jest.fn(),
     };
 
@@ -254,50 +160,21 @@ describe('Relationships', () => {
 
   it('should render dashboards normally', async () => {
     const props = {
-      goInspectObject: () => {},
-      getRelationships: jest.fn().mockImplementation(() => ([
-        {
-          type: 'visualization',
-          id: '1',
-          relationship: 'child',
-          meta: {
-            editUrl: '/management/kibana/objects/savedVisualizations/1',
-            icon: 'visualizeApp',
-            inAppUrl: {
-              path: '/app/kibana#/visualize/edit/1',
-              uiCapabilitiesPath: 'visualize.show',
-            },
-            title: 'My Visualization Title 1',
+      getRelationships: jest.fn().mockImplementation(() => ({
+        visualizations: [
+          {
+            id: '1',
           },
-        },
-        {
-          type: 'visualization',
-          id: '2',
-          relationship: 'child',
-          meta: {
-            editUrl: '/management/kibana/objects/savedVisualizations/2',
-            icon: 'visualizeApp',
-            inAppUrl: {
-              path: '/app/kibana#/visualize/edit/2',
-              uiCapabilitiesPath: 'visualize.show',
-            },
-            title: 'My Visualization Title 2',
-          },
-        },
-      ])),
-      savedObject: {
-        id: '1',
-        type: 'dashboard',
-        meta: {
-          title: 'MyDashboard',
-          icon: 'dashboardApp',
-          editUrl: '#/management/kibana/objects/savedDashboards/1',
-          inAppUrl: {
-            path: '/dashboard/1',
-            uiCapabilitiesPath: 'dashboard.show',
-          },
-        },
-      },
+          {
+            id: '2',
+          }
+        ],
+      })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
+      id: '1',
+      type: 'dashboard',
+      title: 'MyDashboard',
       close: jest.fn(),
     };
 
@@ -321,23 +198,14 @@ describe('Relationships', () => {
 
   it('should render errors', async () => {
     const props = {
-      goInspectObject: () => {},
       getRelationships: jest.fn().mockImplementation(() => {
         throw new Error('foo');
       }),
-      savedObject: {
-        id: '1',
-        type: 'dashboard',
-        meta: {
-          title: 'MyDashboard',
-          icon: 'dashboardApp',
-          editUrl: '#/management/kibana/objects/savedDashboards/1',
-          inAppUrl: {
-            path: '/dashboard/1',
-            uiCapabilitiesPath: 'dashboard.show',
-          },
-        },
-      },
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
+      id: '1',
+      type: 'dashboard',
+      title: 'MyDashboard',
       close: jest.fn(),
     };
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { errors as esErrors } from 'elasticsearch';
 import Boom from 'boom';
 
@@ -26,7 +26,7 @@ import {
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
   convertEsError
-} from '../../../../../src/legacy/server/index_patterns/service/lib/errors';
+} from '../../../../../src/server/index_patterns/service/lib/errors';
 
 import {
   getIndexNotFoundError,

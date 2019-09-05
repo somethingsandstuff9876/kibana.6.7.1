@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import sinon from 'sinon';
 
+import chrome from 'ui/chrome';
 import { hideEmptyDevTools } from '../hide_empty_tools';
-import { npStart } from 'ui/new_platform';
 
 describe('hide dev tools', function () {
-  let updateNavLink;
+  let navlinks;
 
   function PrivateWithoutTools() {
     return [];
@@ -35,12 +35,12 @@ describe('hide dev tools', function () {
   }
 
   function isHidden() {
-    return updateNavLink.calledWith('kibana:dev_tools', { hidden: true });
+    return !!chrome.getNavLinkById('kibana:dev_tools').hidden;
   }
 
   beforeEach(function () {
-    const coreNavLinks = npStart.core.chrome.navLinks;
-    updateNavLink = sinon.spy(coreNavLinks, 'update');
+    navlinks = {};
+    sinon.stub(chrome, 'getNavLinkById').returns(navlinks);
   });
 
   it('should hide the app if there are no dev tools', function () {
@@ -54,6 +54,6 @@ describe('hide dev tools', function () {
   });
 
   afterEach(function () {
-    updateNavLink.restore();
+    chrome.getNavLinkById.restore();
   });
 });

@@ -18,15 +18,13 @@
  */
 
 import template from './timelion_help.html';
-import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import moment from 'moment';
-import '../../components/timelionhelp_tabs_directive';
 
 const app = uiModules.get('apps/timelion', []);
 
-app.directive('timelionHelp', function ($http) {
+app.directive('timelionHelp', function ($http, i18n) {
   return {
     restrict: 'E',
     template,
@@ -36,57 +34,52 @@ app.directive('timelionHelp', function ($http) {
         details: null
       };
 
-      $scope.activeTab = 'funcref';
-      $scope.activateTab = function (tabName) {
-        $scope.activeTab = tabName;
-      };
-
       function init() {
         $scope.es = {
           invalidCount: 0
         };
 
         $scope.translations = {
-          nextButtonLabel: i18n.translate('timelion.help.nextPageButtonLabel', {
+          nextButtonLabel: i18n('timelion.help.nextPageButtonLabel', {
             defaultMessage: 'Next',
           }),
-          previousButtonLabel: i18n.translate('timelion.help.previousPageButtonLabel', {
+          previousButtonLabel: i18n('timelion.help.previousPageButtonLabel', {
             defaultMessage: 'Previous',
           }),
-          dontShowHelpButtonLabel: i18n.translate('timelion.help.dontShowHelpButtonLabel', {
+          dontShowHelpButtonLabel: i18n('timelion.help.dontShowHelpButtonLabel', {
             defaultMessage: `Don't show this again`,
           }),
-          strongNextText: i18n.translate('timelion.help.welcome.content.strongNextText', {
+          strongNextText: i18n('timelion.help.welcome.content.strongNextText', {
             defaultMessage: 'Next',
           }),
-          emphasizedEverythingText: i18n.translate('timelion.help.welcome.content.emphasizedEverythingText', {
+          emphasizedEverythingText: i18n('timelion.help.welcome.content.emphasizedEverythingText', {
             defaultMessage: 'everything',
           }),
-          notValidAdvancedSettingsPath: i18n.translate('timelion.help.configuration.notValid.advancedSettingsPathText', {
+          notValidAdvancedSettingsPath: i18n('timelion.help.configuration.notValid.advancedSettingsPathText', {
             defaultMessage: 'Management / Kibana / Advanced Settings'
           }),
-          validAdvancedSettingsPath: i18n.translate('timelion.help.configuration.valid.advancedSettingsPathText', {
+          validAdvancedSettingsPath: i18n('timelion.help.configuration.valid.advancedSettingsPathText', {
             defaultMessage: 'Management/Kibana/Advanced Settings',
           }),
-          esAsteriskQueryDescription: i18n.translate('timelion.help.querying.esAsteriskQueryDescriptionText', {
+          esAsteriskQueryDescription: i18n('timelion.help.querying.esAsteriskQueryDescriptionText', {
             defaultMessage: 'hey Elasticsearch, find everything in my default index',
           }),
-          esIndexQueryDescription: i18n.translate('timelion.help.querying.esIndexQueryDescriptionText', {
+          esIndexQueryDescription: i18n('timelion.help.querying.esIndexQueryDescriptionText', {
             defaultMessage: 'use * as the q (query) for the logstash-* index',
           }),
-          strongAddText: i18n.translate('timelion.help.expressions.strongAddText', {
+          strongAddText: i18n('timelion.help.expressions.strongAddText', {
             defaultMessage: 'Add',
           }),
-          twoExpressionsDescriptionTitle: i18n.translate('timelion.help.expressions.examples.twoExpressionsDescriptionTitle', {
+          twoExpressionsDescriptionTitle: i18n('timelion.help.expressions.examples.twoExpressionsDescriptionTitle', {
             defaultMessage: 'Double the fun.',
           }),
-          customStylingDescriptionTitle: i18n.translate('timelion.help.expressions.examples.customStylingDescriptionTitle', {
+          customStylingDescriptionTitle: i18n('timelion.help.expressions.examples.customStylingDescriptionTitle', {
             defaultMessage: 'Custom styling.',
           }),
-          namedArgumentsDescriptionTitle: i18n.translate('timelion.help.expressions.examples.namedArgumentsDescriptionTitle', {
+          namedArgumentsDescriptionTitle: i18n('timelion.help.expressions.examples.namedArgumentsDescriptionTitle', {
             defaultMessage: 'Named arguments.',
           }),
-          groupedExpressionsDescriptionTitle: i18n.translate('timelion.help.expressions.examples.groupedExpressionsDescriptionTitle', {
+          groupedExpressionsDescriptionTitle: i18n('timelion.help.expressions.examples.groupedExpressionsDescriptionTitle', {
             defaultMessage: 'Grouped expressions.',
           }),
         };
@@ -126,7 +119,7 @@ app.directive('timelionHelp', function ($http) {
               } catch (e) {
                 if (_.get(resp, 'data.resp.message')) return _.get(resp, 'data.resp.message');
                 if (_.get(resp, 'data.resp.output.payload.message')) return _.get(resp, 'data.resp.output.payload.message');
-                return i18n.translate('timelion.help.unknownErrorMessage', { defaultMessage: 'Unknown error' });
+                return i18n('timelion.help.unknownErrorMessage', { defaultMessage: 'Unknown error' });
               }
             }());
           }

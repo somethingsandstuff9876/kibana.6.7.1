@@ -50,7 +50,7 @@ Note that the `slowlog` fileset is experimental. \
     artifacts: {
       dashboards: [
         {
-          id: '7fea2930-478e-11e7-b1f0-cb29bac6bf8b-ecs',
+          id: '7fea2930-478e-11e7-b1f0-cb29bac6bf8b',
           linkLabel: i18n.translate('kbn.server.tutorials.redisLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Redis logs dashboard',
           }),

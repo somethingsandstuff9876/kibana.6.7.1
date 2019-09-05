@@ -15,7 +15,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'settings', 'share', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings', 'share']);
 
   class ReportingPage {
     async initTests() {
@@ -126,7 +126,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async clearToastNotifications() {
       const toasts = await testSubjects.findAll('toastCloseButton');
-      await Promise.all(toasts.map(async t => await t.click()));
+      await Promise.all(toasts.map(t => t.click()));
     }
 
     async getQueueReportError() {
@@ -134,7 +134,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async getGenerateReportButton() {
-      return await retry.try(async () => await testSubjects.find('generateReportButton'));
+      return await retry.try(() => testSubjects.find('generateReportButton'));
     }
 
     async checkUsePrintLayout() {
@@ -146,20 +146,16 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async clickGenerateReportButton() {
-      await testSubjects.click('generateReportButton');
+      await retry.try(() => testSubjects.click('generateReportButton'));
     }
 
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
       const isToastPresent = await testSubjects.exists('completeReportSuccess', {
-        allowHidden: true,
-        timeout: 90000
+        timeout: 60000
       });
       // Close toast so it doesn't obscure the UI.
-      if (isToastPresent) {
-        await testSubjects.click('completeReportSuccess toastCloseButton');
-      }
-
+      await testSubjects.click('completeReportSuccess toastCloseButton');
       return isToastPresent;
     }
 
@@ -167,14 +163,14 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       log.debug('Reporting:setTimepickerInDataRange');
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInNoDataRange() {
       log.debug('Reporting:setTimepickerInNoDataRange');
       const fromTime = '1999-09-19 06:31:44.000';
       const toTime = '1999-09-23 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
   }
 

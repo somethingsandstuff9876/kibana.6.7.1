@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/multicluster', {
-          from: '2017-08-15 21:00:00.000',
-          to: '2017-08-16 00:00:00.000',
+          from: '2017-08-15 21:00:00',
+          to: '2017-08-16 00:00:00',
         });
 
         await clusterList.assertDefaults();

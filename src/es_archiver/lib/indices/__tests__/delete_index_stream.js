@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import {
   createListStream,
   createPromiseFromStreams,
-} from '../../../../legacy/utils';
+} from '../../../../utils';
 
 import {
   createDeleteIndexStream,

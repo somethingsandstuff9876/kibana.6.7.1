@@ -5,8 +5,12 @@
  */
 
 export {
-  registerHelpers
-} from './elasticsearch';
+  initClusterHelpers
+} from './clusters';
+
+export {
+  initElasticsearchIndicesHelpers
+} from './es_index';
 
 export {
   getRandomString,

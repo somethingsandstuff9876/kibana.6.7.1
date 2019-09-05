@@ -15,10 +15,10 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 NODE="${DIR}/node/bin/node"
-test -x "$NODE"
+test -x "$NODE" || NODE=$(which node)
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
   exit 1
 fi
 
-NODE_OPTIONS="--no-warnings ${NODE_OPTIONS}" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli_plugin" "$@"
+NODE_ENV=production exec "${NODE}" $NODE_OPTIONS --no-warnings "${DIR}/src/cli_plugin" "$@"

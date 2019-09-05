@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { updateTestSuiteFactory } from '../../common/suites/update';
 
-// eslint-disable-next-line import/no-default-export
+// tslint:disable:no-default-export
 export default function updateSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -20,6 +20,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
     expectAlreadyExistsResult,
     expectDefaultSpaceResult,
     expectRbacForbidden,
+    createExpectLegacyForbidden,
   } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('update', () => {
@@ -34,6 +35,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
           readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -48,6 +50,7 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
           readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -59,15 +62,15 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
         tests: {
           alreadyExists: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
           defaultSpace: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
           newSpace: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
         },
       });
@@ -134,16 +137,16 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
         user: scenario.users.legacyAll,
         tests: {
           alreadyExists: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
           defaultSpace: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
           newSpace: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 404,
+            response: expectNotFound,
           },
         },
       });
@@ -182,6 +185,25 @@ export default function updateSpaceTestSuite({ getService }: TestInvoker) {
           newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
+          },
+        },
+      });
+
+      updateTest(`legacy readonly user from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.legacyRead,
+        tests: {
+          alreadyExists: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
+          },
+          defaultSpace: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
+          },
+          newSpace: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
           },
         },
       });

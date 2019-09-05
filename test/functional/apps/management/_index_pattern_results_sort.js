@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -51,6 +51,8 @@ export default function ({ getService, getPageObjects }) {
     columns.forEach(function (col) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
         before(async function () {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaIndices();
           await PageObjects.settings.createIndexPattern();
         });
 
@@ -75,7 +77,9 @@ export default function ({ getService, getPageObjects }) {
       const EXPECTED_FIELD_COUNT = 86;
 
       before(async function () {
+        await PageObjects.settings.navigateTo();
         await PageObjects.settings.createIndexPattern();
+
       });
 
       after(async function () {

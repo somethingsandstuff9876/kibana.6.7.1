@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { brushHandler } from '../create_brush_handler';
+import createBrushHandler from '../create_brush_handler';
 import moment from 'moment';
 import { expect } from 'chai';
 
-describe('brushHandler', () => {
+describe('createBrushHandler', () => {
   let mockTimefilter;
   let onBrush;
   let range;
@@ -29,11 +29,9 @@ describe('brushHandler', () => {
   beforeEach(() => {
     mockTimefilter = {
       time: {},
-      setTime: function(time) {
-        this.time = time;
-      },
+      setTime: function (time) { this.time = time; }
     };
-    onBrush = brushHandler(mockTimefilter);
+    onBrush = createBrushHandler(mockTimefilter);
   });
 
   test('returns brushHandler() that updates timefilter', () => {
@@ -43,4 +41,5 @@ describe('brushHandler', () => {
     expect(mockTimefilter.time.to).to.equal(moment(range.xaxis.to).toISOString());
     expect(mockTimefilter.time.mode).to.equal('absolute');
   });
+
 });

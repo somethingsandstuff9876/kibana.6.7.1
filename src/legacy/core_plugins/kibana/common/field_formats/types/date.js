@@ -53,7 +53,6 @@ export function createDateFormat(FieldFormat) {
           }
 
           const date = moment(val);
-
           if (date.isValid()) {
             return date.format(pattern);
           } else {

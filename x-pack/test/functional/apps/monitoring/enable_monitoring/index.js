@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'common', 'header']);
@@ -19,12 +19,13 @@ export default function ({ getService, getPageObjects }) {
       await browser.setWindowSize(1600, 1000);
       await PageObjects.monitoring.navigateTo();
       await noData.isOnNoDataPage();
+      await PageObjects.header.resumeAutoRefresh();
     });
 
     after(async () => {
       // turn off collection
       const disableCollection = {
-        'persistent':
+        "persistent":
         {
           xpack: {
             monitoring: {

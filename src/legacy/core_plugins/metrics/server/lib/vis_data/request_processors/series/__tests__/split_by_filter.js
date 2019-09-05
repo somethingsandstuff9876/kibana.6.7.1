@@ -17,28 +17,25 @@
  * under the License.
  */
 
-import { splitByFilter } from '../split_by_filter';
+import splitByFilter from '../split_by_filter';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('splitByFilter(req, panel, series)', () => {
+
   let panel;
   let series;
   let req;
   beforeEach(() => {
     panel = {};
-    series = {
-      id: 'test',
-      split_mode: 'filter',
-      filter: { query: 'host:example-01', language: 'lucene' },
-    };
+    series = { id: 'test', split_mode: 'filter', filter: 'host:example-01' };
     req = {
       payload: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z',
-        },
-      },
+          max: '2017-01-01T01:00:00Z'
+        }
+      }
     };
   });
 
@@ -55,21 +52,13 @@ describe('splitByFilter(req, panel, series)', () => {
       aggs: {
         test: {
           filter: {
-            bool: {
-              filter: [],
-              must: [
-                {
-                  query_string: {
-                    query: 'host:example-01',
-                  },
-                },
-              ],
-              must_not: [],
-              should: [],
-            },
-          },
-        },
-      },
+            query_string: {
+              query: 'host:example-01',
+              analyze_wildcard: true
+            }
+          }
+        }
+      }
     });
   });
 
@@ -80,4 +69,6 @@ describe('splitByFilter(req, panel, series)', () => {
     expect(next.calledOnce).to.equal(true);
     expect(doc).to.eql({});
   });
+
 });
+

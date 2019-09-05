@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
-  const log = getService('log');
   const pieChart = getService('pieChart');
-  const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
   describe('sample data', function describeIndexTests() {
-    this.tags('smoke');
 
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
@@ -84,33 +81,37 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample flights data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(18);
+        expect(panelCount).to.be(19);
       });
 
 
-      it('should render visualizations', async () => {
-        await PageObjects.home.launchSampleDataSet('flights');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
-
-        log.debug('Checking pie charts rendered');
+      it.skip('pie charts rendered', async () => {
         await pieChart.expectPieSliceCount(4);
-        log.debug('Checking area, bar and heatmap charts rendered');
+      });
+
+      it.skip('area, bar and heatmap charts rendered', async () => {
         await dashboardExpect.seriesElementCount(15);
-        log.debug('Checking saved searches rendered');
+      });
+
+      it.skip('saved searches render', async () => {
         await dashboardExpect.savedSearchRowCount(50);
-        log.debug('Checking input controls rendered');
+      });
+
+      it.skip('input controls render', async () => {
         await dashboardExpect.inputControlItemCount(3);
-        log.debug('Checking tag cloud rendered');
+      });
+
+      it.skip('tag cloud renders', async () => {
         await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
-        log.debug('Checking vega chart rendered');
+      });
+
+      it.skip('vega chart renders', async () => {
         const tsvb = await find.existsByCssSelector('.vgaVis__view');
         expect(tsvb).to.be(true);
       });
@@ -118,12 +119,11 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample logs data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(11);
       });
@@ -131,12 +131,11 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample ecommerce data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(12);
       });

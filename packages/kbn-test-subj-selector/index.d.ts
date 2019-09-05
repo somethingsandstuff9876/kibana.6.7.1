@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// eslint-disable-next-line import/no-default-export
 export default function(selector: string): string;

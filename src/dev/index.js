@@ -17,10 +17,11 @@
  * under the License.
  */
 
+export { createToolingLog } from './tooling_log';
 export {
   createAutoJUnitReporter,
   setupJUnitReportGeneration,
-} from '@kbn/test';
+} from './mocha';
 
 export {
   generateNoticeFromSource,

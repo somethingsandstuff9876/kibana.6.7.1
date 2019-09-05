@@ -12,10 +12,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const userMenu = getService('userMenu');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
     async login(username, password, options = {}) {
@@ -26,8 +26,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
       const expectSpaceSelector = options.expectSpaceSelector || false;
       const expectSuccess = options.expectSuccess;
-      const expectForbidden = options.expectForbidden || false;
-      const rawDataTabLocator = 'a[id=rawdata-tab]';
 
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
@@ -38,18 +36,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       if (expectSpaceSelector) {
         await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
-      } else if (expectForbidden) {
-        if (await find.existsByCssSelector(rawDataTabLocator)) {
-          // Firefox has 3 tabs and requires navigation to see Raw output
-          await find.clickByCssSelector(rawDataTabLocator);
-        }
-        await retry.try(async () => {
-          if (await find.existsByCssSelector(rawDataTabLocator)) {
-            await find.clickByCssSelector(rawDataTabLocator);
-          }
-          await PageObjects.error.expectForbidden();
-        });
-        log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectSuccess) {
         await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
         log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
@@ -78,48 +64,37 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async initTests() {
       log.debug('SecurityPage:initTests');
       await esArchiver.load('empty_kibana');
+      await kibanaServer.uiSettings.disableToastAutohide();
       await esArchiver.loadIfNeeded('logstash_functional');
-      await browser.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
     }
 
     async login(username, password, options = {}) {
       await this.loginPage.login(username, password, options);
 
-      if (options.expectSpaceSelector || options.expectForbidden) {
+      if (options.expectSpaceSelector) {
         return;
       }
 
-      await retry.waitFor('logout button visible', async () => (
-        await userMenu.logoutLinkExists()
-      ));
+      await retry.try(async () => {
+        const logoutLinkExists = await find.existsByLinkText('Logout');
+        if (!logoutLinkExists) {
+          throw new Error('Login is not completed yet');
+        }
+      });
     }
 
     async logout() {
       log.debug('SecurityPage.logout');
 
-      if (!await userMenu.logoutLinkExists()) {
+      const logoutLinkExists = await find.existsByLinkText('Logout');
+      if (!logoutLinkExists) {
         log.debug('Logout not found');
         return;
       }
 
-      await userMenu.clickLogoutButton();
+      await find.clickByLinkText('Logout');
 
-      await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
-        await find.existsByDisplayedByCssSelector('.login-form')
-      ));
-    }
-
-    async forceLogout() {
-      log.debug('SecurityPage.forceLogout');
-      if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
-        log.debug('Already on the login page, not forcing anything');
-        return;
-      }
-
-      log.debug('Redirecting to /logout to force the logout');
-      const url = PageObjects.common.getHostPort() + '/logout';
-      await browser.get(url);
-      log.debug('Waiting on the login form to appear');
       await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
         await find.existsByDisplayedByCssSelector('.login-form')
       ));
@@ -139,10 +114,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async clickCreateNewRole() {
       await retry.try(() => testSubjects.click('createRoleButton'));
-    }
-
-    async clickCloneRole(roleName) {
-      await retry.try(() => testSubjects.click(`clone-role-action-${roleName}`));
     }
 
     async getCreateIndexPatternInputFieldExists() {
@@ -185,7 +156,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const btn = await find.byButtonText(privilege);
       await btn.click();
 
-      // const options = await find.byCssSelector(`.euiFilterSelectItem`);
+      // const options = await find.byCssSelector(`.euiComboBoxOption`);
       // Object.entries(options).forEach(([key, prop]) => {
       //   console.log({ key, proto: prop.__proto__ });
       // });
@@ -217,16 +188,14 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       return mapAsync(users, async user => {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
-        const emailElement = await user.findByCssSelector('[data-test-subj="userRowEmail"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
         const isReservedElementVisible = await user.findByCssSelector('td:last-child');
 
         return {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
-          email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved: (await isReservedElementVisible.getAttribute('innerHTML')).includes('reservedUser')
+          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
         };
       });
     }
@@ -235,11 +204,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const rolenameElement = await role.findByCssSelector('[data-test-subj="roleRowName"]');
-        const reservedRoleRow = await role.findByCssSelector('td:nth-last-child(2)');
+        const isReservedElementVisible = await role.findByCssSelector('td:nth-child(3)');
 
         return {
           rolename: await rolenameElement.getVisibleText(),
-          reserved: await find.descendantExistsByCssSelector('[data-test-subj="reservedRole"]', reservedRoleRow)
+          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('roleRowReserved')
         };
       });
     }
@@ -305,27 +274,17 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
           function addKibanaPriv(priv) {
 
-            return priv.reduce(async function (promise, privName) {
+            return priv.reduce(function (promise, privName) {
+              // We have to use non-test-subject selectors because this markup is generated by ui-select.
+              return promise
 
-              const button = await testSubjects.find('addSpacePrivilegeButton');
-              await button.click();
-
-              const spaceSelector = await testSubjects.find('spaceSelectorComboBox');
-              await spaceSelector.click();
-
-              const globalSpaceOption = await find.byCssSelector(`#spaceOption_\\*`);
-              await globalSpaceOption.click();
-
-              const basePrivilegeSelector = await testSubjects.find('basePrivilegeComboBox');
-              await basePrivilegeSelector.click();
-
-              const privilegeOption = await find.byCssSelector(`#basePrivilege_${privName}`);
-              await privilegeOption.click();
-
-              const createPrivilegeButton = await testSubjects.find('createSpacePrivilegeButton');
-              await createPrivilegeButton.click();
-
-              return promise;
+                .then(async function () {
+                  log.debug('priv item = ' + privName);
+                  return find.byCssSelector(`[data-test-subj="kibanaMinimumPrivilege"] option[value="${privName}"]`);
+                })
+                .then(function (element) {
+                  return element.click();
+                });
 
             }, Promise.resolve());
           }
@@ -344,7 +303,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           return addPriv(userObj.elasticsearch.indices[0].privileges);
         })
         //clicking the Granted fields and removing the asterix
-        .then(async function () {
+        .then(function () {
 
           function addGrantedField(field) {
             return field.reduce(function (promise, fieldName) {
@@ -360,11 +319,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           }
 
           if (userObj.elasticsearch.indices[0].field_security) {
-            // Toggle FLS switch
-            await testSubjects.click('restrictFieldsQuery0');
-
             // have to remove the '*'
-            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"] svg.euiIcon')
+            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
               .then(function () {
                 return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
               });
@@ -380,8 +336,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async selectRole(role) {
-      const dropdown = await testSubjects.find('userFormRolesDropdown');
-      const input = await dropdown.findByCssSelector('input');
+      const dropdown = await testSubjects.find("userFormRolesDropdown");
+      const input = await dropdown.findByCssSelector("input");
       await input.type(role);
       await testSubjects.click(`roleOption-${role}`);
       await testSubjects.click('comboBoxToggleListButton');

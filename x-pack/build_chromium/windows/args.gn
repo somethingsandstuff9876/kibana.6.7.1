@@ -18,8 +18,6 @@ use_gio = false
 use_libpci = false
 use_pulseaudio = false
 use_udev = false
-# Please, consult @elastic/kibana-security before changing/removing this option.
-use_kerberos = false
 
 is_debug = false
 symbol_level = 0

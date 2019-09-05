@@ -23,7 +23,6 @@ import {
   unloadAction,
   rebuildAllAction,
   emptyKibanaIndexAction,
-  editAction,
 } from './actions';
 
 export class EsArchiver {
@@ -40,15 +39,12 @@ export class EsArchiver {
    *
    *  @param {String} name - the name of this archive, used to determine filename
    *  @param {String|Array<String>} indices - the indices to archive
-   *  @param {Object} options
-   *  @property {Boolean} options.raw - should the archive be raw (unzipped) or not
    *  @return Promise<Stats>
    */
-  async save(name, indices, { raw = false } = {}) {
+  async save(name, indices) {
     return await saveAction({
       name,
       indices,
-      raw,
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
@@ -108,23 +104,6 @@ export class EsArchiver {
   }
 
   /**
-   *  Extract the gzipped files in an archive, then call the handler. When it
-   *  resolves re-archive the gzipped files.
-   *
-   *  @param {String} prefix optional prefix to limit archives that are extracted
-   *  @param {() => Promise<any>} handler
-   *  @return Promise<void>
-   */
-  async edit(prefix, handler) {
-    return await editAction({
-      prefix,
-      log: this.log,
-      dataDir: this.dataDir,
-      handler
-    });
-  }
-
-  /**
    *  Just like load, but skips any existing index
    *
    *  @param {String} name
@@ -144,7 +123,6 @@ export class EsArchiver {
     await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
-      kibanaUrl: this.kibanaUrl,
     });
   }
 }

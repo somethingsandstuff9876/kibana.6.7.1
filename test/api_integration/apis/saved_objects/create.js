@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -46,16 +46,16 @@ export default function ({ getService }) {
 
             expect(resp.body).to.eql({
               id: resp.body.id,
+              migrationVersion: {
+                visualization: '6.7.2',
+              },
               type: 'visualization',
-              migrationVersion: resp.body.migrationVersion,
               updated_at: resp.body.updated_at,
               version: 'WzgsMV0=',
               attributes: {
                 title: 'My favorite vis'
-              },
-              references: [],
+              }
             });
-            expect(resp.body.migrationVersion).to.be.ok();
           });
       });
     });
@@ -87,16 +87,16 @@ export default function ({ getService }) {
 
             expect(resp.body).to.eql({
               id: resp.body.id,
+              migrationVersion: {
+                visualization: '6.7.2',
+              },
               type: 'visualization',
-              migrationVersion: resp.body.migrationVersion,
               updated_at: resp.body.updated_at,
               version: 'WzAsMV0=',
               attributes: {
                 title: 'My favorite vis'
-              },
-              references: [],
+              }
             });
-            expect(resp.body.migrationVersion).to.be.ok();
           });
 
         expect(await es.indices.exists({ index: '.kibana' }))

@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
@@ -27,16 +28,9 @@ import initial from './initial.png';
 import blues from './blues.png';
 import shadedGeohashGrid from './shadedGeohashGrid.png';
 import heatmapRaw from './heatmap_raw.png';
-import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
-import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
-import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
-import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
-import { setup } from '../../../visualizations/public/np_ready/public/legacy';
-
-import { createTileMapVisualization } from '../tile_map_visualization';
-import { createTileMapTypeDefinition } from '../tile_map_type';
+import EMS_CATALOGUE from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest_6.6.json';
+import EMS_FILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files_6.6.json';
+import EMS_TILES from '../../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles_6.6.json';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -62,66 +56,51 @@ const THRESHOLD = 0.45;
 const PIXEL_DIFF = 64;
 
 describe('CoordinateMapsVisualizationTest', function () {
+
   let domNode;
   let CoordinateMapsVisualization;
   let Vis;
   let indexPattern;
   let vis;
-  let dependencies;
 
   let imageComparator;
 
+
   let getManifestStub;
   beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject((Private, $injector) => {
-      const serviceSettings = $injector.get('serviceSettings');
-      const uiSettings = $injector.get('config');
+  beforeEach(ngMock.inject((Private, $injector) => {
 
-      dependencies = {
-        serviceSettings,
-        uiSettings,
-        $injector,
-      };
+    Vis = Private(visModule.VisProvider);
+    CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
+    indexPattern = Private(LogstashIndexPatternStubProvider);
 
-      setup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
 
-      Vis = Private(visModule.VisProvider);
-      CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
-
-      getManifestStub = serviceSettings.__debugStubManifestCalls(async url => {
-        //simulate network calls
-        if (url.startsWith('https://foobar')) {
-          return EMS_CATALOGUE;
-        } else if (url.startsWith('https://tiles.foobar')) {
-          return EMS_TILES;
-        } else if (url.startsWith('https://files.foobar')) {
-          return EMS_FILES;
-        } else if (url.startsWith('https://raster-style.foobar')) {
-          if (url.includes('osm-bright-desaturated')) {
-            return EMS_STYLE_ROAD_MAP_DESATURATED;
-          } else if (url.includes('osm-bright')) {
-            return EMS_STYLE_ROAD_MAP_BRIGHT;
-          } else if (url.includes('dark-matter')) {
-            return EMS_STYLE_DARK_MAP;
-          }
-        }
-      });
-    })
-  );
+    const serviceSettings = $injector.get('serviceSettings');
+    getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
+      //simulate network calls
+      if (url.startsWith('https://foobar')) {
+        return EMS_CATALOGUE;
+      } else if (url.startsWith('https://tiles.foobar')) {
+        return EMS_TILES;
+      } else if (url.startsWith('https://files.foobar')) {
+        return EMS_FILES;
+      }
+    });
+  }));
 
   afterEach(() => {
     getManifestStub.removeStub();
   });
 
   describe('CoordinateMapsVisualization - basics', function () {
+
     beforeEach(async function () {
+
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
       vis = new Vis(indexPattern, {
-        type: 'tile_map',
+        type: 'region_map'
       });
       vis.params = {
         mapType: 'Scaled Circle Markers',
@@ -132,34 +111,28 @@ describe('CoordinateMapsVisualizationTest', function () {
         mapZoom: 2,
         mapCenter: [0, 0],
       };
-      const mockAggs = {
-        byType: type => {
-          return mockAggs.aggs.find(agg => agg.type.type === type);
-        },
-        aggs: [
-          {
-            type: {
-              type: 'metrics',
-            },
-            fieldFormatter: x => {
-              return x;
-            },
-            makeLabel: () => {
-              return 'foobar';
-            },
+      const mockAggs = [
+        {
+          type: {
+            type: 'metrics'
           },
-          {
-            type: {
-              type: 'buckets',
-            },
-            params: { useGeoCentroid: true },
+          fieldFormatter: (x) => {
+            return x;
           },
-        ],
-      };
+          makeLabel: () => {
+            return 'foobar';
+          }
+        }, {
+          type: {
+            type: 'buckets'
+          },
+          params: { useGeoCentroid: true }
+        }];
       vis.getAggConfig = function () {
         return mockAggs;
       };
       vis.aggs = mockAggs;
+
     });
 
     afterEach(function () {
@@ -169,131 +142,148 @@ describe('CoordinateMapsVisualizationTest', function () {
 
     it('should initialize OK', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false,
+        uiState: false
       });
 
       const mismatchedPixels = await compareImage(initial, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
     });
 
+
     it('should toggle to Heatmap OK', async function () {
+
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false,
+        uiState: false
       });
 
+
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,
         data: false,
-        uiState: false,
+        uiState: false
       });
 
       const mismatchedPixels = await compareImage(heatmapRaw, 1);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
     });
 
     it('should toggle back&forth OK between mapTypes', async function () {
+
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false,
+        uiState: false
       });
 
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,
         data: false,
-        uiState: false,
+        uiState: false
       });
 
       vis.params.mapType = 'Scaled Circle Markers';
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,
         data: false,
-        uiState: false,
+        uiState: false
       });
 
       const mismatchedPixels = await compareImage(initial, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
     });
 
     it('should toggle to different color schema ok', async function () {
+
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false,
+        uiState: false
       });
 
+
       vis.params.colorSchema = 'Blues';
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,
         data: false,
-        uiState: false,
+        uiState: false
       });
 
       const mismatchedPixels = await compareImage(blues, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
     });
 
     it('should toggle to different color schema and maptypes ok', async function () {
+
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false,
+        uiState: false
       });
+
 
       vis.params.colorSchema = 'Greens';
       vis.params.mapType = 'Shaded Geohash Grid';
-      await coordinateMapVisualization.render(dummyESResponse, vis.params, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,
         data: false,
-        uiState: false,
+        uiState: false
       });
 
       const mismatchedPixels = await compareImage(shadedGeohashGrid, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
     });
+
+
   });
+
 
   async function compareImage(expectedImageSource, index) {
     const elementList = domNode.querySelectorAll('canvas');
     const firstCanvasOnMap = elementList[index];
     return imageComparator.compareImage(firstCanvasOnMap, expectedImageSource, THRESHOLD);
   }
+
 
   function setupDOM(width, height) {
     domNode = document.createElement('div');
@@ -311,4 +301,6 @@ describe('CoordinateMapsVisualizationTest', function () {
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
   }
+
 });
+

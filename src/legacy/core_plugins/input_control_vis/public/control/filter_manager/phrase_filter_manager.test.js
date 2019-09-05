@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
 describe('PhraseFilterManager', function () {
@@ -51,7 +51,6 @@ describe('PhraseFilterManager', function () {
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
-      expect(newFilter.meta.key).to.be('field1');
       expect(newFilter).to.have.property('query');
       expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match":{"field1":{"query":"ios","type":"phrase"}}}');
     });
@@ -61,7 +60,6 @@ describe('PhraseFilterManager', function () {
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
-      expect(newFilter.meta.key).to.be('field1');
       expect(newFilter).to.have.property('query');
       const query = newFilter.query;
       expect(query).to.have.property('bool');

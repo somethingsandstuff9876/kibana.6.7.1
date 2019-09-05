@@ -8,11 +8,11 @@
 As datasets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
 cyber attacks, or business issues becomes impractical. The Elastic {ml} 
-{anomaly-detect} feature automatically models the normal behavior of your time 
+{anomaly-detect} feature automatically model the normal behavior of your time 
 series data — learning trends, periodicity, and more — in real time to identify 
 anomalies, streamline root cause analysis, and reduce false positives.
 
-{anomaly-detect-cap} runs in and scales with {es}, and includes an
+{anomaly-detect-cap} run in and scale with {es}, and include an
 intuitive UI on the {kib} *Machine Learning* page for creating {anomaly-jobs} 
 and understanding results.
 
@@ -24,9 +24,9 @@ time field, you can use the *Data Visualizer* to identify possible fields for
 [role="screenshot"]
 image::ml/images/ml-data-visualizer-sample.jpg[Data Visualizer for sample flight data]
 
-experimental[] You can also upload a CSV, NDJSON, or log file (up to 100 MB in 
-size). The *Data Visualizer* identifies the file format and field mappings. You 
-can then optionally import that data into an {es} index.  
+experimental[] You can also upload a CSV, NDJSON, or log file (up to 100 MB in size). 
+The *Data Visualizer* identifies the file format and field mappings. You can then 
+optionally import that data into an {es} index.  
 
 If you have a trial or platinum license, you can 
 <<ml-jobs,create {anomaly-jobs}>> and manage jobs and {dfeeds} from the *Job 
@@ -57,14 +57,14 @@ occurring in your operational environment at that time:
 image::ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotations]
 
 In some circumstances, annotations are also added automatically. For example, if
-the {anomaly-job} detects that there is missing data, it annotates the affected 
+the {anomaly-job} detects that there is missing data, it annotates the affected
 time period. For more information, see 
-{stack-ov}/ml-delayed-data-detection.html[Handling delayed data]. The 
-*Job Management* pane shows the full list of annotations for each job.
+{stack-ov}/ml-delayed-data-detection.html[Handling delayed data].
+The *Job Management* pane shows the full list of annotations for each job.
 
-NOTE: The {kib} {ml-features} use pop-ups. You must configure your web 
-browser so that it does not block pop-up windows or create an exception for your 
-{kib} URL.
+NOTE: The {kib} {ml-features} use pop-ups. You must configure your
+web browser so that it does not block pop-up windows or create an exception for
+your {kib} URL.
 
 For more information about the {anomaly-detect} feature, see
 {stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
@@ -73,5 +73,4 @@ For more information about the {anomaly-detect} feature, see
 
 include::creating-jobs.asciidoc[]
 include::job-tips.asciidoc[]
-include::creating-df-kib.asciidoc[]
 

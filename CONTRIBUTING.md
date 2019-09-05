@@ -23,7 +23,6 @@ A high level overview of our contributing guidelines.
   - [Linting](#linting)
   - [Internationalization](#internationalization)
   - [Testing and Building](#testing-and-building)
-    - [Debugging server code](#debugging-server-code)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
   - [Cross-browser compatibility](#cross-browser-compatibility)
@@ -32,7 +31,6 @@ A high level overview of our contributing guidelines.
       - [Browser Automation Notes](#browser-automation-notes)
   - [Building OS packages](#building-os-packages)
   - [Writing documentation](#writing-documentation)
-  - [Release Notes Process](#release-notes-process)
 - [Signing the contributor license agreement](#signing-the-contributor-license-agreement)
 - [Submitting a Pull Request](#submitting-a-pull-request)
 - [Code Reviewing](#code-reviewing)
@@ -40,8 +38,6 @@ A high level overview of our contributing guidelines.
   - [Reviewing Pull Requests](#reviewing-pull-requests)
 
 Don't fret, it's not as daunting as the table of contents makes it out to be!
-
-## Effective issue reporting in Kibana
 
 ### Voicing the importance of an issue
 
@@ -173,80 +169,32 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-### Running Elasticsearch Locally
-
-There are a few options when it comes to running Elasticsearch locally:
-
-#### Nightly snapshot (recommended)
-
-These snapshots are built on a nightly basis which expire after a couple weeks. If running from an old, untracted branch this snapshot might not exist. In which case you might need to run from source or an archive.
+Start elasticsearch from a nightly snapshot.
 
 ```bash
 yarn es snapshot
 ```
 
-#### Source
+This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
 
-By default, it will reference an [elasticsearch](https://github.com/elastic/elasticsearch) checkout which is a sibling to the Kibana directory named `elasticsearch`. If you wish to use a checkout in another location you can provide that by supplying `--source-path`
+> You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
-```bash
-yarn es source
-```
-
-#### Archive
-
-Use this if you already have a distributable. For released versions, one can be obtained on the [Elasticsearch downloads](https://www.elastic.co/downloads/elasticsearch) page.
+If you're just getting started with `elasticsearch`, you could use the following command to populate your instance with a few fake logs to hit the ground running.
 
 ```bash
-yarn es archive <full_path_to_archive>
+node scripts/makelogs
 ```
-
-**Each of these will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.**
-
-##### Sample Data
-
-If you're just getting started with Elasticsearch, you could use the following command to populate your instance with a few fake logs to hit the ground running.
-
-```bash
-node scripts/makelogs --auth <username>:<password>
-```
-> The default username and password combination are `elastic:changeme`
 
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
-### Running Elasticsearch Remotely
-
-You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (**Elasticians: you do! Check with your team about where to find credentials**)
-
-You'll need to [create a `kibana.dev.yml`](#customizing-configkibanadevyml) and add the following to it:
-
-```
-elasticsearch.hosts:
-  - {{ url }}
-elasticsearch.username: {{ username }}
-elasticsearch.password: {{ password }}
-elasticsearch.ssl.verificationMode: none
-```
-
-If many other users will be interacting with your remote cluster, you'll want to add the following to avoid causing conflicts:
-
-```
-kibana.index: '.{YourGitHubHandle}-kibana'
-xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
-```
-
-### Running Kibana
 
 Start the development server.
+  ```bash
+  yarn start
+  ```
 
-```bash
-yarn start
-```
-
-> On Windows, you'll need to use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
+> On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
-
-By default, you can log in with username `elastic` and password `changeme`. See the `--help` options on `yarn es <command>` if you'd like to configure a different password.
 
 #### Running Kibana in Open-Source mode
 
@@ -302,17 +250,6 @@ IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality To
 
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 
-Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
-
-```json
-   "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-    ]
-```
-
 ### Internationalization
 
 All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
@@ -329,7 +266,7 @@ ReactDOM.render(
 );
 ```
 
-There are a number of tools created to support internationalization in Kibana that would allow one to validate internationalized labels,
+There is a number of tools was created to support internationalization in Kibana that would allow one to validate internationalized labels, 
 extract them to a `JSON` file or integrate translations back to Kibana. To know more, please read corresponding [readme](src/dev/i18n/README.md) file.
 
 ### Testing and Building
@@ -350,48 +287,23 @@ You can get all build options using the following command:
 yarn build --help
 ```
 
-macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator's GPU settings. In iTerm2:
-- Open Preferences (Command + ,)
-- In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
-- Open "Advanced GPU Settings..."
-- Uncheck the "Prefer integrated to discrete GPU" option
-- Restart iTerm
-
 ### Debugging Server Code
-`yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
+`yarn debug` will start the server with Node's inspect and debug-brk flags.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
 
 ### Unit testing frameworks
-Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still
-exist in Mocha but all new unit tests should be written in Jest. Mocha tests
-are contained in `__tests__` directories. Whereas Jest tests are stored in
-the same directory as source code files with the `.test.js` suffix.
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
 
-### Running specific Kibana tests
+#### Mocha (legacy)
+Mocha tests are contained in `__tests__` directories.
 
-The following table outlines possible test file locations and how to invoke them:
+#### Jest
+Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
 
-| Test runner        | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
-| -----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                               |
-| Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
-| Mocha              | `src/**/__tests__/**/*.js`<br>`!src/**/public/__tests__/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`       |
-| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`                                                                                     | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
-| Karma              | `src/**/public/__tests__/*.js`                                                                                                                          | `npm run test:dev`                                                                      |
+### Running Jest Unit Tests
 
-For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)
-
-Test runner arguments:
- - Where applicable, the optional arguments `-t=regexp` or `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression.
- - `[test path]` is the relative path to the test file.
-
- Examples:
-  - Run the entire elasticsearch_service test suite with yarn:
-    `node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
-  - Run the jest test case whose description matches 'stops both admin and data clients':
-    `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
-  - Run the api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config test/api_integration/config.js`
-    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
+```bash
+node scripts/jest
+```
 
 ### Debugging Unit Tests
 
@@ -403,10 +315,10 @@ To execute both server and browser tests, but skip linting, use `yarn test:quick
 yarn test:quick
 ```
 
-Use `yarn test:mocha` when you want to run the mocha tests.
+Use `yarn test:server` when you want to run only the server tests.
 
 ```bash
-yarn test:mocha
+yarn test:server
 ```
 
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
@@ -440,12 +352,12 @@ In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. Y
 
 ### Unit Testing Plugins
 
-This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
+This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
 To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-yarn test:mocha
+yarn test:server
 yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
 
@@ -462,7 +374,6 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
 * Run Kibana with `yarn start --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
-* Alternatively you can use browserstack 
 
 #### Running Browser Automation Tests
 
@@ -501,32 +412,6 @@ README for getting the docs tooling set up.
 
 ```bash
 node scripts/docs.js --open
-```
-
-### Release Notes Process
-
-Part of this process only applies to maintainers, since it requires access to GitHub labels.
-
-Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html).
-To include your change in the Release Notes:
-
-1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
-2. Label the PR with the targeted version (ex: `v7.3.0`).
-3. Label the PR with the appropriate GitHub labels:
-    * For a new feature or functionality, use `release_note:enhancement`.
-    * For an external-facing fix, use `release_note:fix`. Exception: docs, build, and test fixes do not go in the Release Notes. Neither fixes for issues that were only on `master` and never have been released.
-    * For a deprecated feature, use `release_note:deprecation`.
-    * For a breaking change, use `release_note:breaking`.
-    * To **NOT** include your changes in the Release Notes, please use `release_note:skip`.
-
-We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
-
-```
-# Dev Docs
-
-## Name the feature with the break (ex: Visualize Loader)
-
-Summary of the change. Anything Under `#Dev Docs` will be used in the blog.
 ```
 
 ## Signing the contributor license agreement

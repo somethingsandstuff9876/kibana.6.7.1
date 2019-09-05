@@ -19,14 +19,11 @@
 
 import { get } from 'lodash';
 
-export async function getRelationships(type, id, savedObjectTypes, $http, basePath) {
-  const url = `${basePath}/api/kibana/management/saved_objects/relationships/${encodeURIComponent(type)}/${encodeURIComponent(id)}`;
+export async function getRelationships(type, id, $http, basePath) {
+  const url = `${basePath}/api/kibana/management/saved_objects/relationships/${type}/${id}`;
   const options = {
     method: 'GET',
     url,
-    params: {
-      savedObjectTypes: savedObjectTypes
-    }
   };
 
   try {

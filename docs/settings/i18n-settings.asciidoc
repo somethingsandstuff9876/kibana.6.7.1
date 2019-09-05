@@ -13,6 +13,5 @@ Kibana currently supports the following locales:
 +
 - English - `en` (default)
 - Chinese - `zh-CN`
-- Japanese - `ja-JP`
 
 

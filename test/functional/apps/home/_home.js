@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'home']);
 
   describe('Kibana takes you home', function describeIndexTests() {
-    this.tags('smoke');
 
     it('clicking on kibana logo should take you to home page', async ()=> {
       await PageObjects.common.navigateToApp('settings');
-      await globalNav.clickLogo();
+      await PageObjects.home.clickKibanaIcon();
       const url = await browser.getCurrentUrl();
       expect(url.includes('/app/kibana#/home')).to.be(true);
     });

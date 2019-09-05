@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-
-export const getSiblingAggValue = (row, metric) => {
+export default (row, metric) => {
   let key = metric.type.replace(/_bucket$/, '');
   if (key === 'std_deviation' && _.includes(['upper', 'lower'], metric.mode)) {
     key = `std_deviation_bounds.${metric.mode}`;

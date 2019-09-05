@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -17,7 +17,6 @@ interface GetTest {
 interface GetTests {
   spaceAware: GetTest;
   notSpaceAware: GetTest;
-  hiddenType: GetTest;
   doesntExist: GetTest;
 }
 
@@ -34,29 +33,36 @@ const doesntExistId = 'foobar';
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectDoesntExistNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound('visualization', doesntExistId, spaceId);
+    return createExpectNotFound(doesntExistId, spaceId);
   };
 
-  const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
+  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      // eslint-disable-next-line max-len
+      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
+    });
+  };
+
+  const createExpectNotFound = (id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
-      message: `Saved object [${type}/${getIdPrefix(spaceId)}${id}] not found`,
+      message: `Saved object [visualization/${getIdPrefix(spaceId)}${id}] not found`,
       statusCode: 404,
     });
   };
 
-  const expectHiddenTypeNotFound = createExpectNotFound(
-    'hiddentype',
-    'hiddentype_1',
-    DEFAULT_SPACE_ID
-  );
+  const createExpectNotSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
+    return createExpectNotFound(spaceAwareId, spaceId);
+  };
 
   const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
-      message: `Unable to get globaltype`,
+      message: `Unable to get globaltype, missing action:saved_objects/globaltype/get`,
       statusCode: 403,
     });
   };
@@ -72,25 +78,23 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       attributes: {
         name: 'My favorite global object',
       },
-      references: [],
     });
   };
 
   const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
-      message: `Unable to get ${type}`,
+      message: `Unable to get ${type}, missing action:saved_objects/${type}/get`,
       statusCode: 403,
     });
   };
 
   const createExpectSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound('visualization', spaceAwareId, spaceId);
+    return createExpectNotFound(spaceAwareId, spaceId);
   };
 
   const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
   const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
-  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
   const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
   const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
@@ -99,7 +103,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     expect(resp.body).to.eql({
       id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
       type: 'visualization',
-      migrationVersion: resp.body.migrationVersion,
+      migrationVersion: {
+        visualization: '6.7.2',
+      },
       updated_at: '2017-09-21T18:51:23.794Z',
       version: resp.body.version,
       attributes: {
@@ -111,13 +117,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         uiStateJSON: resp.body.attributes.uiStateJSON,
         kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
       },
-      references: [
-        {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          type: 'index-pattern',
-          id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
-        },
-      ],
     });
   };
 
@@ -131,7 +130,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.spaceAware.statusCode} when getting a space aware doc`, async () => {
+      it(`should return ${
+        tests.spaceAware.statusCode
+      } when getting a space aware doc`, async () => {
         await supertest
           .get(
             `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
@@ -143,20 +144,14 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
           .then(tests.spaceAware.response);
       });
 
-      it(`should return ${tests.notSpaceAware.statusCode} when getting a non-space-aware doc`, async () => {
+      it(`should return ${
+        tests.notSpaceAware.statusCode
+      } when deleting a non-space-aware doc`, async () => {
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/globaltype/${notSpaceAwareId}`)
           .auth(user.username, user.password)
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response);
-      });
-
-      it(`should return ${tests.hiddenType.statusCode} when getting a hiddentype doc`, async () => {
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
-          .auth(user.username, user.password)
-          .expect(tests.hiddenType.statusCode)
-          .then(tests.hiddenType.response);
       });
 
       describe('document does not exist', () => {
@@ -181,15 +176,15 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
 
   return {
     createExpectDoesntExistNotFound,
+    createExpectLegacyForbidden,
+    createExpectNotSpaceAwareNotFound,
     createExpectNotSpaceAwareRbacForbidden,
     createExpectNotSpaceAwareResults,
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
-    expectHiddenTypeNotFound,
     expectSpaceAwareRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectDoesntExistRbacForbidden,
-    expectHiddenTypeRbacForbidden,
     getTest,
   };
 }

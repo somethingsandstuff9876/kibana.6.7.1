@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
@@ -28,6 +28,7 @@ import {
   EuiSpacer,
   EuiPage,
   EuiPanel,
+  EuiLink,
   EuiText,
   EuiPageBody,
   EuiButtonGroup,
@@ -94,19 +95,21 @@ class TutorialUi extends React.Component {
       });
     }
 
-    chrome.breadcrumbs.set([
-      {
-        text: homeTitle,
-        href: '#/home'
-      },
-      {
-        text: addDataTitle,
-        href: '#/home/tutorial_directory'
-      },
-      {
-        text: tutorial ? tutorial.name : this.props.tutorialId
-      }
-    ]);
+    if(this.props.isK7Design) {
+      chrome.breadcrumbs.set([
+        {
+          text: homeTitle,
+          href: '#/home'
+        },
+        {
+          text: addDataTitle,
+          href: '#/home/tutorial_directory'
+        },
+        {
+          text: tutorial ? tutorial.name : this.props.tutorialId
+        }
+      ]);
+    }
   }
 
   getInstructions = () => {
@@ -261,7 +264,6 @@ class TutorialUi extends React.Component {
       return (
         <InstructionSet
           title={instructionSet.title}
-          callOut={instructionSet.callOut}
           instructionVariants={instructionSet.instructionVariants}
           statusCheckConfig={instructionSet.statusCheck}
           statusCheckState={this.state.statusCheckStates[index]}
@@ -374,10 +376,28 @@ class TutorialUi extends React.Component {
       );
     }
 
+    let breadcrumbs;
+    if (!this.props.isK7Design) {
+      breadcrumbs = (
+        <Fragment>
+          <div>
+            <EuiLink href="#/home">{homeTitle}</EuiLink> /{' '}
+            <EuiLink href="#/home/tutorial_directory">{addDataTitle}</EuiLink> /{' '}
+            {this.state.tutorial ? this.state.tutorial.name : this.props.tutorialId}
+          </div>
+          <EuiSpacer size="s" />
+        </Fragment>
+      );
+    }
+
     return (
-      <EuiPage restrictWidth={1200}>
+      <EuiPage className="homPage">
         <EuiPageBody>
+
+          {breadcrumbs}
+
           {content}
+
         </EuiPageBody>
       </EuiPage>
     );
@@ -391,6 +411,7 @@ TutorialUi.propTypes = {
   replaceTemplateStrings: PropTypes.func.isRequired,
   tutorialId: PropTypes.string.isRequired,
   bulkCreate: PropTypes.func.isRequired,
+  isK7Design: PropTypes.bool.isRequired,
 };
 
 export const Tutorial = injectI18n(TutorialUi);

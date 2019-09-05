@@ -5,13 +5,12 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
 export default function ({ getService }) {
   const es = getService('es');
-  const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');
   const testHistoryIndex = '.task_manager_test_result';
@@ -22,16 +21,12 @@ export default function ({ getService }) {
       .set('kbn-xsrf', 'xxx')
       .expect(200));
 
-    beforeEach(async () => {
-      const exists = await es.indices.exists({ index: testHistoryIndex });
-      if (exists) {
-        await es.deleteByQuery({
-          index: testHistoryIndex,
-          q: 'type:task',
-          refresh: true,
-        });
-      }
-    });
+    beforeEach(async () =>
+      (await es.indices.exists({ index: testHistoryIndex })) && es.deleteByQuery({
+        index: testHistoryIndex,
+        q: 'type:task',
+        refresh: true,
+      }));
 
     function currentTasks() {
       return supertest.get('/api/sample_tasks')
@@ -42,6 +37,7 @@ export default function ({ getService }) {
     function historyDocs() {
       return es.search({
         index: testHistoryIndex,
+        type: '_doc',
         q: 'type:task',
       }).then(result => result.hits.hits);
     }
@@ -57,22 +53,18 @@ export default function ({ getService }) {
     it('should support middleware', async () => {
       const historyItem = _.random(1, 100);
 
-      const scheduledTask = await scheduleTask({
+      await scheduleTask({
         taskType: 'sampleTask',
         interval: '30m',
         params: { historyItem },
       });
-      log.debug(`Task created: ${scheduledTask.id}`);
 
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
         const [task] = (await currentTasks()).docs;
-        log.debug(`Task found: ${task.id}`);
-        log.debug(`Task status: ${task.status}`);
-        log.debug(`Task state: ${JSON.stringify(task.state, null, 2)}`);
-        log.debug(`Task params: ${JSON.stringify(task.params, null, 2)}`);
 
+        expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
         expect(task.params).to.eql({
@@ -115,7 +107,7 @@ export default function ({ getService }) {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.attempts).to.be.greaterThan(0);
-        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt) + 5 * 60 * 1000);
+        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt));
       });
     });
 

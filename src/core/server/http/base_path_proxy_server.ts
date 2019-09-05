@@ -18,14 +18,13 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Server, Request } from 'hapi';
-import Url from 'url';
+import { Server } from 'hapi';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getListenerOptions, getServerOptions } from './http_tools';
+import { createServer, getServerOptions } from './http_tools';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
@@ -38,11 +37,11 @@ export class BasePathProxyServer {
   private server?: Server;
   private httpsAgent?: HttpsAgent;
 
-  public get basePath() {
+  get basePath() {
     return this.httpConfig.basePath;
   }
 
-  public get targetPort() {
+  get targetPort() {
     return this.devConfig.basePathProxyTargetPort;
   }
 
@@ -63,8 +62,7 @@ export class BasePathProxyServer {
     this.log.debug('starting basepath proxy server');
 
     const serverOptions = getServerOptions(this.httpConfig);
-    const listenerOptions = getListenerOptions(this.httpConfig);
-    this.server = createServer(serverOptions, listenerOptions);
+    this.server = createServer(serverOptions);
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
@@ -145,38 +143,6 @@ export class BasePathProxyServer {
         ],
       },
       path: `${this.httpConfig.basePath}/{kbnPath*}`,
-    });
-
-    this.server.route({
-      handler: {
-        proxy: {
-          agent: this.httpsAgent,
-          passThrough: true,
-          xforward: true,
-          mapUri: (request: Request) => ({
-            uri: Url.format({
-              hostname: request.server.info.host,
-              port: this.devConfig.basePathProxyTargetPort,
-              protocol: request.server.info.protocol,
-              pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
-              query: request.query,
-            }),
-            headers: request.headers,
-          }),
-        },
-      },
-      method: '*',
-      options: {
-        pre: [
-          // Before we proxy request to a target port we may want to wait until some
-          // condition is met (e.g. until target listener is ready).
-          async (request, responseToolkit) => {
-            await blockUntil();
-            return responseToolkit.continue;
-          },
-        ],
-      },
-      path: `/__UNSAFE_bypassBasePath/{kbnPath*}`,
     });
 
     // It may happen that basepath has changed, but user still uses the old one,

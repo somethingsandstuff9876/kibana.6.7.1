@@ -1,12 +1,10 @@
 [[saved-objects-api-get]]
 === Get Object
 
-beta[This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible. ]
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 The get saved object API enables you to retrieve a single Kibana saved object
 by id.
-
-Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Request
 

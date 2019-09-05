@@ -26,7 +26,6 @@ const url = require('url');
 const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 const { Artifact } = require('../artifact');
-const { parseSettings, SettingsFilter } = require('../settings');
 
 /**
  * Extracts an ES archive and optionally installs plugins
@@ -45,8 +44,6 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     basePath = BASE_PATH,
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
-    bundledJDK = false,
-    esArgs = [],
   } = options;
 
   let dest = archive;
@@ -65,16 +62,15 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   await decompress(dest, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
-  if (license !== 'oss') {
+  if (license === 'trial') {
     // starting in 6.3, security is disabled by default. Since we bootstrap
     // the keystore, we can enable security ourselves.
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+  }
 
+  if (license !== 'oss') {
     await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
-    await configureKeystore(installPath, log, bundledJDK, [
-      ['bootstrap.password', password],
-      ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
-    ]);
+    await configureKeystore(installPath, password, log);
   }
 
   return { installPath };
@@ -95,33 +91,16 @@ async function appendToConfig(installPath, key, value) {
  * Creates and configures Keystore
  *
  * @param {String} installPath
+ * @param {String} password
  * @param {ToolingLog} log
- * @param {boolean} bundledJDK
- * @param {Array<[string, string]>} secureSettings List of custom Elasticsearch secure settings to
- * add into the keystore.
  */
-async function configureKeystore(
-  installPath,
-  log = defaultLog,
-  bundledJDK = false,
-  secureSettings
-) {
-  const env = {};
-  if (bundledJDK) {
-    env.JAVA_HOME = '';
-  }
-  await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath, env });
+async function configureKeystore(installPath, password, log = defaultLog) {
+  log.info('setting bootstrap password to %s', chalk.bold(password));
 
-  for (const [secureSettingName, secureSettingValue] of secureSettings) {
-    log.info(
-      `setting secure setting %s to %s`,
-      chalk.bold(secureSettingName),
-      chalk.bold(secureSettingValue)
-    );
-    await execa(ES_KEYSTORE_BIN, ['add', secureSettingName, '-x'], {
-      input: secureSettingValue,
-      cwd: installPath,
-      env,
-    });
-  }
+  await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath });
+
+  await execa(ES_KEYSTORE_BIN, ['add', 'bootstrap.password', '-x'], {
+    input: password,
+    cwd: installPath,
+  });
 }

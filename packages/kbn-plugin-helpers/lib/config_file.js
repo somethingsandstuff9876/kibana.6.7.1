@@ -20,10 +20,11 @@
 const resolve = require('path').resolve;
 const readFileSync = require('fs').readFileSync;
 
-const configFiles = ['.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json'];
+const configFiles = [ '.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json' ];
 const configCache = {};
+const KIBANA_ROOT_OVERRIDE = process.env.KIBANA_ROOT ? resolve(process.env.KIBANA_ROOT) : null;
 
-module.exports = function(root) {
+module.exports = function (root) {
   if (!root) root = process.cwd();
 
   if (configCache[root]) {
@@ -31,9 +32,9 @@ module.exports = function(root) {
   }
 
   // config files to read from, in the order they are merged together
-  let config = (configCache[root] = {});
+  let config = configCache[root] = {};
 
-  configFiles.forEach(function(configFile) {
+  configFiles.forEach(function (configFile) {
     try {
       const content = JSON.parse(readFileSync(resolve(root, configFile)));
       config = Object.assign(config, content);
@@ -45,22 +46,13 @@ module.exports = function(root) {
     }
   });
 
-  const deprecationMsg =
-    'has been removed from `@kbn/plugin-helpers`. ' +
-    'During development your plugin must live in `./plugins/{pluginName}` ' +
-    'inside the Kibana folder or `../kibana-extra/{pluginName}` ' +
-    'relative to the Kibana folder to work with this package.\n';
-
-  if (config.kibanaRoot) {
-    throw new Error('The `kibanaRoot` config option ' + deprecationMsg);
-  }
-  if (process.env.KIBANA_ROOT) {
-    throw new Error('The `KIBANA_ROOT` environment variable ' + deprecationMsg);
-  }
-
   // use resolve to ensure correct resolution of paths
-  const { includePlugins } = config;
+  const { kibanaRoot, includePlugins } = config;
+  if (kibanaRoot) config.kibanaRoot = resolve(root, kibanaRoot);
   if (includePlugins) config.includePlugins = includePlugins.map(path => resolve(root, path));
+
+  // allow env setting to override kibana root from config
+  if (KIBANA_ROOT_OVERRIDE) config.kibanaRoot = KIBANA_ROOT_OVERRIDE;
 
   return config;
 };

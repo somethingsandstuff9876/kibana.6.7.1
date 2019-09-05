@@ -19,43 +19,36 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ColorPicker } from '../../color_picker';
-import { AddDeleteButtons } from '../../add_delete_buttons';
+import ColorPicker from '../../color_picker';
+import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import { Split } from '../../split';
-import { SeriesDragHandler } from '../../series_drag_handler';
-import {
-  EuiTabs,
-  EuiTab,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldText,
-  EuiButtonIcon,
-} from '@elastic/eui';
-import { createTextHandler } from '../../lib/create_text_handler';
+import Sortable from 'react-anything-sortable';
+import Split from '../../split';
+import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import createAggRowRender from '../../lib/create_agg_row_render';
+import createTextHandler from '../../lib/create_text_handler';
+import { createUpDownHandler } from '../../lib/sort_keyhandler';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { Aggs } from '../../aggs/aggs';
 
 function GaugeSeriesUi(props) {
   const {
     panel,
     fields,
     onAdd,
-    name,
     onChange,
     onDelete,
     disableDelete,
     disableAdd,
     selectedTab,
     visible,
-    intl,
-    uiRestrictions,
+    intl
   } = props;
 
   const defaults = { label: '' };
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
+  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -64,24 +57,27 @@ function GaugeSeriesUi(props) {
   if (visible) {
     let seriesBody;
     if (selectedTab === 'metrics') {
+      const handleSort = (data) => {
+        const metrics = data.map(id => model.metrics.find(m => m.id === id));
+        props.onChange({ metrics });
+      };
       seriesBody = (
         <div>
-          <Aggs
-            onChange={props.onChange}
-            fields={fields}
-            panel={panel}
-            model={model}
-            name={name}
-            uiRestrictions={uiRestrictions}
-            dragHandleProps={props.dragHandleProps}
-          />
+          <Sortable
+            style={{ cursor: 'default' }}
+            dynamic={true}
+            direction="vertical"
+            onSort={handleSort}
+            sortHandle="tvbAggRow__sortHandle"
+          >
+            { aggs }
+          </Sortable>
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}
               fields={fields}
               panel={panel}
               model={model}
-              uiRestrictions={uiRestrictions}
             />
           </div>
         </div>
@@ -92,15 +88,20 @@ function GaugeSeriesUi(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
-          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
     body = (
       <div className="tvbSeries__body">
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
-            <FormattedMessage id="tsvb.gauge.dataTab.metricsButtonLabel" defaultMessage="Metrics" />
+          <EuiTab
+            isSelected={selectedTab === 'metrics'}
+            onClick={() => props.switchTab('metrics')}
+          >
+            <FormattedMessage
+              id="tsvb.gauge.dataTab.metricsButtonLabel"
+              defaultMessage="Metrics"
+            />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
@@ -119,58 +120,74 @@ function GaugeSeriesUi(props) {
   }
 
   const colorPicker = (
-    <ColorPicker disableTrash={true} onChange={props.onChange} name="color" value={model.color} />
+    <ColorPicker
+      disableTrash={true}
+      onChange={props.onChange}
+      name="color"
+      value={model.color}
+    />
   );
 
+  let dragHandle;
+  if (!props.disableDelete) {
+    dragHandle = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={(<FormattedMessage
+            id="tsvb.gauge.sort.dragToSortTooltip"
+            defaultMessage="Drag to sort"
+          />)}
+        >
+          <EuiButtonIcon
+            className="tvbSeries__sortHandle"
+            iconType="grab"
+            aria-label={intl.formatMessage({ id: 'tsvb.gauge.sort.sortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
+            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
+  }
+
   return (
-    <div className={`${props.className}`} style={props.style}>
+    <div
+      className={`${props.className}`}
+      style={props.style}
+      onMouseDown={props.onMouseDown}
+      onTouchStart={props.onTouchStart}
+    >
+
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({
-              id: 'tsvb.gauge.editor.toggleEditorAriaLabel',
-              defaultMessage: 'Toggle series editor',
-            })}
+            aria-label={intl.formatMessage({ id: 'tsvb.gauge.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>{colorPicker}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          { colorPicker }
+        </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({
-              id: 'tsvb.gauge.editor.labelPlaceholder',
-              defaultMessage: 'Label',
-            })}
+            placeholder={intl.formatMessage({ id: 'tsvb.gauge.editor.labelPlaceholder', defaultMessage: 'Label' })}
             value={model.label}
           />
         </EuiFlexItem>
 
-        <SeriesDragHandler
-          dragHandleProps={props.dragHandleProps}
-          hideDragHandler={props.disableDelete}
-        />
+        { dragHandle }
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({
-              id: 'tsvb.gauge.editor.addSeriesTooltip',
-              defaultMessage: 'Add Series',
-            })}
-            deleteTooltip={intl.formatMessage({
-              id: 'tsvb.gauge.editor.deleteSeriesTooltip',
-              defaultMessage: 'Delete Series',
-            })}
-            cloneTooltip={intl.formatMessage({
-              id: 'tsvb.gauge.editor.cloneSeriesTooltip',
-              defaultMessage: 'Clone Series',
-            })}
+            addTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
+            deleteTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
+            cloneTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
@@ -180,9 +197,11 @@ function GaugeSeriesUi(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {body}
+
+      { body }
     </div>
   );
+
 }
 
 GaugeSeriesUi.propTypes = {
@@ -196,16 +215,19 @@ GaugeSeriesUi.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
+  onMouseDown: PropTypes.func,
+  onSortableItemMount: PropTypes.func,
+  onSortableItemReadyToMove: PropTypes.func,
+  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   selectedTab: PropTypes.string,
+  sortData: PropTypes.string,
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool,
-  uiRestrictions: PropTypes.object,
-  dragHandleProps: PropTypes.object,
-  indexPatternForQuery: PropTypes.string,
+  visible: PropTypes.bool
 };
 
-export const GaugeSeries = injectI18n(GaugeSeriesUi);
+const GaugeSeries = injectI18n(GaugeSeriesUi);
+export default GaugeSeries;

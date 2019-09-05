@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { collectReferencesDeep } from './collect_references_deep';
+import { collectDashboards } from './collect_dashboards';
 
 
 export async function exportDashboards(req) {
@@ -26,9 +26,8 @@ export async function exportDashboards(req) {
   const config = req.server.config();
 
   const savedObjectsClient = req.getSavedObjectsClient();
-  const objectsToExport = ids.map(id => ({ id, type: 'dashboard' }));
 
-  const objects = await collectReferencesDeep(savedObjectsClient, objectsToExport);
+  const objects = await collectDashboards(savedObjectsClient, ids);
   return {
     version: config.get('pkg.version'),
     objects

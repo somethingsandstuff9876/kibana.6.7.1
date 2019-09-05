@@ -1,5 +1,4 @@
 // Discover plugin styles
-@import 'mixins';
 
 // Prefix all styles with "dsc" to avoid conflicts.
 // Examples
@@ -11,10 +10,7 @@
 @import 'components/fetch_error/index';
 @import 'components/field_chooser/index';
 @import 'directives/index';
-@import 'doc_table/index';
 
 @import 'hacks';
 
 @import 'discover';
-
-@import 'embeddable/index';

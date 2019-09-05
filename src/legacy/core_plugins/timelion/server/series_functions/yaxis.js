@@ -97,7 +97,7 @@ export default new Chainable('yaxis', {
       name: 'tickDecimals',
       types: ['number', 'null'],
       help: i18n.translate('timelion.help.functions.yaxis.args.tickDecimalsHelpText', {
-        defaultMessage: 'The number of decimal places for the y-axis tick labels.',
+        defaultMessage: 'tick decimal precision',
       }),
     },
   ],

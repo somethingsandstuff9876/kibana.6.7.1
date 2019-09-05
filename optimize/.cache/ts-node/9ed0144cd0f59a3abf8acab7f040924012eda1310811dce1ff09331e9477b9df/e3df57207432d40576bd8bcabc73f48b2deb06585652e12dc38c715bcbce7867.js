@@ -1,0 +1,37 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const base64_1 = require("./base64");
+/**
+ * Encode the sequence params into an "opaque" version string
+ * that can be used in the saved object API in place of numeric
+ * version numbers
+ */
+function encodeVersion(seqNo, primaryTerm) {
+    if (!Number.isInteger(primaryTerm)) {
+        throw new TypeError('_primary_term from elasticsearch must be an integer');
+    }
+    if (!Number.isInteger(seqNo)) {
+        throw new TypeError('_seq_no from elasticsearch must be an integer');
+    }
+    return base64_1.encodeBase64(JSON.stringify([seqNo, primaryTerm]));
+}
+exports.encodeVersion = encodeVersion;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL3NlcnZlci9zYXZlZF9vYmplY3RzL3ZlcnNpb24vZW5jb2RlX3ZlcnNpb24udHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3NyYy9zZXJ2ZXIvc2F2ZWRfb2JqZWN0cy92ZXJzaW9uL2VuY29kZV92ZXJzaW9uLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FpQkc7O0FBRUgscUNBQXdDO0FBRXhDOzs7O0dBSUc7QUFDSCxTQUFnQixhQUFhLENBQUMsS0FBYSxFQUFFLFdBQW1CO0lBQzlELElBQUksQ0FBQyxNQUFNLENBQUMsU0FBUyxDQUFDLFdBQVcsQ0FBQyxFQUFFO1FBQ2xDLE1BQU0sSUFBSSxTQUFTLENBQUMscURBQXFELENBQUMsQ0FBQztLQUM1RTtJQUVELElBQUksQ0FBQyxNQUFNLENBQUMsU0FBUyxDQUFDLEtBQUssQ0FBQyxFQUFFO1FBQzVCLE1BQU0sSUFBSSxTQUFTLENBQUMsK0NBQStDLENBQUMsQ0FBQztLQUN0RTtJQUVELE9BQU8scUJBQVksQ0FBQyxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUMsS0FBSyxFQUFFLFdBQVcsQ0FBQyxDQUFDLENBQUMsQ0FBQztBQUM1RCxDQUFDO0FBVkQsc0NBVUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogTGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZSBvciBtb3JlIGNvbnRyaWJ1dG9yXG4gKiBsaWNlbnNlIGFncmVlbWVudHMuIFNlZSB0aGUgTk9USUNFIGZpbGUgZGlzdHJpYnV0ZWQgd2l0aFxuICogdGhpcyB3b3JrIGZvciBhZGRpdGlvbmFsIGluZm9ybWF0aW9uIHJlZ2FyZGluZyBjb3B5cmlnaHRcbiAqIG93bmVyc2hpcC4gRWxhc3RpY3NlYXJjaCBCLlYuIGxpY2Vuc2VzIHRoaXMgZmlsZSB0byB5b3UgdW5kZXJcbiAqIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7IHlvdSBtYXlcbiAqIG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsXG4gKiBzb2Z0d2FyZSBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhblxuICogXCJBUyBJU1wiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTllcbiAqIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuICBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZVxuICogc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZCBsaW1pdGF0aW9uc1xuICogdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgZW5jb2RlQmFzZTY0IH0gZnJvbSAnLi9iYXNlNjQnO1xuXG4vKipcbiAqIEVuY29kZSB0aGUgc2VxdWVuY2UgcGFyYW1zIGludG8gYW4gXCJvcGFxdWVcIiB2ZXJzaW9uIHN0cmluZ1xuICogdGhhdCBjYW4gYmUgdXNlZCBpbiB0aGUgc2F2ZWQgb2JqZWN0IEFQSSBpbiBwbGFjZSBvZiBudW1lcmljXG4gKiB2ZXJzaW9uIG51bWJlcnNcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGVuY29kZVZlcnNpb24oc2VxTm86IG51bWJlciwgcHJpbWFyeVRlcm06IG51bWJlcikge1xuICBpZiAoIU51bWJlci5pc0ludGVnZXIocHJpbWFyeVRlcm0pKSB7XG4gICAgdGhyb3cgbmV3IFR5cGVFcnJvcignX3ByaW1hcnlfdGVybSBmcm9tIGVsYXN0aWNzZWFyY2ggbXVzdCBiZSBhbiBpbnRlZ2VyJyk7XG4gIH1cblxuICBpZiAoIU51bWJlci5pc0ludGVnZXIoc2VxTm8pKSB7XG4gICAgdGhyb3cgbmV3IFR5cGVFcnJvcignX3NlcV9ubyBmcm9tIGVsYXN0aWNzZWFyY2ggbXVzdCBiZSBhbiBpbnRlZ2VyJyk7XG4gIH1cblxuICByZXR1cm4gZW5jb2RlQmFzZTY0KEpTT04uc3RyaW5naWZ5KFtzZXFObywgcHJpbWFyeVRlcm1dKSk7XG59XG4iXX0=

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 const HIGH_ALERT_MESSAGE = 'High severity alert';
@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('in alerts panel, a single medium alert is shown', async () => {
         const clusterAlerts = await alerts.getOverviewAlerts();
-        await new Promise(r => setTimeout(r, 10000));
         expect(clusterAlerts.length).to.be(1);
 
         const { alertIcon, alertText } = await alerts.getOverviewAlert(0);
@@ -98,7 +97,10 @@ export default function ({ getService, getPageObjects }) {
         await alerts.clickViewAll();
         expect(await alerts.isOnListingPage()).to.be(true);
 
-        // Check the all data in the table
+        const rows = await alerts.getTableAlerts();
+        expect(rows.length).to.be(10);
+
+        // check the all data in the table
         const tableData = [
           {
             alertIcon: HIGH_ALERT_MESSAGE,
@@ -144,24 +146,18 @@ export default function ({ getService, getPageObjects }) {
           },
         ];
 
-        // In some environments, with Elasticsearch 7, the cluster's status goes yellow, which makes
-        // this test flakey, as there is occasionally an unexpected alert about this. So, we'll ignore
-        // that one.
-        const alertsAll = Array.from(await alerts.getTableAlertsAll()).filter(({ alertText }) => (
-          !alertText.includes('status is yellow')
-        ));
-        expect(alertsAll.length).to.be(tableData.length);
+        const alertsAll = await alerts.getTableAlertsAll();
 
         alertsAll.forEach((obj, index) => {
-          expect(`${alertsAll[index].alertIcon} ${alertsAll[index].alertText}`)
-            .to.be(`${tableData[index].alertIcon} ${tableData[index].alertText}`);
+          expect(alertsAll[index].alertIcon).to.be(tableData[index].alertIcon);
+          expect(alertsAll[index].alertText).to.be(tableData[index].alertText);
         });
 
         await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
       });
     });
 
-    describe('alert actions take you to the elasticsearch indices listing', () => {
+    describe('alert actions take you to the elasticsearch indices listing', async () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {

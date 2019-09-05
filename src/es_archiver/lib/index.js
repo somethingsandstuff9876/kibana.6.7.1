@@ -28,7 +28,6 @@ export {
   createGenerateIndexRecordsStream,
   deleteKibanaIndices,
   migrateKibanaIndex,
-  createDefaultSpace,
 } from './indices';
 
 export {
@@ -49,11 +48,3 @@ export {
 export {
   readDirectory
 } from './directory';
-
-export {
-  Progress
-} from './progress';
-
-export {
-  getEnabledKibanaPluginIds,
-} from './kibana_plugins';

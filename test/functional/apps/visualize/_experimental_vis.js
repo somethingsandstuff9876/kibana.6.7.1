@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default ({ getService, getPageObjects }) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('visualize app', function () {
-    this.tags('smoke');
+  describe('visualize app', () => {
 
     describe('experimental visualizations', () => {
 

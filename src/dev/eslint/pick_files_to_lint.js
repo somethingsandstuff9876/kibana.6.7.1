@@ -30,7 +30,7 @@ export function pickFilesToLint(log, files) {
   const cli = new CLIEngine();
 
   return files.filter(file => {
-    if (!file.isJs() && !file.isTypescript()) {
+    if (!file.isJs()) {
       return;
     }
 

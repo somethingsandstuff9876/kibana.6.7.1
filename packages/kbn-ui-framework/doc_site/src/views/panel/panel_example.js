@@ -27,9 +27,9 @@ import {
   GuideText,
 } from '../../components';
 
-import panelHtml from './panel.html';
-import panelWithToolBarHtml from './panel_with_toolbar.html';
-import panelWithHeaderSectionsHtml from './panel_with_header_sections.html';
+const panelHtml = require('./panel.html');
+const panelWithToolBarHtml = require('./panel_with_toolbar.html');
+const panelWithHeaderSectionsHtml = require('./panel_with_header_sections.html');
 
 export default props => (
   <GuidePage title={props.route.name}>

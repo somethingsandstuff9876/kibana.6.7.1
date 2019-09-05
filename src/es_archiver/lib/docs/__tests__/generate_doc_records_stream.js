@@ -18,17 +18,16 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { delay } from 'bluebird';
 
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
-} from '../../../../legacy/utils';
+} from '../../../../utils';
 
 import { createGenerateDocRecordsStream } from '../generate_doc_records_stream';
-import { Progress } from '../../progress';
 import {
   createStubStats,
   createStubClient,
@@ -51,14 +50,10 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       }
     ]);
 
-    const progress = new Progress();
     await createPromiseFromStreams([
       createListStream(['logstash-*']),
-      createGenerateDocRecordsStream(client, stats, progress)
+      createGenerateDocRecordsStream(client, stats)
     ]);
-
-    expect(progress.getTotal()).to.be(0);
-    expect(progress.getComplete()).to.be(0);
   });
 
   it('uses a 1 minute scroll timeout', async () => {
@@ -78,14 +73,10 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       }
     ]);
 
-    const progress = new Progress();
     await createPromiseFromStreams([
       createListStream(['logstash-*']),
-      createGenerateDocRecordsStream(client, stats, progress)
+      createGenerateDocRecordsStream(client, stats)
     ]);
-
-    expect(progress.getTotal()).to.be(0);
-    expect(progress.getComplete()).to.be(0);
   });
 
   it('consumes index names and scrolls completely before continuing', async () => {
@@ -98,7 +89,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         await delay(200);
         return {
           _scroll_id: 'index1ScrollId',
-          hits: { total: 2, hits: [ { _id: 1, _index: '.kibana_foo' } ] }
+          hits: { total: 2, hits: [ { _id: 1 } ] }
         };
       },
       async (name, params) => {
@@ -107,7 +98,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         expect(Date.now() - checkpoint).to.not.be.lessThan(200);
         checkpoint = Date.now();
         await delay(200);
-        return { hits: { total: 2, hits: [ { _id: 2, _index: 'foo' } ] } };
+        return { hits: { total: 2, hits: [ { _id: 2 } ] } };
       },
       async (name, params) => {
         expect(name).to.be('search');
@@ -119,13 +110,12 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       }
     ]);
 
-    const progress = new Progress();
     const docRecords = await createPromiseFromStreams([
       createListStream([
         'index1',
         'index2',
       ]),
-      createGenerateDocRecordsStream(client, stats, progress),
+      createGenerateDocRecordsStream(client, stats),
       createConcatStream([])
     ]);
 
@@ -133,7 +123,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       {
         type: 'doc',
         value: {
-          index: '.kibana_1',
+          index: undefined,
           type: undefined,
           id: 1,
           source: undefined
@@ -142,7 +132,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       {
         type: 'doc',
         value: {
-          index: 'foo',
+          index: undefined,
           type: undefined,
           id: 2,
           source: undefined
@@ -150,7 +140,5 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       },
     ]);
     sinon.assert.calledTwice(stats.archivedDoc);
-    expect(progress.getTotal()).to.be(2);
-    expect(progress.getComplete()).to.be(2);
   });
 });

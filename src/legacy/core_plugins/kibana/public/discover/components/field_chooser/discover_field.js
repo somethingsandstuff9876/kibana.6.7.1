@@ -18,18 +18,15 @@
  */
 
 import $ from 'jquery';
-import { i18n } from '@kbn/i18n';
 import html from './discover_field.html';
 import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
-import './string_progress_bar';
 import detailsHtml from './lib/detail_views/string.html';
-import { capabilities } from 'ui/capabilities';
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
-app.directive('discoverField', function ($compile) {
+app.directive('discoverField', function ($compile, i18n) {
   return {
     restrict: 'E',
     template: html,
@@ -51,10 +48,10 @@ app.directive('discoverField', function ($compile) {
         }
 
         $scope.addRemoveButtonLabel = $scope.field.display
-          ? i18n.translate('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
+          ? i18n('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
             defaultMessage: 'remove',
           })
-          : i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
+          : i18n('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
             defaultMessage: 'add',
           });
       };
@@ -63,7 +60,7 @@ app.directive('discoverField', function ($compile) {
         let warnings = [];
 
         if (field.scripted) {
-          warnings.push(i18n.translate('kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription', {
+          warnings.push(i18n('kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription', {
             defaultMessage: 'Scripted fields can take a long time to execute.',
           }));
         }
@@ -77,8 +74,6 @@ app.directive('discoverField', function ($compile) {
         return warnings;
 
       };
-
-      $scope.canVisualize = capabilities.get().visualize.show;
 
       $scope.toggleDisplay = function (field) {
         if (field.display) {
@@ -107,11 +102,11 @@ app.directive('discoverField', function ($compile) {
           detailScope = $scope.$new();
           detailScope.warnings = getWarnings(field);
           detailScope.getBucketAriaLabel = (bucket) => {
-            return i18n.translate('kbn.discover.fieldChooser.discoverField.bucketAriaLabel', {
+            return i18n('kbn.discover.fieldChooser.discoverField.bucketAriaLabel', {
               defaultMessage: 'Value: {value}',
               values: {
                 value: bucket.display === ''
-                  ? i18n.translate('kbn.discover.fieldChooser.discoverField.emptyStringText', {
+                  ? i18n('kbn.discover.fieldChooser.discoverField.emptyStringText', {
                     defaultMessage: 'Empty string',
                   })
                   : bucket.display,

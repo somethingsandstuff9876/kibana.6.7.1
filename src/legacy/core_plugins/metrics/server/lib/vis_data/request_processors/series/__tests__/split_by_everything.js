@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { splitByEverything } from '../split_by_everything';
+import splitByEverything from '../split_by_everything';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('splitByEverything(req, panel, series)', () => {
+
   let panel;
   let series;
   let req;
@@ -32,9 +33,9 @@ describe('splitByEverything(req, panel, series)', () => {
       payload: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z',
-        },
-      },
+          max: '2017-01-01T01:00:00Z'
+        }
+      }
     };
   });
 
@@ -51,10 +52,10 @@ describe('splitByEverything(req, panel, series)', () => {
       aggs: {
         test: {
           filter: {
-            match_all: {},
-          },
-        },
-      },
+            match_all: {}
+          }
+        }
+      }
     });
   });
 
@@ -66,4 +67,5 @@ describe('splitByEverything(req, panel, series)', () => {
     expect(next.calledOnce).to.equal(true);
     expect(doc).to.eql({});
   });
+
 });

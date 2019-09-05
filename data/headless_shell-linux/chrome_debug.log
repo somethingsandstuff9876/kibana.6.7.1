@@ -1,0 +1,83 @@
+[0905/081247.333880:WARNING:resource_bundle.cc(357)] locale_file_path.empty() for locale 
+[0905/081247.334043:INFO:cpu_info.cc(49)] Available number of cores: 8
+[0905/081247.334074:VERBOSE1:zygote_main_linux.cc(217)] ZygoteMain: initializing 0 fork delegates
+[0905/081247.357548:WARNING:resource_bundle.cc(357)] locale_file_path.empty() for locale 
+[0905/081247.358211:ERROR:egl_util.cc(60)] Failed to load GLES library: /home/anthony/git_workspaces/kibana/data/headless_shell-linux/swiftshader/libGLESv2.so: /home/anthony/git_workspaces/kibana/data/headless_shell-linux/swiftshader/libGLESv2.so: cannot open shared object file: No such file or directory
+[0905/081247.358265:VERBOSE1:gpu_init.cc(257)] gl::init::InitializeGLNoExtensionsOneOff failed
+[0905/081247.366087:ERROR:viz_main_impl.cc(170)] Exiting GPU process due to errors during initialization
+[0905/081247.367349:VERBOSE1:statistics_recorder.cc(410)] Collections of all histograms
+Histogram: ChildProcess.FieldTrials.CreateFromShmemSuccess recorded 1 samples, mean = 1.0 (flags = 0x1)
+0  O                                                                         (0 = 0.0%)
+1  ------------------------------------------------------------------------O (1 = 100.0%) {0.0%}
+2  O                                                                         (0 = 0.0%) {100.0%}
+
+Histogram: TaskScheduler.DetachDuration.ContentChild.ForegroundPool recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.HeartbeatLatencyMicroseconds.ContentChild.BackgroundTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.HeartbeatLatencyMicroseconds.ContentChild.BackgroundTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.HeartbeatLatencyMicroseconds.ContentChild.UserBlockingTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.HeartbeatLatencyMicroseconds.ContentChild.UserBlockingTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.HeartbeatLatencyMicroseconds.ContentChild.UserVisibleTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.HeartbeatLatencyMicroseconds.ContentChild.UserVisibleTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumActiveWorkers.ContentChild.ForegroundPool recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksBeforeDetach.ContentChild.ForegroundPool recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksBetweenWaits.ContentChild.ForegroundPool recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksRunWhileQueuing.ContentChild.BackgroundTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksRunWhileQueuing.ContentChild.BackgroundTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksRunWhileQueuing.ContentChild.UserBlockingTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksRunWhileQueuing.ContentChild.UserBlockingTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksRunWhileQueuing.ContentChild.UserVisibleTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumTasksRunWhileQueuing.ContentChild.UserVisibleTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.NumWorkers.ContentChild.ForegroundPool recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.TaskLatencyMicroseconds.ContentChild.BackgroundTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.TaskLatencyMicroseconds.ContentChild.BackgroundTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.TaskLatencyMicroseconds.ContentChild.UserBlockingTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.TaskLatencyMicroseconds.ContentChild.UserBlockingTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.TaskLatencyMicroseconds.ContentChild.UserVisibleTaskPriority recorded 0 samples (flags = 0x1)
+0 ... 
+
+Histogram: TaskScheduler.TaskLatencyMicroseconds.ContentChild.UserVisibleTaskPriority_MayBlock recorded 0 samples (flags = 0x1)
+0 ... 
+
+

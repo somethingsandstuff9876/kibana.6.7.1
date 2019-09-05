@@ -23,7 +23,6 @@
  */
 
 import { forEach, get } from 'lodash';
-import { coerce } from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 
 /**
@@ -62,11 +61,7 @@ export function ensureEsVersion(server, kibanaVersion) {
 
         // It's acceptable if ES and Kibana versions are not the same so long as
         // they are not incompatible, but we should warn about it
-
-        // Ignore version qualifiers
-        // https://github.com/elastic/elasticsearch/issues/36859
-        const looseMismatch = coerce(esNode.version).version !== coerce(kibanaVersion).version;
-        if (looseMismatch) {
+        if (esNode.version !== kibanaVersion) {
           warningNodes.push(esNode);
         }
       });

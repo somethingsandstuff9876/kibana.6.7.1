@@ -7,8 +7,8 @@ export default {
   'yScale': null,
   'series': [{
     'label': 'ios',
-    'id': '1',
-    'yAxisFormatter': _.identity,
+    'aggLabel': 'Count',
+    'aggId': '1',
     'values': [{
       'x': '_all',
       'y': 2820,
@@ -16,8 +16,8 @@ export default {
     }]
   }, {
     'label': 'win 7',
+    'aggLabel': 'Count',
     'aggId': '1',
-    'yAxisFormatter': _.identity,
     'values': [{
       'x': '_all',
       'y': 2319,
@@ -25,8 +25,8 @@ export default {
     }]
   }, {
     'label': 'win 8',
-    'id': '1',
-    'yAxisFormatter': _.identity,
+    'aggLabel': 'Count',
+    'aggId': '1',
     'values': [{
       'x': '_all',
       'y': 1835,
@@ -34,8 +34,8 @@ export default {
     }]
   }, {
     'label': 'windows xp service pack 2 version 20123452',
-    'id': '1',
-    'yAxisFormatter': _.identity,
+    'aggLabel': 'Count',
+    'aggId': '1',
     'values': [{
       'x': '_all',
       'y': 734,
@@ -43,8 +43,8 @@ export default {
     }]
   }, {
     'label': 'osx',
-    'id': '1',
-    'yAxisFormatter': _.identity,
+    'aggLabel': 'Count',
+    'aggId': '1',
     'values': [{
       'x': '_all',
       'y': 1352,

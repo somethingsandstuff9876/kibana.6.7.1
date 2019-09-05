@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -38,7 +38,6 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
-                esTypes: ['date'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -46,7 +45,6 @@ export default function ({ getService }) {
               {
                 name: 'number_conflict',
                 type: 'number',
-                esTypes: ['integer', 'float'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -54,7 +52,6 @@ export default function ({ getService }) {
               {
                 name: 'string_conflict',
                 type: 'string',
-                esTypes: ['text', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
@@ -62,7 +59,6 @@ export default function ({ getService }) {
               {
                 name: 'success',
                 type: 'conflict',
-                esTypes: ['boolean', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,

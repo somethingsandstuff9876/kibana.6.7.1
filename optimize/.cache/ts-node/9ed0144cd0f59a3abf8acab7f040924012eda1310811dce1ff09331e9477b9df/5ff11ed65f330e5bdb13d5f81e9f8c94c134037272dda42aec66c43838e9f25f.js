@@ -1,0 +1,14 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const d3_time_format_1 = require("d3-time-format");
+const formatDate = d3_time_format_1.timeFormat('%Y-%m-%d %H:%M:%S.%L');
+function formatTime(time) {
+    return formatDate(new Date(time));
+}
+exports.formatTime = formatTime;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvaW5mcmEvY29tbW9uL3RpbWUvdGltZS50cyIsInNvdXJjZXMiOlsiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvaW5mcmEvY29tbW9uL3RpbWUvdGltZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7R0FJRzs7QUFFSCxtREFBNEM7QUFFNUMsTUFBTSxVQUFVLEdBQUcsMkJBQVUsQ0FBQyxzQkFBc0IsQ0FBQyxDQUFDO0FBRXRELFNBQWdCLFVBQVUsQ0FBQyxJQUFZO0lBQ3JDLE9BQU8sVUFBVSxDQUFDLElBQUksSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUM7QUFDcEMsQ0FBQztBQUZELGdDQUVDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIENvcHlyaWdodCBFbGFzdGljc2VhcmNoIEIuVi4gYW5kL29yIGxpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmVcbiAqIG9yIG1vcmUgY29udHJpYnV0b3IgbGljZW5zZSBhZ3JlZW1lbnRzLiBMaWNlbnNlZCB1bmRlciB0aGUgRWxhc3RpYyBMaWNlbnNlO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBFbGFzdGljIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgdGltZUZvcm1hdCB9IGZyb20gJ2QzLXRpbWUtZm9ybWF0JztcblxuY29uc3QgZm9ybWF0RGF0ZSA9IHRpbWVGb3JtYXQoJyVZLSVtLSVkICVIOiVNOiVTLiVMJyk7XG5cbmV4cG9ydCBmdW5jdGlvbiBmb3JtYXRUaW1lKHRpbWU6IG51bWJlcikge1xuICByZXR1cm4gZm9ybWF0RGF0ZShuZXcgRGF0ZSh0aW1lKSk7XG59XG4iXX0=

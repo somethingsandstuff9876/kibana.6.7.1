@@ -126,5 +126,3 @@ export function renderWithIntl<T>(
 
   return render(nodeWithIntlProp(node), options);
 }
-
-export const nextTick = () => new Promise(res => process.nextTick(res));

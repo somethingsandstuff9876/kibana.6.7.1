@@ -20,32 +20,22 @@
 import React from 'react';
 
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import { VisualizeConstants } from '../visualize_constants';
+
+import { TypeSelection } from './type_selection';
 
 import chrome from 'ui/chrome';
 import { VisType } from 'ui/vis';
-import { VisTypeAlias } from '../../../../visualizations/public/np_ready/public';
-import { VisualizeConstants } from '../visualize_constants';
-
-import { SearchSelection } from './search_selection';
-import { TypeSelection } from './type_selection';
 
 interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: VisType[];
-  visTypeAliases?: VisTypeAlias[];
   editorParams?: string[];
 }
 
-interface TypeSelectionState {
-  showSearchVisModal: boolean;
-  visType?: VisType;
-}
-
-const baseUrl = `#${VisualizeConstants.CREATE_PATH}?`;
-
-class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState> {
+class NewVisModal extends React.Component<TypeSelectionProps> {
   public static defaultProps = {
     editorParams: [],
   };
@@ -55,10 +45,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   constructor(props: TypeSelectionProps) {
     super(props);
     this.isLabsEnabled = chrome.getUiSettingsClient().get('visualize:enableLabs');
-
-    this.state = {
-      showSearchVisModal: false,
-    };
   }
 
   public render() {
@@ -66,64 +52,26 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       return null;
     }
 
-    const visNewVisDialogAriaLabel = i18n.translate(
-      'kbn.visualize.newVisWizard.helpTextAriaLabel',
-      {
-        defaultMessage:
-          'Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further.',
-      }
-    );
-
-    const selectionModal =
-      this.state.showSearchVisModal && this.state.visType ? (
-        <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
-          <SearchSelection onSearchSelected={this.onSearchSelected} visType={this.state.visType} />
-        </EuiModal>
-      ) : (
-        <EuiModal
-          onClose={this.onCloseModal}
-          className="visNewVisDialog"
-          aria-label={visNewVisDialogAriaLabel}
-          role="menu"
-        >
+    return (
+      <EuiOverlayMask>
+        <EuiModal onClose={this.props.onClose} maxWidth={'100vw'} className="visNewVisDialog">
           <TypeSelection
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
-            visTypeAliases={this.props.visTypeAliases}
           />
         </EuiModal>
-      );
-
-    return <EuiOverlayMask>{selectionModal}</EuiOverlayMask>;
+      </EuiOverlayMask>
+    );
   }
 
-  private onCloseModal = () => {
-    this.setState({ showSearchVisModal: false });
-    this.props.onClose();
-  };
-
   private onVisTypeSelected = (visType: VisType) => {
-    if (visType.requiresSearch && visType.options.showIndexSelection) {
-      this.setState({
-        showSearchVisModal: true,
-        visType,
-      });
-    } else {
-      const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
-      this.props.onClose();
-      location.assign(`${baseUrl}${params.join('&')}`);
-    }
-  };
-
-  private onSearchSelected = (searchId: string, searchType: string) => {
+    const baseUrl =
+      visType.requiresSearch && visType.options.showIndexSelection
+        ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
+        : `#${VisualizeConstants.CREATE_PATH}?`;
+    const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
     this.props.onClose();
-
-    const params = [
-      `type=${encodeURIComponent(this.state.visType!.name)}`,
-      `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`,
-      ...this.props.editorParams!,
-    ];
     location.assign(`${baseUrl}${params.join('&')}`);
   };
 }

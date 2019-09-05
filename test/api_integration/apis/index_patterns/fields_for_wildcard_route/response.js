@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { sortBy } from 'lodash';
 
 export default function ({ getService }) {
@@ -41,7 +41,6 @@ export default function ({ getService }) {
           fields: [
             {
               type: 'boolean',
-              esTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
@@ -49,7 +48,6 @@ export default function ({ getService }) {
             },
             {
               type: 'string',
-              esTypes: ['text'],
               searchable: true,
               aggregatable: false,
               name: 'baz',
@@ -57,17 +55,13 @@ export default function ({ getService }) {
             },
             {
               type: 'string',
-              esTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
-              readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              readFromDocValues: true
             },
             {
               type: 'number',
-              esTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',
@@ -92,9 +86,8 @@ export default function ({ getService }) {
         .expect(200, {
           fields: [
             {
-              aggregatable: true,
+              aggregatable: false,
               name: '_id',
-              esTypes: ['_id'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
@@ -102,14 +95,12 @@ export default function ({ getService }) {
             {
               aggregatable: false,
               name: '_source',
-              esTypes: ['_source'],
               readFromDocValues: false,
               searchable: false,
               type: '_source',
             },
             {
               type: 'boolean',
-              esTypes: ['boolean'],
               searchable: true,
               aggregatable: true,
               name: 'bar',
@@ -118,20 +109,16 @@ export default function ({ getService }) {
             {
               aggregatable: false,
               name: 'baz',
-              esTypes: ['text'],
               readFromDocValues: false,
               searchable: true,
               type: 'string',
             },
             {
               type: 'string',
-              esTypes: ['keyword'],
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
-              readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              readFromDocValues: true
             },
             {
               aggregatable: false,
@@ -142,7 +129,6 @@ export default function ({ getService }) {
             },
             {
               type: 'number',
-              esTypes: ['long'],
               searchable: true,
               aggregatable: true,
               name: 'foo',

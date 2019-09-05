@@ -24,14 +24,6 @@ import {
   Content,
 } from './content';
 
-
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown"/>,
-  };
-});
-
-
 test('should render content with markdown', () => {
   const component = shallow(<Content
     text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}

@@ -19,24 +19,52 @@
 
 import { resolve } from 'path';
 
+import getopts from 'getopts';
 import dedent from 'dedent';
 import chalk from 'chalk';
 
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { buildDistributables } from './build_distributables';
 import { isErrorLogged } from './lib';
-import { readCliArgs } from './args';
 
 // ensure the cwd() is always the repo root
 process.chdir(resolve(__dirname, '../../../'));
 
-const { showHelp, unknownFlags, log, buildArgs } = readCliArgs(process.argv);
+const unknownFlags = [];
+const flags = getopts(process.argv.slice(0), {
+  boolean: [
+    'oss',
+    'no-oss',
+    'skip-archives',
+    'skip-os-packages',
+    'rpm',
+    'deb',
+    'docker',
+    'release',
+    'skip-node-download',
+    'verbose',
+    'debug',
+    'all-platforms'
+  ],
+  alias: {
+    v: 'verbose',
+    d: 'debug',
+  },
+  default: {
+    debug: true
+  },
+  unknown: (flag) => {
+    unknownFlags.push(flag);
+  }
+});
 
-if (unknownFlags.length) {
+if (unknownFlags.length && !flags.help) {
   const pluralized = unknownFlags.length > 1 ? 'flags' : 'flag';
   console.log(chalk`\n{red Unknown ${pluralized}: ${unknownFlags.join(', ')}}\n`);
+  flags.help = true;
 }
 
-if (showHelp) {
+if (flags.help) {
   console.log(
     dedent(chalk`
       {dim usage:} node scripts/build
@@ -53,7 +81,6 @@ if (showHelp) {
         --deb                   {dim Only build the deb package}
         --docker                {dim Only build the docker image}
         --release               {dim Produce a release-ready distributable}
-        --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
         --no-debug              {dim Turn off debug logging}
@@ -62,7 +89,44 @@ if (showHelp) {
   process.exit(1);
 }
 
-buildDistributables({ log, ...buildArgs }).catch(error => {
+// In order to build a docker image we always need
+// to generate all the platforms
+if (flags.docker) {
+  flags['all-platforms'] = true;
+}
+
+const log = new ToolingLog({
+  level: pickLevelFromFlags(flags, {
+    default: flags.debug === false ? 'info' : 'debug'
+  }),
+  writeTo: process.stdout
+});
+
+function isOsPackageDesired(name) {
+  if (flags['skip-os-packages'] || !flags['all-platforms']) {
+    return false;
+  }
+
+  // build all if no flags specified
+  if (flags.rpm === undefined && flags.deb === undefined && flags.docker === undefined) {
+    return true;
+  }
+
+  return Boolean(flags[name]);
+}
+
+buildDistributables({
+  log,
+  isRelease: Boolean(flags.release),
+  buildOssDist: flags.oss !== false,
+  buildDefaultDist: !flags.oss,
+  downloadFreshNode: !Boolean(flags['skip-node-download']),
+  createArchives: !Boolean(flags['skip-archives']),
+  createRpmPackage: isOsPackageDesired('rpm'),
+  createDebPackage: isOsPackageDesired('deb'),
+  createDockerPackage: isOsPackageDesired('docker'),
+  targetAllPlatforms: Boolean(flags['all-platforms']),
+}).catch(error => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');
     log.error(error);

@@ -1,0 +1,19 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const lodash_1 = require("lodash");
+/**
+ * Returns whether the given Space is reserved or not.
+ *
+ * @param space the space
+ * @returns boolean
+ */
+function isReservedSpace(space) {
+    return lodash_1.get(space, '_reserved', false);
+}
+exports.isReservedSpace = isReservedSpace;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvc3BhY2VzL2NvbW1vbi9pc19yZXNlcnZlZF9zcGFjZS50cyIsInNvdXJjZXMiOlsiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvc3BhY2VzL2NvbW1vbi9pc19yZXNlcnZlZF9zcGFjZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7R0FJRzs7QUFFSCxtQ0FBNkI7QUFHN0I7Ozs7O0dBS0c7QUFDSCxTQUFnQixlQUFlLENBQUMsS0FBNkI7SUFDM0QsT0FBTyxZQUFHLENBQUMsS0FBSyxFQUFFLFdBQVcsRUFBRSxLQUFLLENBQUMsQ0FBQztBQUN4QyxDQUFDO0FBRkQsMENBRUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IEVsYXN0aWNzZWFyY2ggQi5WLiBhbmQvb3IgbGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZVxuICogb3IgbW9yZSBjb250cmlidXRvciBsaWNlbnNlIGFncmVlbWVudHMuIExpY2Vuc2VkIHVuZGVyIHRoZSBFbGFzdGljIExpY2Vuc2U7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIEVsYXN0aWMgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQgeyBnZXQgfSBmcm9tICdsb2Rhc2gnO1xuaW1wb3J0IHsgU3BhY2UgfSBmcm9tICcuL21vZGVsL3NwYWNlJztcblxuLyoqXG4gKiBSZXR1cm5zIHdoZXRoZXIgdGhlIGdpdmVuIFNwYWNlIGlzIHJlc2VydmVkIG9yIG5vdC5cbiAqXG4gKiBAcGFyYW0gc3BhY2UgdGhlIHNwYWNlXG4gKiBAcmV0dXJucyBib29sZWFuXG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBpc1Jlc2VydmVkU3BhY2Uoc3BhY2U/OiBQYXJ0aWFsPFNwYWNlPiB8IG51bGwpOiBib29sZWFuIHtcbiAgcmV0dXJuIGdldChzcGFjZSwgJ19yZXNlcnZlZCcsIGZhbHNlKTtcbn1cbiJdfQ==

@@ -17,32 +17,33 @@
  * under the License.
  */
 
-import { splitByTerms } from '../split_by_terms';
+import splitByTerms from '../split_by_terms';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('splitByTerms(req, panel, series)', () => {
+
   let panel;
   let series;
   let req;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp',
+      time_field: 'timestamp'
     };
     series = {
       id: 'test',
       split_mode: 'terms',
       terms_size: 10,
       terms_field: 'host',
-      metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }],
+      metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }]
     };
     req = {
       payload: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z',
-        },
-      },
+          max: '2017-01-01T01:00:00Z'
+        }
+      }
     };
   });
 
@@ -61,18 +62,18 @@ describe('splitByTerms(req, panel, series)', () => {
           terms: {
             field: 'host',
             order: {
-              _count: 'desc',
+              _count: 'desc'
             },
-            size: 10,
-          },
-        },
-      },
+            size: 10
+          }
+        }
+      }
     });
   });
 
   it('returns a valid terms agg sort by terms', () => {
     const next = doc => doc;
-    series.terms_order_by = '_key';
+    series.terms_order_by = '_term';
     series.terms_direction = 'asc';
     const doc = splitByTerms(req, panel, series)(next)({});
     expect(doc).to.eql({
@@ -81,12 +82,12 @@ describe('splitByTerms(req, panel, series)', () => {
           terms: {
             field: 'host',
             order: {
-              _key: 'asc',
+              _term: 'asc'
             },
-            size: 10,
-          },
-        },
-      },
+            size: 10
+          }
+        }
+      }
     });
   });
 
@@ -101,18 +102,18 @@ describe('splitByTerms(req, panel, series)', () => {
             field: 'host',
             size: 10,
             order: {
-              'avgmetric-SORT': 'desc',
-            },
+              'avgmetric-SORT': 'desc'
+            }
           },
           aggs: {
             'avgmetric-SORT': {
               avg: {
-                field: 'cpu',
-              },
-            },
-          },
-        },
-      },
+                field: 'cpu'
+              }
+            }
+          }
+        }
+      }
     });
   });
 
@@ -123,4 +124,7 @@ describe('splitByTerms(req, panel, series)', () => {
     expect(next.calledOnce).to.equal(true);
     expect(doc).to.eql({});
   });
+
 });
+
+

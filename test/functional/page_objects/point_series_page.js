@@ -40,12 +40,12 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async getValueAxesCount() {
-      const axes = await find.allByCssSelector('.visEditorSidebar__section:contains("Value Axes") > .visEditorSidebar__section');
+      const axes = await find.allByCssSelector('.kuiSideBarSection:contains("Value Axes") > .kuiSideBarSection');
       return axes.length;
     }
 
     async getSeriesCount() {
-      const series = await find.allByCssSelector('.visEditorSidebar__section:contains("Series") > .visEditorSidebar__section');
+      const series = await find.allByCssSelector('.kuiSideBarSection:contains("Series") > .kuiSideBarSection');
       return series.length;
     }
 
@@ -74,16 +74,15 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async toggleGridCategoryLines() {
-      return await testSubjects.click('showCategoryLines');
+      return await find.clickByCssSelector('#showCategoryLines');
     }
 
     async setGridValueAxis(axis) {
-      log.debug(`setGridValueAxis(${axis})`);
       return await find.clickByCssSelector(`select#gridAxis option[value="${axis}"]`);
     }
 
     async toggleCollapsibleTitle(title) {
-      const sidebarTitles = await find.allByCssSelector('.visEditorSidebar__collapsibleTitle .visEditorSidebar__collapsibleTitleText');
+      const sidebarTitles = await find.allByCssSelector('.kuiSideBarCollapsibleTitle .kuiSideBarCollapsibleTitle__text');
       log.debug('found sidebar titles ' + sidebarTitles.length);
 
       return Promise.all(sidebarTitles.map(async (titleDiv) => {

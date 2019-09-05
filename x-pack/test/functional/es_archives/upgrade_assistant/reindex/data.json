@@ -2,26 +2,26 @@
   "type": "doc",
   "value": {
     "index": "dummydata",
+    "type": "_doc",
     "source": {
       "@timestamp": "2018-10-30T18:51:56.792Z",
       "host": {
-        "architecture": "x86_64",
         "name": "foo.home",
+        "architecture": "x86_64",
         "os": {
-          "build": "18A391",
+          "version": "10.14",
           "family": "darwin",
-          "platform": "darwin",
-          "version": "10.14"
+          "build": "18A391",
+          "platform": "darwin"
         }
       },
-      "https": true,
-      "response_ms": 114,
       "versions": [
         "1.0.0",
         "8.8.4"
-      ]
-    },
-    "type": "_doc"
+      ],
+      "https": true,
+      "response_ms": 114
+    }
   }
 }
 
@@ -29,25 +29,25 @@
   "type": "doc",
   "value": {
     "index": "dummydata",
+    "type": "_doc",
     "source": {
       "@timestamp": "2018-12-30T18:51:56.792Z",
       "host": {
-        "architecture": "x86_64",
         "name": "bar.home",
+        "architecture": "x86_64",
         "os": {
-          "build": "18AXX",
+          "version": "10.12",
           "family": "darwin",
-          "platform": "darwin",
-          "version": "10.12"
+          "build": "18AXX",
+          "platform": "darwin"
         }
       },
-      "https": false,
-      "response_ms": 1567,
       "versions": [
         "0.4"
-      ]
-    },
-    "type": "_doc"
+      ],
+      "https": false,
+      "response_ms": 1567
+    }
   }
 }
 
@@ -55,23 +55,23 @@
   "type": "doc",
   "value": {
     "index": "dummydata",
+    "type": "_doc",
     "source": {
       "@timestamp": "2018-01-30T18:51:56.792Z",
       "host": {
-        "architecture": "x86_64",
         "name": "qux.home",
+        "architecture": "x86_64",
         "os": {
-          "build": "YYY",
+          "version": "3.24",
           "family": "linux",
-          "platform": "linux",
-          "version": "3.24"
+          "build": "YYY",
+          "platform": "linux"
         }
       },
-      "https": true,
-      "response_ms": 94,
       "versions": [
-      ]
-    },
-    "type": "_doc"
+      ],
+      "https": true,
+      "response_ms": 94
+    }
   }
 }

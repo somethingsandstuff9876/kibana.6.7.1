@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Wreck from '@hapi/wreck';
+import Wreck from 'wreck';
 import Progress from '../progress';
 import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';

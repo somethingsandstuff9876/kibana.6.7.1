@@ -29,7 +29,8 @@ function formatErrorResponse(e, h) {
   }).code(500);
 }
 
-export function runRoute(server) {
+
+export default function (server) {
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',
@@ -70,4 +71,5 @@ export function runRoute(server) {
       }
     }
   });
+
 }

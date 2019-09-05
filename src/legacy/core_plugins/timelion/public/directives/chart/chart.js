@@ -18,11 +18,9 @@
  */
 import panelRegistryProvider from '../../lib/panel_registry';
 
-import { i18n } from '@kbn/i18n';
-
 require('ui/modules')
   .get('apps/timelion', [])
-  .directive('chart', function (Private) {
+  .directive('chart', function (Private, i18n) {
     return {
       restrict: 'A',
       scope: {
@@ -49,7 +47,7 @@ require('ui/modules')
 
           if (!panelSchema) {
             $elem.text(
-              i18n.translate('timelion.chart.seriesList.noSchemaWarning', {
+              i18n('timelion.chart.seriesList.noSchemaWarning', {
                 defaultMessage: 'No such panel type: {renderType}',
                 values: { renderType: $scope.seriesList.render.type },
               })

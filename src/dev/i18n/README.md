@@ -4,7 +4,7 @@
 
 ### Description
 
-The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, pug}` files in provided plugins directories to a JSON file.
+The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, handlebars, hbs, pug}` files in provided plugins directories to a JSON file.
 
 It uses Babel to parse code and build an AST for each file or a single JS expression if whole file parsing is impossible. The tool is able to validate, extract and match IDs, default messages and descriptions only if they are defined statically and together, otherwise it will fail with detailed explanation. That means one can't define ID in one place and default message in another, or use function call to dynamically create default message etc.
 
@@ -128,6 +128,15 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
 
   * Expression in `#{...}` is parsed as a JS expression.
 
+* **Handlebars (.handlebars, .hbs)**
+
+  ```hbs
+  {{i18n 'pluginNamespace.messageId' '{"defaultMessage": "Default message string literal", "description": "Message context or description"}'}}
+  ```
+
+  * The `values` and `description` are optional.
+  * The third token (the second argument of i18n function call) should be a string literal that contains a valid JSON.
+
 ### Usage
 
 ```bash
@@ -175,11 +184,11 @@ The tool throws an exception if `formats` object is missing in locale file.
 ### Usage
 
 ```bash
-node scripts/i18n_integrate --source path/to/locale.json --target x-pack/legacy/plugins/translations/translations/locale.json
+node scripts/i18n_integrate --source path/to/locale.json --target x-pack/plugins/translations/translations/locale.json
 ```
 
 * `--source` path to the JSON file with translations that should be integrated.
-* `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from
+* `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from 
 [.i18nrc.json](../../../.i18nrc.json) are ignored in this case. It's currently used for integrating of Kibana built-in
 translations that are located in a single JSON file within `x-pack/translations` plugin.
 * `--dry-run` tells the tool to exit after verification phase and not write translations to the disk.

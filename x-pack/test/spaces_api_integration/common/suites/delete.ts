@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -26,6 +26,16 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+  const createExpectLegacyForbidden = (username: string, action: string) => (resp: {
+    [key: string]: any;
+  }) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`,
+    });
+  };
+
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -66,19 +76,11 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 9,
+        doc_count: 4,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 2,
-            },
             {
               key: 'space',
               doc_count: 2,
@@ -88,33 +90,25 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               doc_count: 1,
             },
             {
-              key: 'index-pattern',
+              key: 'dashboard',
               doc_count: 1,
             },
           ],
         },
       },
       {
-        doc_count: 7,
+        doc_count: 2,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 2,
-            },
-            {
               key: 'config',
               doc_count: 1,
             },
             {
-              key: 'index-pattern',
+              key: 'dashboard',
               doc_count: 1,
             },
           ],
@@ -180,7 +174,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.exists.response);
       });
 
-      describe(`when the space is reserved`, () => {
+      describe(`when the space is reserved`, async () => {
         it(`should return ${tests.reservedSpace.statusCode}`, async () => {
           return supertest
             .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
@@ -207,6 +201,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   deleteTest.only = makeDeleteTest(describe.only);
 
   return {
+    createExpectLegacyForbidden,
     createExpectResult,
     deleteTest,
     expectEmptyResult,

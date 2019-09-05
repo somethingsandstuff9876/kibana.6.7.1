@@ -11,13 +11,12 @@ export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['grokDebugger']);
 
-  describe('grok debugger app', function () {
-    this.tags('smoke');
+  describe('grok debugger app', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
       // Increase window height to ensure "Simulate" button is shown above the
       // fold. Otherwise it can't be clicked by the browser driver.
-      await browser.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
 
       await PageObjects.grokDebugger.gotoGrokDebugger();
     });

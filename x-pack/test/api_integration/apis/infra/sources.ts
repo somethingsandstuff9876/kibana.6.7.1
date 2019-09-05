@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import gql from 'graphql-tag';
 
-import { sourceQuery } from '../../../../legacy/plugins/infra/public/containers/source/query_source.gql_query';
-import {
-  sourceConfigurationFieldsFragment,
-  sourceStatusFieldsFragment,
-} from '../../../../legacy/plugins/infra/public/containers/source/source_fields_fragment.gql_query';
-import { SourceQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
+import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
+import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
+import { KbnTestProvider } from './types';
 
-export default function({ getService }: FtrProviderContext) {
+const sourcesTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -42,13 +37,9 @@ export default function({ getService }: FtrProviderContext) {
         expect(sourceConfiguration.name).to.be('Default');
         expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
         expect(sourceConfiguration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
-        expect(sourceConfiguration.fields.container).to.be('container.id');
+        expect(sourceConfiguration.fields.container).to.be('docker.container.id');
         expect(sourceConfiguration.fields.host).to.be('host.name');
         expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
-        expect(sourceConfiguration.logColumns).to.have.length(3);
-        expect(sourceConfiguration.logColumns[0]).to.have.key('timestampColumn');
-        expect(sourceConfiguration.logColumns[1]).to.have.key('fieldColumn');
-        expect(sourceConfiguration.logColumns[2]).to.have.key('messageColumn');
 
         // test data in x-pack/test/functional/es_archives/infra/data.json.gz
         expect(sourceStatus.indexFields.length).to.be(1765);
@@ -62,7 +53,7 @@ export default function({ getService }: FtrProviderContext) {
         const response = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            sourceProperties: {
+            source: {
               name: 'NAME',
               description: 'DESCRIPTION',
               logAlias: 'filebeat-**',
@@ -74,13 +65,6 @@ export default function({ getService }: FtrProviderContext) {
                 tiebreaker: 'TIEBREAKER',
                 timestamp: 'TIMESTAMP',
               },
-              logColumns: [
-                {
-                  messageColumn: {
-                    id: 'MESSAGE_COLUMN',
-                  },
-                },
-              ],
             },
             sourceId: 'default',
           },
@@ -100,9 +84,6 @@ export default function({ getService }: FtrProviderContext) {
         expect(configuration.fields.pod).to.be('POD');
         expect(configuration.fields.tiebreaker).to.be('TIEBREAKER');
         expect(configuration.fields.timestamp).to.be('TIMESTAMP');
-        expect(configuration.logColumns).to.have.length(1);
-        expect(configuration.logColumns[0]).to.have.key('messageColumn');
-
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
@@ -111,7 +92,7 @@ export default function({ getService }: FtrProviderContext) {
         const response = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            sourceProperties: {
+            source: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -127,12 +108,11 @@ export default function({ getService }: FtrProviderContext) {
         expect(configuration.description).to.be('');
         expect(configuration.metricAlias).to.be('metricbeat-*');
         expect(configuration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
-        expect(configuration.fields.container).to.be('container.id');
+        expect(configuration.fields.container).to.be('docker.container.id');
         expect(configuration.fields.host).to.be('host.name');
         expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
         expect(configuration.fields.tiebreaker).to.be('_doc');
         expect(configuration.fields.timestamp).to.be('@timestamp');
-        expect(configuration.logColumns).to.have.length(3);
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
@@ -141,7 +121,7 @@ export default function({ getService }: FtrProviderContext) {
         await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            sourceProperties: {
+            source: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -152,7 +132,7 @@ export default function({ getService }: FtrProviderContext) {
           .mutate<any>({
             mutation: createSourceMutation,
             variables: {
-              sourceProperties: {
+              source: {
                 name: 'NAME',
               },
               sourceId: 'default',
@@ -174,7 +154,7 @@ export default function({ getService }: FtrProviderContext) {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            sourceProperties: {
+            source: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -199,11 +179,11 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('updateSource mutation', () => {
-      it('applies all top-level field updates to an existing source', async () => {
+      it('applies multiple updates to an existing source', async () => {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            sourceProperties: {
+            source: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -220,12 +200,33 @@ export default function({ getService }: FtrProviderContext) {
           mutation: updateSourceMutation,
           variables: {
             sourceId: 'default',
-            sourceProperties: {
-              name: 'UPDATED_NAME',
-              description: 'UPDATED_DESCRIPTION',
-              metricAlias: 'metricbeat-**',
-              logAlias: 'filebeat-**',
-            },
+            changes: [
+              {
+                setName: {
+                  name: 'UPDATED_NAME',
+                },
+              },
+              {
+                setDescription: {
+                  description: 'UPDATED_DESCRIPTION',
+                },
+              },
+              {
+                setAliases: {
+                  logAlias: 'filebeat-**',
+                  metricAlias: 'metricbeat-**',
+                },
+              },
+              {
+                setFields: {
+                  container: 'UPDATED_CONTAINER',
+                  host: 'UPDATED_HOST',
+                  pod: 'UPDATED_POD',
+                  tiebreaker: 'UPDATED_TIEBREAKER',
+                  timestamp: 'UPDATED_TIMESTAMP',
+                },
+              },
+            ],
           },
         });
 
@@ -239,21 +240,20 @@ export default function({ getService }: FtrProviderContext) {
         expect(configuration.description).to.be('UPDATED_DESCRIPTION');
         expect(configuration.metricAlias).to.be('metricbeat-**');
         expect(configuration.logAlias).to.be('filebeat-**');
-        expect(configuration.fields.host).to.be('host.name');
-        expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
-        expect(configuration.fields.tiebreaker).to.be('_doc');
-        expect(configuration.fields.timestamp).to.be('@timestamp');
-        expect(configuration.fields.container).to.be('container.id');
-        expect(configuration.logColumns).to.have.length(3);
+        expect(configuration.fields.container).to.be('UPDATED_CONTAINER');
+        expect(configuration.fields.host).to.be('UPDATED_HOST');
+        expect(configuration.fields.pod).to.be('UPDATED_POD');
+        expect(configuration.fields.tiebreaker).to.be('UPDATED_TIEBREAKER');
+        expect(configuration.fields.timestamp).to.be('UPDATED_TIMESTAMP');
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
 
-      it('applies a single top-level update to an existing source', async () => {
+      it('updates a single alias', async () => {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            sourceProperties: {
+            source: {
               name: 'NAME',
             },
             sourceId: 'default',
@@ -270,9 +270,13 @@ export default function({ getService }: FtrProviderContext) {
           mutation: updateSourceMutation,
           variables: {
             sourceId: 'default',
-            sourceProperties: {
-              metricAlias: 'metricbeat-**',
-            },
+            changes: [
+              {
+                setAliases: {
+                  metricAlias: 'metricbeat-**',
+                },
+              },
+            ],
           },
         });
 
@@ -288,15 +292,12 @@ export default function({ getService }: FtrProviderContext) {
         expect(status.metricIndicesExist).to.be(true);
       });
 
-      it('applies a single nested field update to an existing source', async () => {
+      it('updates a single field', async () => {
         const creationResponse = await client.mutate<any>({
           mutation: createSourceMutation,
           variables: {
-            sourceProperties: {
+            source: {
               name: 'NAME',
-              fields: {
-                host: 'HOST',
-              },
             },
             sourceId: 'default',
           },
@@ -312,11 +313,13 @@ export default function({ getService }: FtrProviderContext) {
           mutation: updateSourceMutation,
           variables: {
             sourceId: 'default',
-            sourceProperties: {
-              fields: {
-                container: 'UPDATED_CONTAINER',
+            changes: [
+              {
+                setFields: {
+                  container: 'UPDATED_CONTAINER',
+                },
               },
-            },
+            ],
           },
         });
 
@@ -327,82 +330,45 @@ export default function({ getService }: FtrProviderContext) {
         expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.fields.container).to.be('UPDATED_CONTAINER');
-        expect(configuration.fields.host).to.be('HOST');
+        expect(configuration.fields.host).to.be('host.name');
         expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
         expect(configuration.fields.tiebreaker).to.be('_doc');
         expect(configuration.fields.timestamp).to.be('@timestamp');
       });
-
-      it('applies a log column update to an existing source', async () => {
-        const creationResponse = await client.mutate<any>({
-          mutation: createSourceMutation,
-          variables: {
-            sourceProperties: {
-              name: 'NAME',
-            },
-            sourceId: 'default',
-          },
-        });
-
-        const { version: initialVersion, updatedAt: createdAt } =
-          creationResponse.data && creationResponse.data.createSource.source;
-
-        expect(initialVersion).to.be.a('string');
-        expect(createdAt).to.be.greaterThan(0);
-
-        const updateResponse = await client.mutate<any>({
-          mutation: updateSourceMutation,
-          variables: {
-            sourceId: 'default',
-            sourceProperties: {
-              logColumns: [
-                {
-                  fieldColumn: {
-                    id: 'ADDED_COLUMN_ID',
-                    field: 'ADDED_COLUMN_FIELD',
-                  },
-                },
-              ],
-            },
-          },
-        });
-
-        const { version, updatedAt, configuration } =
-          updateResponse.data && updateResponse.data.updateSource.source;
-
-        expect(version).to.be.a('string');
-        expect(version).to.not.be(initialVersion);
-        expect(updatedAt).to.be.greaterThan(createdAt);
-        expect(configuration.logColumns).to.have.length(1);
-        expect(configuration.logColumns[0]).to.have.key('fieldColumn');
-        expect(configuration.logColumns[0].fieldColumn).to.have.property('id', 'ADDED_COLUMN_ID');
-        expect(configuration.logColumns[0].fieldColumn).to.have.property(
-          'field',
-          'ADDED_COLUMN_FIELD'
-        );
-      });
     });
   });
-}
+};
+
+// tslint:disable-next-line no-default-export
+export default sourcesTests;
 
 const createSourceMutation = gql`
-  mutation createSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {
-    createSource(id: $sourceId, sourceProperties: $sourceProperties) {
+  mutation createSource($sourceId: ID!, $source: CreateSourceInput!) {
+    createSource(id: $sourceId, source: $source) {
       source {
-        ...InfraSourceFields
+        id
+        version
+        updatedAt
         configuration {
-          ...SourceConfigurationFields
+          name
+          description
+          metricAlias
+          logAlias
+          fields {
+            container
+            host
+            pod
+            tiebreaker
+            timestamp
+          }
         }
         status {
-          ...SourceStatusFields
+          logIndicesExist
+          metricIndicesExist
         }
       }
     }
   }
-
-  ${sharedFragments.InfraSourceFields}
-  ${sourceConfigurationFieldsFragment}
-  ${sourceStatusFieldsFragment}
 `;
 
 const deleteSourceMutation = gql`
@@ -414,21 +380,30 @@ const deleteSourceMutation = gql`
 `;
 
 const updateSourceMutation = gql`
-  mutation updateSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {
-    updateSource(id: $sourceId, sourceProperties: $sourceProperties) {
+  mutation updateSource($sourceId: ID!, $changes: [UpdateSourceInput!]!) {
+    updateSource(id: $sourceId, changes: $changes) {
       source {
-        ...InfraSourceFields
+        id
+        version
+        updatedAt
         configuration {
-          ...SourceConfigurationFields
+          name
+          description
+          metricAlias
+          logAlias
+          fields {
+            container
+            host
+            pod
+            tiebreaker
+            timestamp
+          }
         }
         status {
-          ...SourceStatusFields
+          logIndicesExist
+          metricIndicesExist
         }
       }
     }
   }
-
-  ${sharedFragments.InfraSourceFields}
-  ${sourceConfigurationFieldsFragment}
-  ${sourceStatusFieldsFragment}
 `;

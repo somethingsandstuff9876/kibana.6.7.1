@@ -93,7 +93,6 @@ const foo = `You won't believe this.`;
 
 // bad
 const foo = 'You won\'t believe this.';
-const foo = "You won't believe this.";
 ```
 
 ## Use object destructuring

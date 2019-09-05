@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('histogram agg onSearchRequestStart', function () {
     before(async function () {
@@ -34,9 +34,10 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = Split Rows');
-      await PageObjects.visualize.clickBucket('Split rows');
+      await PageObjects.visualize.clickBucket('Split Rows');
       log.debug('Aggregation = Histogram');
       await PageObjects.visualize.selectAggregation('Histogram');
       log.debug('Field = machine.ram');

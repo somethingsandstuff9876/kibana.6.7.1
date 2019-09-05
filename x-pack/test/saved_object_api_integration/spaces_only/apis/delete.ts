@@ -5,10 +5,11 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { deleteTestSuiteFactory } from '../../common/suites/delete';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -18,7 +19,6 @@ export default function({ getService }: FtrProviderContext) {
       createExpectUnknownDocNotFound,
       deleteTest,
       expectEmpty,
-      expectGenericNotFound,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
     deleteTest(`in the default space`, {
@@ -31,10 +31,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectGenericNotFound,
         },
         invalidId: {
           statusCode: 404,
@@ -54,10 +50,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: expectEmpty,
         },
-        hiddenType: {
-          statusCode: 404,
-          response: expectGenericNotFound,
-        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
@@ -76,10 +68,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectGenericNotFound,
         },
         invalidId: {
           statusCode: 404,

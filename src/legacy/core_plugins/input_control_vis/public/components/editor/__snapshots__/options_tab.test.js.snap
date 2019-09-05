@@ -1,13 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OptionsTab should renders OptionsTab 1`] = `
+exports[`renders OptionsTab 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="updateFiltersOnChange"
-    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -27,7 +26,6 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="useTimeFilter"
-    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -47,13 +45,12 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="pinFilters"
-    labelType="label"
   >
     <EuiSwitch
       data-test-subj="inputControlEditorPinFiltersCheckbox"
       label={
         <FormattedMessage
-          defaultMessage="Pin filters for all applications"
+          defaultMessage="Pin filters to global state"
           id="inputControl.editor.optionsTab.pinFiltersLabel"
           values={Object {}}
         />

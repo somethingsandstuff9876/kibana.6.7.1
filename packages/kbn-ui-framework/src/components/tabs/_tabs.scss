@@ -1,6 +1,10 @@
 .kuiTabs {
   display: flex;
   border-bottom: $kuiBorderThin;
+
+  @include darkTheme {
+    border-bottom: 1px solid $tabBorderColor--darkTheme;
+  }
 }
 
 
@@ -21,6 +25,12 @@
   border: 1px solid $kuiBorderColor;
   border-radius: 0; /* 1 */
   margin-bottom: -1px; /* 3 */
+
+  @include darkTheme {
+    color: $tabColor--darkTheme;
+    background-color: $tabBackgroundColor--darkTheme;
+    border-color: $tabBorderColor--darkTheme;
+  }
 
   & + & {
     border-left: none;
@@ -43,11 +53,22 @@
     z-index: 1;
     color: $kuiLinkColor;
     border: 1px solid $kuiSelectedBorderColor !important;
+
+    @include darkTheme {
+      color: $tabColor--darkTheme;
+      background-color: $tabBackgroundColor--darkTheme;
+      border-color: $tabBorderColor--darkTheme !important;
+    }
   }
 
   &:hover:not(.kuiTab-isSelected) {
     color: $kuiLinkHoverColor;
     background-color: $tabHoverBackgroundColor;
+
+    @include darkTheme {
+      color: $kuiLinkColor-isHover--darkTheme;
+      background-color: $tabHoverBackgroundColor--darkTheme;
+    }
   }
 
   &.kuiTab-isSelected {
@@ -55,5 +76,11 @@
     color: $kuiFontColor;
     background-color: $tabBackgroundColor;
     border-bottom-color: $tabBackgroundColor;
+
+    @include darkTheme {
+      color: $tabColor--darkTheme;
+      background-color: $tabBackgroundColor--darkTheme;
+      border-bottom-color: $tabBackgroundColor--darkTheme;
+    }
   }
 }

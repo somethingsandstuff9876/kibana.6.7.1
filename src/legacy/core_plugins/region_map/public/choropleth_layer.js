@@ -24,6 +24,7 @@ import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { uiModules } from 'ui/modules';
 import * as topojson from 'topojson-client';
 import { toastNotifications } from 'ui/notify';
 import * as colorUtil from 'ui/vis/map/color_util';
@@ -34,6 +35,15 @@ const EMPTY_STYLE = {
   color: 'rgb(200,200,200)',
   fillOpacity: 0
 };
+
+
+const emsServiceSettings = new Promise((resolve) => {
+  uiModules.get('kibana').run(($injector) => {
+    const serviceSttings = $injector.get('serviceSettings');
+    resolve(serviceSttings);
+  });
+});
+
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
@@ -68,10 +78,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  constructor(name, attribution, format, showAllShapes, meta, layerConfig, serviceSettings) {
+  constructor(name, attribution, format, showAllShapes, meta, layerConfig) {
 
     super();
-    this._serviceSettings = serviceSettings;
+
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]].value;
@@ -183,7 +193,8 @@ CORS configuration of the server permits requests from the Kibana application on
 
   //This method is stubbed in the tests to avoid network request during unit tests.
   async _makeJsonAjaxCall() {
-    return this._serviceSettings.getJsonForRegionLayer(this._layerConfig);
+    const serviceSettings = await emsServiceSettings;
+    return serviceSettings.getJsonForRegionLayer(this._layerConfig);
   }
 
   _invalidateJoin() {
@@ -230,7 +241,7 @@ CORS configuration of the server permits requests from the Kibana application on
     return this._layerName;
   }
 
-  setTooltipFormatter(tooltipFormatter, fieldFormatter, fieldName, metricLabel) {
+  setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName) {
     this._tooltipFormatter = (geojsonFeature) => {
       if (!this._metrics) {
         return '';
@@ -238,7 +249,7 @@ CORS configuration of the server permits requests from the Kibana application on
       const match = this._metrics.find((bucket) => {
         return compareLexicographically(bucket.term, geojsonFeature.properties[this._joinField]) === 0;
       });
-      return tooltipFormatter(match, fieldFormatter, fieldName, metricLabel);
+      return tooltipFormatter(metricsAgg, match, fieldName);
     };
   }
 
@@ -251,14 +262,14 @@ CORS configuration of the server permits requests from the Kibana application on
     this._setStyle();
   }
 
-  cloneChoroplethLayerForNewData(name, attribution, format, showAllData, meta, layerConfig, serviceSettings) {
-    const clonedLayer = new ChoroplethLayer(name, attribution, format, showAllData, meta, layerConfig, serviceSettings);
+  cloneChoroplethLayerForNewData(name, attribution, format, showAllData, meta, layerConfig) {
+    const clonedLayer = new ChoroplethLayer(name, attribution, format, showAllData, meta, layerConfig);
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
     clonedLayer.setLineWeight(this._lineWeight);
     clonedLayer.setTooltipFormatter(this._tooltipFormatter);
-    if (this._metrics) {
-      clonedLayer.setMetrics(this._metrics, this._valueFormatter, this._metricTitle);
+    if (this._metrics && this._metricsAgg) {
+      clonedLayer.setMetrics(this._metrics, this._metricsAgg);
     }
     return clonedLayer;
   }
@@ -278,10 +289,11 @@ CORS configuration of the server permits requests from the Kibana application on
     return this._whenDataLoaded;
   }
 
-  setMetrics(metrics, fieldFormatter, metricTitle) {
+  setMetrics(metrics, metricsAgg) {
     this._metrics = metrics.slice();
-    this._valueFormatter = fieldFormatter;
-    this._metricTitle = metricTitle;
+
+    this._metricsAgg = metricsAgg;
+    this._valueFormatter = this._metricsAgg.fieldFormatter();
 
     this._metrics.sort((a, b) => compareLexicographically(a.term, b.term));
     this._invalidateJoin();
@@ -334,11 +346,11 @@ CORS configuration of the server permits requests from the Kibana application on
 
   appendLegendContents(jqueryDiv) {
 
-    if (!this._legendColors || !this._legendQuantizer) {
+    if (!this._legendColors || !this._legendQuantizer || !this._metricsAgg) {
       return;
     }
 
-    const titleText = this._metricTitle;
+    const titleText = this._metricsAgg.makeLabel();
     const $title = $('<div>').addClass('visMapLegend__title').text(titleText);
     jqueryDiv.append($title);
 
@@ -346,9 +358,7 @@ CORS configuration of the server permits requests from the Kibana application on
 
       const labelText = this._legendQuantizer
         .invertExtent(color)
-        .map(val => {
-          return this._valueFormatter.convert(val);
-        })
+        .map(this._valueFormatter)
         .join(' – ');
 
       const label = $('<div>');

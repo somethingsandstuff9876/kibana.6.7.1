@@ -54,9 +54,7 @@ export function replaceTemplateStrings(text, params = {}) {
           filebeat: documentationLinks.filebeat.base,
           metricbeat: documentationLinks.metricbeat.base,
           heartbeat: documentationLinks.heartbeat.base,
-          functionbeat: documentationLinks.functionbeat.base,
-          winlogbeat: documentationLinks.winlogbeat.base,
-          auditbeat: documentationLinks.auditbeat.base,
+          functionbeat: documentationLinks.functionbeat.base
         },
         logstash: documentationLinks.logstash.base,
         version: DOC_LINK_VERSION

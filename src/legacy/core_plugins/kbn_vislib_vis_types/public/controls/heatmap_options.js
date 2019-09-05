@@ -18,12 +18,11 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { i18n } from '@kbn/i18n';
 import heatmapOptionsTemplate from './heatmap_options.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('heatmapOptions', function () {
+module.directive('heatmapOptions', function (i18n) {
   return {
     restrict: 'E',
     template: heatmapOptionsTemplate,
@@ -65,7 +64,7 @@ module.directive('heatmapOptions', function () {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return -Infinity;
+        if (index === 0) return;
         return $scope.editorState.params.colorsRange[index - 1].to;
       };
 
@@ -90,7 +89,7 @@ module.directive('heatmapOptions', function () {
         $scope.customColors = true;
       });
 
-      $scope.requiredText = i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.requiredText', {
+      $scope.requiredText = i18n('kbnVislibVisTypes.controls.heatmapOptions.requiredText', {
         defaultMessage: 'Required:'
       });
     }

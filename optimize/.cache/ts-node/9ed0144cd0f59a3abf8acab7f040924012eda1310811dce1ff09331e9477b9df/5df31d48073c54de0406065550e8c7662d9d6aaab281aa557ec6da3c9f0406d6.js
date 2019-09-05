@@ -1,0 +1,38 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * The charting library we're currently using requires histogram data points have an
+ * x and an x0 property, where x0 is the beginning of a data point and x provides
+ * the size of the point from the start. This function attempts to generalize the
+ * concept so any bucket that has a numeric value as its key can be put into this format.
+ *
+ * Additionally, histograms that stack horizontally instead of vertically need to have
+ * a y and a y0 value. We're not doing this currently but with some minor modification
+ * this function could provide formatting for those buckets as well.
+ * @param buckets The ES data to format.
+ */
+function formatEsBucketsForHistogram(buckets) {
+    // wait for first bucket to fill up
+    if (buckets.length < 2) {
+        return [];
+    }
+    const TERMINAL_INDEX = buckets.length - 1;
+    const { key: terminalBucketTime } = buckets[TERMINAL_INDEX];
+    // drop the most recent bucket to avoid returning incomplete bucket
+    return buckets.slice(0, TERMINAL_INDEX).map((item, index, array) => {
+        const { key } = item;
+        const nextItem = array[index + 1];
+        const bucketSize = nextItem ? Math.abs(nextItem.key - key) : Math.abs(terminalBucketTime - key);
+        return Object.assign({}, {
+            x: key + bucketSize,
+            x0: key,
+        }, item);
+    });
+}
+exports.formatEsBucketsForHistogram = formatEsBucketsForHistogram;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvdXB0aW1lL3NlcnZlci9saWIvaGVscGVyL2Zvcm1hdF9lc19idWNrZXRzX2Zvcl9oaXN0b2dyYW0udHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3gtcGFjay9wbHVnaW5zL3VwdGltZS9zZXJ2ZXIvbGliL2hlbHBlci9mb3JtYXRfZXNfYnVja2V0c19mb3JfaGlzdG9ncmFtLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7OztHQUlHOztBQUlIOzs7Ozs7Ozs7O0dBVUc7QUFDSCxTQUFnQiwyQkFBMkIsQ0FDekMsT0FBWTtJQUVaLG1DQUFtQztJQUNuQyxJQUFJLE9BQU8sQ0FBQyxNQUFNLEdBQUcsQ0FBQyxFQUFFO1FBQ3RCLE9BQU8sRUFBRSxDQUFDO0tBQ1g7SUFDRCxNQUFNLGNBQWMsR0FBRyxPQUFPLENBQUMsTUFBTSxHQUFHLENBQUMsQ0FBQztJQUMxQyxNQUFNLEVBQUUsR0FBRyxFQUFFLGtCQUFrQixFQUFFLEdBQUcsT0FBTyxDQUFDLGNBQWMsQ0FBQyxDQUFDO0lBQzVELG1FQUFtRTtJQUNuRSxPQUFPLE9BQU8sQ0FBQyxLQUFLLENBQUMsQ0FBQyxFQUFFLGNBQWMsQ0FBQyxDQUFDLEdBQUcsQ0FBQyxDQUFDLElBQUksRUFBRSxLQUFLLEVBQUUsS0FBSyxFQUFFLEVBQUU7UUFDakUsTUFBTSxFQUFFLEdBQUcsRUFBRSxHQUFHLElBQUksQ0FBQztRQUNyQixNQUFNLFFBQVEsR0FBRyxLQUFLLENBQUMsS0FBSyxHQUFHLENBQUMsQ0FBQyxDQUFDO1FBQ2xDLE1BQU0sVUFBVSxHQUFHLFFBQVEsQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUMsR0FBRyxHQUFHLEdBQUcsQ0FBQyxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLGtCQUFrQixHQUFHLEdBQUcsQ0FBQyxDQUFDO1FBRWhHLE9BQU8sTUFBTSxDQUFDLE1BQU0sQ0FDbEIsRUFBRSxFQUNGO1lBQ0UsQ0FBQyxFQUFFLEdBQUcsR0FBRyxVQUFVO1lBQ25CLEVBQUUsRUFBRSxHQUFHO1NBQ1IsRUFDRCxJQUFJLENBQ0wsQ0FBQztJQUNKLENBQUMsQ0FBQyxDQUFDO0FBQ0wsQ0FBQztBQXhCRCxrRUF3QkMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IEVsYXN0aWNzZWFyY2ggQi5WLiBhbmQvb3IgbGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZVxuICogb3IgbW9yZSBjb250cmlidXRvciBsaWNlbnNlIGFncmVlbWVudHMuIExpY2Vuc2VkIHVuZGVyIHRoZSBFbGFzdGljIExpY2Vuc2U7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIEVsYXN0aWMgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQgeyBVTUVTQnVja2V0LCBVTUVTSGlzdG9ncmFtQnVja2V0IH0gZnJvbSAnLi4vYWRhcHRlcnMvZGF0YWJhc2UnO1xuXG4vKipcbiAqIFRoZSBjaGFydGluZyBsaWJyYXJ5IHdlJ3JlIGN1cnJlbnRseSB1c2luZyByZXF1aXJlcyBoaXN0b2dyYW0gZGF0YSBwb2ludHMgaGF2ZSBhblxuICogeCBhbmQgYW4geDAgcHJvcGVydHksIHdoZXJlIHgwIGlzIHRoZSBiZWdpbm5pbmcgb2YgYSBkYXRhIHBvaW50IGFuZCB4IHByb3ZpZGVzXG4gKiB0aGUgc2l6ZSBvZiB0aGUgcG9pbnQgZnJvbSB0aGUgc3RhcnQuIFRoaXMgZnVuY3Rpb24gYXR0ZW1wdHMgdG8gZ2VuZXJhbGl6ZSB0aGVcbiAqIGNvbmNlcHQgc28gYW55IGJ1Y2tldCB0aGF0IGhhcyBhIG51bWVyaWMgdmFsdWUgYXMgaXRzIGtleSBjYW4gYmUgcHV0IGludG8gdGhpcyBmb3JtYXQuXG4gKlxuICogQWRkaXRpb25hbGx5LCBoaXN0b2dyYW1zIHRoYXQgc3RhY2sgaG9yaXpvbnRhbGx5IGluc3RlYWQgb2YgdmVydGljYWxseSBuZWVkIHRvIGhhdmVcbiAqIGEgeSBhbmQgYSB5MCB2YWx1ZS4gV2UncmUgbm90IGRvaW5nIHRoaXMgY3VycmVudGx5IGJ1dCB3aXRoIHNvbWUgbWlub3IgbW9kaWZpY2F0aW9uXG4gKiB0aGlzIGZ1bmN0aW9uIGNvdWxkIHByb3ZpZGUgZm9ybWF0dGluZyBmb3IgdGhvc2UgYnVja2V0cyBhcyB3ZWxsLlxuICogQHBhcmFtIGJ1Y2tldHMgVGhlIEVTIGRhdGEgdG8gZm9ybWF0LlxuICovXG5leHBvcnQgZnVuY3Rpb24gZm9ybWF0RXNCdWNrZXRzRm9ySGlzdG9ncmFtPFQgZXh0ZW5kcyBVTUVTQnVja2V0PihcbiAgYnVja2V0czogVFtdXG4pOiBBcnJheTxUICYgVU1FU0hpc3RvZ3JhbUJ1Y2tldD4ge1xuICAvLyB3YWl0IGZvciBmaXJzdCBidWNrZXQgdG8gZmlsbCB1cFxuICBpZiAoYnVja2V0cy5sZW5ndGggPCAyKSB7XG4gICAgcmV0dXJuIFtdO1xuICB9XG4gIGNvbnN0IFRFUk1JTkFMX0lOREVYID0gYnVja2V0cy5sZW5ndGggLSAxO1xuICBjb25zdCB7IGtleTogdGVybWluYWxCdWNrZXRUaW1lIH0gPSBidWNrZXRzW1RFUk1JTkFMX0lOREVYXTtcbiAgLy8gZHJvcCB0aGUgbW9zdCByZWNlbnQgYnVja2V0IHRvIGF2b2lkIHJldHVybmluZyBpbmNvbXBsZXRlIGJ1Y2tldFxuICByZXR1cm4gYnVja2V0cy5zbGljZSgwLCBURVJNSU5BTF9JTkRFWCkubWFwKChpdGVtLCBpbmRleCwgYXJyYXkpID0+IHtcbiAgICBjb25zdCB7IGtleSB9ID0gaXRlbTtcbiAgICBjb25zdCBuZXh0SXRlbSA9IGFycmF5W2luZGV4ICsgMV07XG4gICAgY29uc3QgYnVja2V0U2l6ZSA9IG5leHRJdGVtID8gTWF0aC5hYnMobmV4dEl0ZW0ua2V5IC0ga2V5KSA6IE1hdGguYWJzKHRlcm1pbmFsQnVja2V0VGltZSAtIGtleSk7XG5cbiAgICByZXR1cm4gT2JqZWN0LmFzc2lnbihcbiAgICAgIHt9LFxuICAgICAge1xuICAgICAgICB4OiBrZXkgKyBidWNrZXRTaXplLFxuICAgICAgICB4MDoga2V5LFxuICAgICAgfSxcbiAgICAgIGl0ZW1cbiAgICApO1xuICB9KTtcbn1cbiJdfQ==

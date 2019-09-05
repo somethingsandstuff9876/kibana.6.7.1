@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import ngMock from 'ng_mock';
+
+import { FilterManagerProvider } from 'ui/filter_manager';
 
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
@@ -31,6 +33,8 @@ describe('context app', function () {
     let increaseSuccessorCount;
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
+      Private.stub(FilterManagerProvider, {});
+
       increaseSuccessorCount = Private(QueryParameterActionsProvider).increaseSuccessorCount;
     }));
 

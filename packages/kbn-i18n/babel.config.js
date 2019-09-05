@@ -17,13 +17,34 @@
  * under the License.
  */
 
+// We can't use common Kibana presets here because of babel versions incompatibility
 module.exports = {
+  plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
+  presets: ['@babel/preset-react', '@babel/typescript'],
   env: {
     web: {
-      presets: ['@kbn/babel-preset/webpack_preset'],
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
+            },
+          },
+        ],
+      ],
     },
     node: {
-      presets: ['@kbn/babel-preset/node_preset'],
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              node: 'current',
+            },
+          },
+        ],
+      ],
     },
   },
   ignore: ['**/*.test.ts', '**/*.test.tsx'],

@@ -19,13 +19,17 @@
 
 import uuid from 'uuid';
 import { expect } from 'chai';
-import { reIdSeries } from '../re_id_series';
+import reIdSeries from '../re_id_series';
 
 describe('reIdSeries()', () => {
+
   it('reassign ids for series with just basic metrics', () => {
     const series = {
       id: uuid.v1(),
-      metrics: [{ id: uuid.v1() }, { id: uuid.v1() }],
+      metrics: [
+        { id: uuid.v1() },
+        { id: uuid.v1() }
+      ]
     };
     const newSeries = reIdSeries(series);
     expect(newSeries).to.not.equal(series);
@@ -39,8 +43,11 @@ describe('reIdSeries()', () => {
     const firstMetricId = uuid.v1();
     const series = {
       id: uuid.v1(),
-      metrics: [{ id: firstMetricId }, { id: uuid.v1() }],
-      terms_order_by: firstMetricId,
+      metrics: [
+        { id: firstMetricId },
+        { id: uuid.v1() }
+      ],
+      terms_order_by: firstMetricId
     };
     const newSeries = reIdSeries(series);
     expect(newSeries).to.not.equal(series);
@@ -55,7 +62,10 @@ describe('reIdSeries()', () => {
     const firstMetricId = uuid.v1();
     const series = {
       id: uuid.v1(),
-      metrics: [{ id: firstMetricId }, { id: uuid.v1(), field: firstMetricId }],
+      metrics: [
+        { id: firstMetricId },
+        { id: uuid.v1(), field: firstMetricId }
+      ]
     };
     const newSeries = reIdSeries(series);
     expect(newSeries).to.not.equal(series);
@@ -72,13 +82,16 @@ describe('reIdSeries()', () => {
         {
           id: uuid.v1(),
           type: 'calculation',
-          variables: [{ id: uuid.v1(), field: firstMetricId }],
-        },
-      ],
+          variables: [{ id: uuid.v1(), field: firstMetricId }]
+        }
+      ]
     };
     const newSeries = reIdSeries(series);
     expect(newSeries).to.not.equal(series);
     expect(newSeries.id).to.not.equal(series.id);
     expect(newSeries.metrics[1].variables[0].field).to.equal(newSeries.metrics[0].id);
   });
+
+
+
 });

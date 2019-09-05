@@ -30,7 +30,7 @@ const protocolMap = new Map<string, number>([
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
 ]);
 
-export const sslSchema = schema.object(
+const sslSchema = schema.object(
   {
     certificate: schema.maybe(schema.string()),
     certificateAuthorities: schema.maybe(
@@ -45,23 +45,20 @@ export const sslSchema = schema.object(
     key: schema.maybe(schema.string()),
     keyPassphrase: schema.maybe(schema.string()),
     redirectHttpFromPort: schema.maybe(schema.number()),
-    supportedProtocols: schema.arrayOf(
-      schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
-      { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
-    ),
-    clientAuthentication: schema.oneOf(
-      [schema.literal('none'), schema.literal('optional'), schema.literal('required')],
-      { defaultValue: 'none' }
+    supportedProtocols: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('TLSv1'),
+          schema.literal('TLSv1.1'),
+          schema.literal('TLSv1.2'),
+        ])
+      )
     ),
   },
   {
     validate: ssl => {
       if (ssl.enabled && (!ssl.key || !ssl.certificate)) {
         return 'must specify [certificate] and [key] when ssl is enabled';
-      }
-
-      if (!ssl.enabled && ssl.clientAuthentication !== 'none') {
-        return 'must enable ssl to use [clientAuthentication]';
       }
     },
   }
@@ -70,17 +67,20 @@ export const sslSchema = schema.object(
 type SslConfigType = TypeOf<typeof sslSchema>;
 
 export class SslConfig {
+  /**
+   * @internal
+   */
+  public static schema = sslSchema;
+
   public enabled: boolean;
   public redirectHttpFromPort: number | undefined;
   public key: string | undefined;
   public certificate: string | undefined;
   public certificateAuthorities: string[] | undefined;
   public keyPassphrase: string | undefined;
-  public requestCert: boolean;
-  public rejectUnauthorized: boolean;
 
   public cipherSuites: string[];
-  public supportedProtocols: string[];
+  public supportedProtocols: string[] | undefined;
 
   /**
    * @internal
@@ -94,27 +94,24 @@ export class SslConfig {
     this.keyPassphrase = config.keyPassphrase;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
-    this.requestCert = config.clientAuthentication !== 'none';
-    this.rejectUnauthorized = config.clientAuthentication === 'required';
   }
 
   /**
    * Options that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options.
    */
   public getSecureOptions() {
-    // our validation should ensure that this.supportedProtocols is at least an empty array,
-    // which the following logic depends upon.
-    if (this.supportedProtocols == null || this.supportedProtocols.length === 0) {
-      throw new Error(`supportedProtocols should be specified`);
+    if (this.supportedProtocols === undefined || this.supportedProtocols.length === 0) {
+      return 0;
     }
 
     const supportedProtocols = this.supportedProtocols;
     return Array.from(protocolMap).reduce((secureOptions, [protocolAlias, secureOption]) => {
       // `secureOption` is the option that turns *off* support for a particular protocol,
       // so if protocol is supported, we should not enable this option.
+      // tslint:disable no-bitwise
       return supportedProtocols.includes(protocolAlias)
         ? secureOptions
-        : secureOptions | secureOption; // eslint-disable-line no-bitwise
+        : secureOptions | secureOption;
     }, 0);
   }
 

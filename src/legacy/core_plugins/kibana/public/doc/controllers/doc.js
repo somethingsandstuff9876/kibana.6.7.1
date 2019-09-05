@@ -19,15 +19,16 @@
 
 import 'ui/notify';
 import 'ui/courier';
+import 'ui/doc_viewer';
 import 'ui/index_patterns';
 import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import 'plugins/kibana/doc_viewer';
-import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
+
 
 const app = uiModules.get('apps/doc', [
+  'kibana/notify',
   'kibana/courier',
   'kibana/index_patterns'
 ]);
@@ -39,29 +40,18 @@ const resolveIndexPattern = {
   }
 };
 
-const k7Breadcrumbs = ($route) => [
-  ...getRootBreadcrumbs(),
-  {
-    text: `${$route.current.params.index}#${$route.current.params.id}`
-  }
-];
-
 uiRoutes
-  // the old, pre 8.0 route, no longer used, keep it to stay compatible
-  // somebody might have bookmarked his favorite log messages
+  .when('/doc/:indexPattern/:index/:type/:id', {
+    template: html,
+    resolve: resolveIndexPattern
+  })
   .when('/doc/:indexPattern/:index/:type', {
     template: html,
-    resolve: resolveIndexPattern,
-    k7Breadcrumbs
-  })
-  //the new route, es 7 deprecated types, es 8 removed them
-  .when('/doc/:indexPattern/:index', {
-    template: html,
-    resolve: resolveIndexPattern,
-    k7Breadcrumbs
+    resolve: resolveIndexPattern
   });
 
 app.controller('doc', function ($scope, $route, es) {
+
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
@@ -75,6 +65,7 @@ app.controller('doc', function ($scope, $route, es) {
     body: {
       query: {
         ids: {
+          type: $route.current.params.type,
           values: [$route.current.params.id]
         }
       },

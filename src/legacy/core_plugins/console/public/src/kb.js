@@ -23,7 +23,7 @@ import {
   FieldAutocompleteComponent,
   ListComponent,
   TemplateAutocompleteComponent,
-  UsernameAutocompleteComponent,
+  UsernameAutocompleteComponent
 } from './autocomplete/components';
 
 import $ from 'jquery';
@@ -62,9 +62,6 @@ const parametrizedComponentFactories = {
   id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  transform_id: function (name, parent) {
-    return idAutocompleteComponentFactory(name, parent);
-  },
   username: function (name, parent) {
     return new UsernameAutocompleteComponent(name, parent);
   },
@@ -89,7 +86,14 @@ const parametrizedComponentFactories = {
   nodes: function (name, parent) {
     return new ListComponent(
       name,
-      ['_local', '_master', 'data:true', 'data:false', 'master:true', 'master:false'],
+      [
+        '_local',
+        '_master',
+        'data:true',
+        'data:false',
+        'master:true',
+        'master:false',
+      ],
       parent
     );
   },
@@ -131,7 +135,10 @@ function loadApisFromJson(
     urlParametrizedComponentFactories || parametrizedComponentFactories;
   bodyParametrizedComponentFactories =
     bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
-  const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
+  const api = new Api(
+    urlParametrizedComponentFactories,
+    bodyParametrizedComponentFactories
+  );
   const names = [];
   _.each(json, function (apiJson, name) {
     names.unshift(name);

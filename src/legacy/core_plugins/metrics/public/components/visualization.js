@@ -21,32 +21,32 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 
-import { TimeseriesVisualization } from './vis_types/timeseries/vis';
-import { metric } from './vis_types/metric/vis';
-import { TopNVisualization as topN } from './vis_types/top_n/vis';
-import { TableVis as table } from './vis_types/table/vis';
-import { gauge } from './vis_types/gauge/vis';
-import { MarkdownVisualization as markdown } from './vis_types/markdown/vis';
-import { ErrorComponent } from './error';
-import { NoDataComponent } from './no_data';
+import timeseries from './vis_types/timeseries/vis';
+import metric from './vis_types/metric/vis';
+import topN from './vis_types/top_n/vis';
+import table from './vis_types/table/vis';
+import gauge from './vis_types/gauge/vis';
+import markdown from './vis_types/markdown/vis';
+import Error from './error';
+import NoData from './no_data';
 
 const types = {
-  timeseries: TimeseriesVisualization,
+  timeseries,
   metric,
   top_n: topN,
   table,
   gauge,
-  markdown,
+  markdown
 };
 
-export function Visualization(props) {
+function Visualization(props) {
   const { visData, model } = props;
   // Show the error panel
   const error = _.get(visData, `${model.id}.error`);
   if (error) {
     return (
       <div className={props.className}>
-        <ErrorComponent error={error} />
+        <Error error={error} />
       </div>
     );
   }
@@ -56,24 +56,27 @@ export function Visualization(props) {
   if (noData) {
     return (
       <div className={props.className}>
-        <NoDataComponent />
+        <NoData />
       </div>
     );
   }
 
   const component = types[model.type];
   if (component) {
-    return React.createElement(component, {
-      dateFormat: props.dateFormat,
-      backgroundColor: props.backgroundColor,
-      model: props.model,
-      onBrush: props.onBrush,
-      onChange: props.onChange,
-      onUiState: props.onUiState,
-      uiState: props.uiState,
-      visData: visData.type === model.type ? visData : {},
-      getConfig: props.getConfig,
-    });
+    return (
+      React.createElement(component, {
+        dateFormat: props.dateFormat,
+        reversed: props.reversed,
+        backgroundColor: props.backgroundColor,
+        model: props.model,
+        onBrush: props.onBrush,
+        onChange: props.onChange,
+        onUiState: props.onUiState,
+        uiState: props.uiState,
+        visData: visData.type === model.type ? visData : {},
+        getConfig: props.getConfig
+      })
+    );
   }
   return <div className={props.className} />;
 }
@@ -86,11 +89,14 @@ Visualization.propTypes = {
   onChange: PropTypes.func,
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
+  reversed: PropTypes.bool,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
-  getConfig: PropTypes.func,
+  getConfig: PropTypes.func
 };
 
 Visualization.defaultProps = {
-  className: 'tvbVis',
+  className: 'tvbVis'
 };
+
+export default Visualization;

@@ -4,9 +4,8 @@
   position: relative;
   box-sizing: border-box;
   border: 2px dashed transparent;
-  // sass-lint:disable-block no-important
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
   margin-bottom: $euiSizeM;
 
   &.active {
@@ -15,7 +14,7 @@
 }
 
 .timCell.running {
-  opacity: .5;
+  opacity: 0.50;
 }
 
 
@@ -34,7 +33,7 @@
     width: $euiSizeL;
     height: $euiSizeL;
     line-height: $euiSizeL;
-    border-radius: $euiSizeL / 2;
+    border-radius: $euiSizeL/2;
     border: $euiBorderThin;
     background-color: $euiColorLightestShade;
     z-index: $euiZLevel1;

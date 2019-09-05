@@ -5,20 +5,20 @@
  */
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const {
     bulkCreateTest,
+    createExpectLegacyForbidden,
     createExpectResults,
-    createExpectRbacForbidden,
-    expectBadRequestForHiddenType,
-    expectedForbiddenTypesWithHiddenType: expectedForbiddenTypesWithHiddenType,
+    expectRbacForbidden,
   } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
@@ -27,11 +27,7 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(),
-        },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
       },
     });
@@ -43,10 +39,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        includingSpace: {
-          statusCode: 200,
-          response: expectBadRequestForHiddenType,
-        },
       },
     });
 
@@ -54,12 +46,20 @@ export default function({ getService }: FtrProviderContext) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         default: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(),
+          statusCode: 200,
+          response: createExpectResults(),
         },
-        includingSpace: {
+      },
+    });
+
+    bulkCreateTest(`legacy readonly user`, {
+      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+      tests: {
+        default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: createExpectLegacyForbidden(
+            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
+          ),
         },
       },
     });
@@ -71,10 +71,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(['hiddentype']),
-        },
       },
     });
 
@@ -83,11 +79,7 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(),
-        },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -99,10 +91,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(['hiddentype']),
-        },
       },
     });
 
@@ -111,11 +99,7 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(),
-        },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -125,11 +109,7 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(),
-        },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -139,11 +119,7 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(),
-        },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -153,11 +129,7 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(),
-        },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: expectRbacForbidden,
         },
       },
     });
@@ -167,11 +139,7 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         default: {
           statusCode: 403,
-          response: createExpectRbacForbidden(),
-        },
-        includingSpace: {
-          statusCode: 403,
-          response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
+          response: expectRbacForbidden,
         },
       },
     });

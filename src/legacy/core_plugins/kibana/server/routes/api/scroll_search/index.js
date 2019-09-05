@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import handleESError from '../../../lib/handle_es_error';
+
 export function scrollSearchApi(server) {
   server.route({
     path: '/api/kibana/legacy_scroll_start',
@@ -35,7 +37,7 @@ export function scrollSearchApi(server) {
       try {
         return await callWithRequest(req, 'search', params);
       } catch (err) {
-        throw server.plugins.elasticsearch.handleESError(err);
+        throw handleESError(err);
       }
     }
   });
@@ -49,7 +51,7 @@ export function scrollSearchApi(server) {
       try {
         return await callWithRequest(req, 'scroll', { scrollId, scroll: '1m' });
       } catch (err) {
-        throw server.plugins.elasticsearch.handleESError(err);
+        throw handleESError(err);
       }
     }
   });

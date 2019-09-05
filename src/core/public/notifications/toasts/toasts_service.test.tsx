@@ -17,53 +17,39 @@
  * under the License.
  */
 
-import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.mocks';
+const mockReactDomRender = jest.fn();
+const mockReactDomUnmount = jest.fn();
+jest.mock('react-dom', () => ({
+  render: mockReactDomRender,
+  unmountComponentAtNode: mockReactDomUnmount,
+}));
 
 import { ToastsService } from './toasts_service';
-import { ToastsApi } from './toasts_api';
-import { overlayServiceMock } from '../../overlays/overlay_service.mock';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { ToastsStartContract } from './toasts_start_contract';
 
-const mockI18n: any = {
+const mockI18nContract: any = {
   Context: function I18nContext() {
     return '';
   },
 };
 
-const mockOverlays = overlayServiceMock.createStartContract();
-
-describe('#setup()', () => {
-  it('returns a ToastsApi', () => {
-    const toasts = new ToastsService();
-
-    expect(
-      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
-    ).toBeInstanceOf(ToastsApi);
-  });
-});
-
 describe('#start()', () => {
   it('renders the GlobalToastList into the targetDomElement param', async () => {
     const targetDomElement = document.createElement('div');
     targetDomElement.setAttribute('test', 'target-dom-element');
-    const toasts = new ToastsService();
+    const toasts = new ToastsService({ targetDomElement });
 
     expect(mockReactDomRender).not.toHaveBeenCalled();
-    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
-    toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
+    toasts.start({ i18n: mockI18nContract });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
 
-  it('returns a ToastsApi', () => {
-    const targetDomElement = document.createElement('div');
-    const toasts = new ToastsService();
+  it('returns a ToastsStartContract', () => {
+    const toasts = new ToastsService({
+      targetDomElement: document.createElement('div'),
+    });
 
-    expect(
-      toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() })
-    ).toBeInstanceOf(ToastsApi);
-    expect(
-      toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays })
-    ).toBeInstanceOf(ToastsApi);
+    expect(toasts.start({ i18n: mockI18nContract })).toBeInstanceOf(ToastsStartContract);
   });
 });
 
@@ -71,18 +57,19 @@ describe('#stop()', () => {
   it('unmounts the GlobalToastList from the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
     targetDomElement.setAttribute('test', 'target-dom-element');
-    const toasts = new ToastsService();
+    const toasts = new ToastsService({ targetDomElement });
 
-    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
-    toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
+    toasts.start({ i18n: mockI18nContract });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
     toasts.stop();
     expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
   });
 
-  it('does not fail if setup() was never called', () => {
-    const toasts = new ToastsService();
+  it('does not fail if start() was never called', () => {
+    const targetDomElement = document.createElement('div');
+    targetDomElement.setAttribute('test', 'target-dom-element');
+    const toasts = new ToastsService({ targetDomElement });
     expect(() => {
       toasts.stop();
     }).not.toThrowError();
@@ -90,10 +77,9 @@ describe('#stop()', () => {
 
   it('empties the content of the targetDomElement', () => {
     const targetDomElement = document.createElement('div');
-    const toasts = new ToastsService();
+    const toasts = new ToastsService({ targetDomElement });
 
-    toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
-    toasts.start({ i18n: mockI18n, targetDomElement, overlays: mockOverlays });
+    targetDomElement.appendChild(document.createTextNode('foo bar'));
     toasts.stop();
     expect(targetDomElement.childNodes).toHaveLength(0);
   });

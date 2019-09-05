@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 import * as i18nModule from './i18n';
 
 describe('I18n engine', () => {
@@ -887,7 +885,7 @@ describe('I18n engine', () => {
   });
 
   describe('load', () => {
-    let mockFetch: jest.Mock;
+    let mockFetch: jest.Mock<unknown>;
     beforeEach(() => {
       mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
     });

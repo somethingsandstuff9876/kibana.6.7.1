@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import moment from 'moment';
 
-import { ES_INDEX_NAME } from './constants';
+import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -39,6 +39,7 @@ export default function ({ getService }) {
 
       await es.index({
         index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         body: {
           type: 'enrollment_token',
@@ -58,10 +59,11 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(200);
+        .expect(201);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
@@ -75,12 +77,13 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(200);
+        .expect(201);
 
-      const accessTokenFromApi = apiResponse.item;
+      const accessTokenFromApi = apiResponse.access_token;
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
@@ -98,10 +101,7 @@ export default function ({ getService }) {
         .send(beat)
         .expect(400);
 
-      expect(apiResponse).to.eql({
-        success: false,
-        error: { code: 400, message: 'Invalid enrollment token' },
-      });
+      expect(apiResponse).to.eql({ message: 'Invalid enrollment token' });
     });
 
     it('should reject an expired enrollment token', async () => {
@@ -112,6 +112,7 @@ export default function ({ getService }) {
 
       await es.index({
         index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
         id: `enrollment_token:${expiredEnrollmentToken}`,
         body: {
           type: 'enrollment_token',
@@ -131,10 +132,7 @@ export default function ({ getService }) {
         .send(beat)
         .expect(400);
 
-      expect(apiResponse).to.eql({
-        success: false,
-        error: { code: 400, message: 'Expired enrollment token' },
-      });
+      expect(apiResponse).to.eql({ message: 'Expired enrollment token' });
     });
 
     it('should delete the given enrollment token so it may not be reused', async () => {
@@ -143,10 +141,11 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(200);
+        .expect(201);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         ignore: [404],
       });
@@ -160,10 +159,11 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(200);
+        .expect(201);
 
       await es.index({
         index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         body: {
           type: 'enrollment_token',
@@ -181,7 +181,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(200);
+        .expect(201);
     });
   });
 }

@@ -6,16 +6,15 @@
 
 import buildVersion from './helpers/build_version';
 import gitInfo from './helpers/git_info';
-import chalk from 'chalk';
 
-export default (gulp, { log, pkg }) => {
+export default (gulp, { log, colors, pkg }) => {
   gulp.task('report', () => {
     return gitInfo()
       .then(function (info) {
-        log('Package Name', chalk.yellow(pkg.name));
-        log('Version', chalk.yellow(buildVersion(pkg)));
-        log('Build Number', chalk.yellow(info.number));
-        log('Build SHA', chalk.yellow(info.sha));
+        log('Package Name', colors.yellow(pkg.name));
+        log('Version', colors.yellow(buildVersion(pkg)));
+        log('Build Number', colors.yellow(info.number));
+        log('Build SHA', colors.yellow(info.sha));
       });
   });
 };

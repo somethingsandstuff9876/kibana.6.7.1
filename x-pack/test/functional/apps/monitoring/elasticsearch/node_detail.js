@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9300',
           jvmHeap: 'JVM Heap\n29%',
-          freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
+          freeDiskSpace: 'Free Disk Space\n173.9 GB',
           documentCount: 'Documents\n24.8k',
           dataSize: 'Data\n50.4 MB',
           indicesCount: 'Indices\n20',
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9302',
           jvmHeap: 'JVM Heap\n17%',
-          freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
+          freeDiskSpace: 'Free Disk Space\n173.9 GB',
           documentCount: 'Documents\n240',
           dataSize: 'Data\n1.4 MB',
           indicesCount: 'Indices\n4',
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9302',
           jvmHeap: 'JVM Heap\nN/A',
-          freeDiskSpace: 'Free Disk Space\nN/A (N/A)',
+          freeDiskSpace: 'Free Disk Space\nN/A',
           documentCount: 'Documents\nN/A',
           dataSize: 'Data\nN/A',
           indicesCount: 'Indices\nN/A',

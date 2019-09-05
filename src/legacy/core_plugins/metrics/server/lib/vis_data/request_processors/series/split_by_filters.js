@@ -18,15 +18,15 @@
  */
 
 import _ from 'lodash';
-import { buildEsQuery } from '@kbn/es-query';
-export function splitByFilters(req, panel, series, esQueryConfig, indexPattern) {
+export default function splitByFilter(req, panel, series) {
   return next => doc => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach(filter => {
-        const builtEsQuery = buildEsQuery(indexPattern, [filter.filter], [], esQueryConfig);
-        _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtEsQuery);
+        _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}.query_string.query`, filter.filter || '*');
+        _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}.query_string.analyze_wildcard`, true);
       });
     }
     return next(doc);
   };
 }
+

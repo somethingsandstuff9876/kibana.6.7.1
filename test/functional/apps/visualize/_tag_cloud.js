@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickTagCloud');
       await PageObjects.visualize.clickTagCloud();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       log.debug('select Tags');
       await PageObjects.visualize.clickBucket('Tags');
       log.debug('Click aggregation Terms');
@@ -49,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         await PageObjects.visualize.selectField(termsField);
       });
-      await PageObjects.visualize.selectOrderByMetric(2, '_key');
+      await PageObjects.visualize.selectOrderBy('_key');
       await PageObjects.visualize.clickGo();
     });
 
@@ -74,7 +75,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickEditorSidebarCollapse();
     });
 
-
     it('should still show all tags after sidebar has been collapsed', async function () {
       await PageObjects.visualize.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
       const data = await PageObjects.visualize.getTextTag();
       log.debug(data);
-      expect(data).to.eql(['32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008']);
+      expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
     });
 
     it('should still show all tags after browser was resized very small', async function () {
@@ -96,13 +96,13 @@ export default function ({ getService, getPageObjects }) {
       expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
     });
 
+
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
-
 
 
     it('should show the tags and relative size', function () {
@@ -131,8 +131,7 @@ export default function ({ getService, getPageObjects }) {
     describe('formatted field', function () {
       before(async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
@@ -140,15 +139,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('visualize');
         await PageObjects.visualize.loadSavedVisualization(vizName1, { navigateToVisualize: false });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
       });
 
       after(async function () {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.clickKibanaIndices();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('');

@@ -3,22 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { TestInvoker } from './lib/types';
 
-export default function statusPageFunctonalTests({
-  getService,
-  getPageObjects,
-}: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function statusPageFunctonalTests({ getService, getPageObjects }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'statusPage', 'home']);
 
-  describe('Status Page', function() {
-    this.tags('smoke');
+  describe('Status Page', () => {
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => await esArchiver.unload('empty_kibana'));
 
     it('allows user to navigate without authentication', async () => {
-      await PageObjects.security.logout();
       await PageObjects.statusPage.navigateToPage();
       await PageObjects.statusPage.expectStatusPage();
     });

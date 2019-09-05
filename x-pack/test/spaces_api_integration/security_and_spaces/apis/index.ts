@@ -7,20 +7,18 @@
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { TestInvoker } from '../../common/lib/types';
 
-// eslint-disable-next-line import/no-default-export
+// tslint:disable:no-default-export
 export default function({ loadTestFile, getService }: TestInvoker) {
   const es = getService('es');
   const supertest = getService('supertest');
 
   describe('spaces api with security', function() {
-    this.tags('ciGroup8');
+    this.tags('ciGroup5');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);
     });
 
-    loadTestFile(require.resolve('./copy_to_space'));
-    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));

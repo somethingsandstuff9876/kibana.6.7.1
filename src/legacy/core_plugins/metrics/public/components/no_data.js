@@ -19,23 +19,17 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 
-export function NoDataComponent() {
+function NoDataComponent() {
   return (
-    <div className="visError" data-test-subj="noTSVBDataMessage">
-      <EuiText size="xs" color="subdued">
-        <EuiIcon type="visualizeApp" size="m" color="subdued" aria-hidden="true" />
-
-        <EuiSpacer size="s" />
-
-        <p>
-          <FormattedMessage
-            id="tsvb.noDataDescription"
-            defaultMessage="No data to display for the selected metrics"
-          />
-        </p>
-      </EuiText>
+    <div className="tvbNoData" data-test-subj="noTSVBDataMessage">
+      <div className="tvbNoData__title">
+        <FormattedMessage
+          id="tsvb.noDataDescription"
+          defaultMessage="No data to display for the selected metrics"
+        />
+      </div>
     </div>
   );
 }
+export default NoDataComponent;

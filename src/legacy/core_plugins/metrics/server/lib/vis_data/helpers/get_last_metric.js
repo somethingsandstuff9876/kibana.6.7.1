@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-
-export function getLastMetric(series) {
+export default function getLastMetric(series) {
   return _.last(series.metrics.filter(s => s.type !== 'series_agg'));
+
 }
+

@@ -33,16 +33,16 @@ import { tap } from 'rxjs/operators';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FatalErrorInfo } from './get_error_info';
+import { ErrorInfo } from './get_error_info';
 
 interface Props {
   kibanaVersion: string;
   buildNumber: number;
-  errorInfo$: Rx.Observable<FatalErrorInfo>;
+  errorInfo$: Rx.Observable<ErrorInfo>;
 }
 
 interface State {
-  errors: FatalErrorInfo[];
+  errors: ErrorInfo[];
 }
 
 export class FatalErrorsScreen extends React.Component<Props, State> {
@@ -72,7 +72,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
       )
     ).subscribe({
       error(error) {
-        // eslint-disable-next-line no-console
+        // tslint:disable-next-line no-console
         console.error('Uncaught error in fatal error screen internals', error);
       },
     });

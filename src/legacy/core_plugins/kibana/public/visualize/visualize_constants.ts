@@ -24,7 +24,3 @@ export const VisualizeConstants = {
   CREATE_PATH: '/visualize/create',
   EDIT_PATH: '/visualize/edit',
 };
-
-export function createVisualizeEditUrl(id: string) {
-  return `${VisualizeConstants.EDIT_PATH}/${id}`;
-}

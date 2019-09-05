@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 9,109', async () => {
           const data = await PageObjects.visualize.getTableVisData();
           return data.trim() === '9,109';
@@ -53,7 +54,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should respect the time filter when linked to a saved search', async () => {
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-21 10:00:00.000');
+        await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-21 10:00:00.000');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 3,950', async () => {
           const data = await PageObjects.visualize.getTableVisData();
           return data.trim() === '3,950';

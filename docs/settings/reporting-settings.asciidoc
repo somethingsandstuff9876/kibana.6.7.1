@@ -1,21 +1,21 @@
 [role="xpack"]
 [[reporting-settings-kb]]
-=== Reporting settings in Kibana
+=== {reporting} settings in Kibana
 ++++
-<titleabbrev>Reporting settings</titleabbrev>
+<titleabbrev>Reporting Settings</titleabbrev>
 ++++
 
 You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
-* <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
+* <<reporting-kibana-server-settings,Control how {reporting}  communicates with the {kib} server>>
 * <<reporting-job-queue-settings,Manage background jobs>>
 * <<reporting-capture-settings,Capture screenshots>>
 
 [float]
 [[general-reporting-settings]]
-==== General reporting settings
-[[xpack-enable-reporting]]`xpack.reporting.enabled`::
-Set to `false` to disable the {report-features}.
+==== General Reporting Settings
+`xpack.reporting.enabled`::
+Set to `false` to disable {reporting}.
 
 `xpack.reporting.encryptionKey`::
 Set to any text string. By default, Kibana will generate a random key when it
@@ -24,7 +24,7 @@ setting to preserve the same key across multiple restarts and multiple instances
 
 [float]
 [[reporting-kibana-server-settings]]
-==== Kibana server settings
+==== Kibana Server Settings
 
 Reporting uses the Kibana interface to generate reports. In most cases, you don't need
 to configure Reporting to communicate with Kibana. However, if you use a reverse-proxy
@@ -44,7 +44,7 @@ proxy host requires that the Kibana server has network access to the proxy.
 
 [float]
 [[reporting-job-queue-settings]]
-==== Background job settings
+==== Background Job Settings
 
 Reporting generates reports in the background and jobs are coordinated using documents
 in Elasticsearch. Depending on how often you generate reports and the overall number of
@@ -68,17 +68,17 @@ security is enabled, `xpack.security.encryptionKey`.
 ============
 
 `xpack.reporting.queue.pollInterval`::
-Specifies the number of milliseconds that the reporting poller waits between polling the
-index for any pending Reporting jobs. Defaults to `3000` (3 seconds).
+Specifies the number of milliseconds that idle workers wait between polling the
+index for pending jobs. Defaults to `3000` (3 seconds).
 
-[[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
+`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under
 heavy load, you might need to increase this timeout. Specified in milliseconds.
 Defaults to `120000` (two minutes).
 
 [float]
 [[reporting-capture-settings]]
-==== Capture settings
+==== Capture Settings
 
 Reporting works by capturing screenshots from Kibana. The following settings
 control the capturing process.
@@ -90,13 +90,21 @@ setting should not have much effect. If you are seeing empty images instead of
 visualizations, try increasing this value.
 Defaults to `3000` (3 seconds).
 
-[[xpack-reporting-browser]]`xpack.reporting.capture.browser.type`::
-Specifies the browser to use to capture screenshots. This setting exists for
-backward compatibility. The only valid option is `chromium`. 
+`xpack.reporting.capture.browser.type`::
+Specifies the browser to use to capture screenshots. Valid options are `phantom`
+and `chromium`. When `chromium` is set, the settings specified in the <<reporting-chromium-settings, Chromium settings>>
+are respected. Defaults to `chromium`.
+
+[NOTE]
+============
+Starting in 7.0, Phantom support will be removed from Kibana, and `chromium`
+will be the only valid option for the `xpack.reporting.capture.browser.type` setting.
+============
+
 
 [float]
 [[reporting-chromium-settings]]
-==== Chromium settings
+==== Chromium Settings
 
 When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you can also specify the following settings.
 
@@ -120,15 +128,15 @@ Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".ela
 
 [float]
 [[reporting-csv-settings]]
-==== CSV settings
-[[xpack-reporting-csv]]`xpack.reporting.csv.maxSizeBytes`::
+==== CSV Settings
+`xpack.reporting.csv.maxSizeBytes`::
 The maximum size of a CSV file before being truncated. This setting exists to prevent
 large exports from causing performance and storage issues.
 Defaults to `10485760` (10mB)
 
 [float]
 [[reporting-advanced-settings]]
-==== Advanced settings
+==== Advanced Settings
 
 `xpack.reporting.index`::
 Reporting uses a weekly index in Elasticsearch to store the reporting job and

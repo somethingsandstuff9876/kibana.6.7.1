@@ -50,7 +50,7 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
     }
   }
 }
-async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModalPromise) {
+async function importIndexPattern(doc, indexPatterns, overwriteAll) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
   const emptyPattern = await indexPatterns.get();
   const {
@@ -76,35 +76,13 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
   addJsonFieldToIndexPattern(importedIndexPattern, typeMeta, 'typeMeta', title);
   Object.assign(emptyPattern, importedIndexPattern);
 
-  let newId = await emptyPattern.create(overwriteAll);
-  if (!newId) {
-    // We can override and we want to prompt for confirmation
-    try {
-      await confirmModalPromise(
-        i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
-          defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
-        {
-          title: i18n.translate('kbn.management.indexPattern.confirmOverwriteTitle', {
-            defaultMessage: 'Overwrite {type}?',
-            values: { type },
-          }),
-          confirmButtonText: i18n.translate('kbn.management.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' }),
-        }
-      );
-      newId = await emptyPattern.create(true);
-    } catch (err) {
-      return;
-    }
-  }
-  indexPatterns.clearCache(newId);
+  const newId = await emptyPattern.create(true, !overwriteAll);
+  indexPatterns.cache.clear(newId);
   return newId;
 }
 
 async function importDocument(obj, doc, overwriteAll) {
-  await obj.applyESResp({
-    references: doc._references || [],
-    ...doc,
-  });
+  await obj.applyESResp(doc);
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
 
@@ -140,38 +118,19 @@ export async function resolveIndexPatternConflicts(
   overwriteAll
 ) {
   let importCount = 0;
-
   await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj }) => {
-    // Resolve search index reference:
     let oldIndexId = obj.searchSource.getOwnField('index');
     // Depending on the object, this can either be the raw id or the actual index pattern object
     if (typeof oldIndexId !== 'string') {
       oldIndexId = oldIndexId.id;
     }
-    let resolution = resolutions.find(({ oldId }) => oldId === oldIndexId);
-    if (resolution) {
-      const newIndexId = resolution.newId;
-      await obj.hydrateIndexPattern(newIndexId);
-    }
-
-    // Resolve filter index reference:
-    const filter = (obj.searchSource.getOwnField('filter') || []).map((filter) => {
-      if (!(filter.meta && filter.meta.index)) {
-        return filter;
-      }
-
-      resolution = resolutions.find(({ oldId }) => oldId === filter.meta.index);
-      return resolution ? ({ ...filter, ...{ meta: { ...filter.meta, index: resolution.newId } } }) : filter;
-    });
-
-    if (filter.length > 0) {
-      obj.searchSource.setField('filter', filter);
-    }
-
+    const resolution = resolutions.find(({ oldId }) => oldId === oldIndexId);
     if (!resolution) {
       // The user decided to skip this conflict so do nothing
       return;
     }
+    const newIndexId = resolution.newId;
+    await obj.hydrateIndexPattern(newIndexId);
     if (await saveObject(obj, overwriteAll)) {
       importCount++;
     }
@@ -208,12 +167,13 @@ export async function resolveSavedSearches(savedSearches, services, indexPattern
   return importCount;
 }
 
-export async function resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns, confirmModalPromise) {
+export async function resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns) {
   const docTypes = groupByType(savedObjects);
 
   // Keep track of how many we actually import because the user
   // can cancel an override
   let importedObjectCount = 0;
+  // Keep a record of any objects which fail to import for unknown reasons.
   const failedImports = [];
   // Start with the index patterns since everything is dependent on them
   await awaitEachItemInParallel(docTypes.indexPatterns, async indexPatternDoc => {
@@ -221,8 +181,7 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
       const importedIndexPatternId = await importIndexPattern(
         indexPatternDoc,
         indexPatterns,
-        overwriteAll,
-        confirmModalPromise
+        overwriteAll
       );
       if (importedIndexPatternId) {
         importedObjectCount++;
@@ -239,8 +198,6 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
   // exist. We will provide a way for the user to manually select a new index pattern for those
   // saved objects.
   const conflictedIndexPatterns = [];
-  // Keep a record of any objects which fail to import for unknown reasons.
-
   // It's possible to have saved objects that link to saved searches which then link to index patterns
   // and those could error out, but the error comes as an index pattern not found error. We can't resolve
   // those the same as way as normal index pattern not found errors, but when those are fixed, it's very
@@ -275,12 +232,18 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
         importedObjectCount++;
       }
     } catch (error) {
-      const isIndexPatternNotFound = error instanceof SavedObjectNotFound &&
-        error.savedObjectType === 'index-pattern';
-      if (isIndexPatternNotFound && obj.savedSearchId) {
-        conflictedSavedObjectsLinkedToSavedSearches.push(obj);
-      } else if (isIndexPatternNotFound) {
-        conflictedIndexPatterns.push({ obj, doc: otherDoc });
+      if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'search') {
+          failedImports.push({ obj, error });
+        }
+
+        if (error.savedObjectType === 'index-pattern') {
+          if (obj.savedSearchId) {
+            conflictedSavedObjectsLinkedToSavedSearches.push(obj);
+          } else {
+            conflictedIndexPatterns.push({ obj, doc: otherDoc });
+          }
+        }
       } else {
         failedImports.push({ obj, error });
       }

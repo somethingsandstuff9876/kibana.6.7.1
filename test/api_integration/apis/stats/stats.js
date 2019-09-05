@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 const assertStatsAndMetrics = body => {
   expect(body.kibana.name).to.be.a('string');
@@ -120,25 +120,13 @@ export default function ({ getService }) {
       });
 
       describe('exclude usage', () => {
-        it('should include an empty usage object from the API response', () => {
+        it('should exclude usage from the API response', () => {
           return supertest
             .get('/api/stats?extended&exclude_usage')
             .expect('Content-Type', /json/)
             .expect(200)
             .then(({ body }) => {
-              expect(body).to.have.property('usage');
-              expect(body.usage).to.eql({});
-            });
-        });
-
-        it('should include an empty usage object from the API response if `legacy` is provided', () => {
-          return supertest
-            .get('/api/stats?extended&exclude_usage&legacy')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .then(({ body }) => {
-              expect(body).to.have.property('usage');
-              expect(body.usage).to.eql({});
+              expect(body).to.not.have.property('usage');
             });
         });
       });

@@ -18,7 +18,7 @@
  */
 
 import L from 'leaflet';
-import { min, isEqual } from 'lodash';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
@@ -26,7 +26,6 @@ import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';
 import { GeohashGridMarkers } from './markers/geohash_grid';
-import { MapTypes } from './map_types';
 
 export class GeohashLayer extends KibanaMapLayer {
 
@@ -55,23 +54,23 @@ export class GeohashLayer extends KibanaMapLayer {
       colorRamp: this._geohashOptions.colorRamp
     };
     switch (this._geohashOptions.mapType) {
-      case MapTypes.ScaledCircleMarkers:
+      case 'Scaled Circle Markers':
         this._geohashMarkers = new ScaledCirclesMarkers(this._featureCollection,
           this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
-      case MapTypes.ShadedCircleMarkers:
+      case 'Shaded Circle Markers':
         this._geohashMarkers = new ShadedCirclesMarkers(this._featureCollection,
           this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
-      case MapTypes.ShadedGeohashGrid:
+      case 'Shaded Geohash Grid':
         this._geohashMarkers = new GeohashGridMarkers(this._featureCollection,
           this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
-      case MapTypes.Heatmap:
+      case 'Heatmap':
 
         let radius = 15;
         if (this._featureCollectionMetaData.geohashGridDimensionsAtEquator) {
-          const minGridLength = min(this._featureCollectionMetaData.geohashGridDimensionsAtEquator);
+          const minGridLength = _.min(this._featureCollectionMetaData.geohashGridDimensionsAtEquator);
           const metersPerPixel = this._kibanaMap.getMetersPerPixel();
           radius = (minGridLength / metersPerPixel) / 2;
         }
@@ -136,7 +135,7 @@ export class GeohashLayer extends KibanaMapLayer {
 
   isReusable(options) {
 
-    if (isEqual(this._geohashOptions, options)) {
+    if (_.isEqual(this._geohashOptions, options)) {
       return true;
     }
 
@@ -145,7 +144,7 @@ export class GeohashLayer extends KibanaMapLayer {
       return false;
     } else if (this._geohashOptions.mapType !== options.mapType) {
       return false;
-    } else if (this._geohashOptions.mapType === 'Heatmap' && !isEqual(this._geohashOptions.heatmap, options)) {
+    } else if (this._geohashOptions.mapType === 'Heatmap' && !_.isEqual(this._geohashOptions.heatmap, options)) {
       return false;
     } else {
       return true;

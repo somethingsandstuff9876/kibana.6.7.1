@@ -1,11 +1,13 @@
 {
   "update": {
     "url_params": {
+      "include_type_name": "",
       "wait_for_active_shards": "",
       "_source": [],
-      "_source_excludes": [],
-      "_source_includes": [],
+      "_source_exclude": [],
+      "_source_include": [],
       "lang": "painless",
+      "parent": "",
       "refresh": [
         "true",
         "false",
@@ -14,16 +16,19 @@
       "retry_on_conflict": "0",
       "routing": "",
       "timeout": "",
-      "if_seq_no": "",
-      "if_primary_term": ""
+      "version": "",
+      "version_type": [
+        "internal",
+        "force"
+      ]
     },
     "methods": [
       "POST"
     ],
     "patterns": [
-      "{indices}/_update/{id}",
-      "{indices}/{type}/{id}/_update"
+      "{indices}/{type}/{id}/_update",
+      "{indices}/_doc/{id}/_update"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update.html"
   }
 }

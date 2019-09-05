@@ -1,0 +1,34 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+class KibanaResponse {
+    constructor(status, payload) {
+        this.status = status;
+        this.payload = payload;
+    }
+}
+exports.KibanaResponse = KibanaResponse;
+exports.responseFactory = {
+    accepted: (payload) => new KibanaResponse(202, payload),
+    badRequest: (err) => new KibanaResponse(400, err),
+    noContent: () => new KibanaResponse(204),
+    ok: (payload) => new KibanaResponse(200, payload),
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL2NvcmUvc2VydmVyL2h0dHAvcm91dGVyL3Jlc3BvbnNlLnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS9zcmMvY29yZS9zZXJ2ZXIvaHR0cC9yb3V0ZXIvcmVzcG9uc2UudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7OztHQWlCRzs7QUFLSCxNQUFhLGNBQWM7SUFDekIsWUFBcUIsTUFBa0IsRUFBVyxPQUFXO1FBQXhDLFdBQU0sR0FBTixNQUFNLENBQVk7UUFBVyxZQUFPLEdBQVAsT0FBTyxDQUFJO0lBQUcsQ0FBQztDQUNsRTtBQUZELHdDQUVDO0FBRVksUUFBQSxlQUFlLEdBQUc7SUFDN0IsUUFBUSxFQUFFLENBQW1DLE9BQVUsRUFBRSxFQUFFLENBQUMsSUFBSSxjQUFjLENBQUMsR0FBRyxFQUFFLE9BQU8sQ0FBQztJQUM1RixVQUFVLEVBQUUsQ0FBa0IsR0FBTSxFQUFFLEVBQUUsQ0FBQyxJQUFJLGNBQWMsQ0FBQyxHQUFHLEVBQUUsR0FBRyxDQUFDO0lBQ3JFLFNBQVMsRUFBRSxHQUFHLEVBQUUsQ0FBQyxJQUFJLGNBQWMsQ0FBTyxHQUFHLENBQUM7SUFDOUMsRUFBRSxFQUFFLENBQW1DLE9BQVUsRUFBRSxFQUFFLENBQUMsSUFBSSxjQUFjLENBQUMsR0FBRyxFQUFFLE9BQU8sQ0FBQztDQUN2RixDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIExpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmUgb3IgbW9yZSBjb250cmlidXRvclxuICogbGljZW5zZSBhZ3JlZW1lbnRzLiBTZWUgdGhlIE5PVElDRSBmaWxlIGRpc3RyaWJ1dGVkIHdpdGhcbiAqIHRoaXMgd29yayBmb3IgYWRkaXRpb25hbCBpbmZvcm1hdGlvbiByZWdhcmRpbmcgY29weXJpZ2h0XG4gKiBvd25lcnNoaXAuIEVsYXN0aWNzZWFyY2ggQi5WLiBsaWNlbnNlcyB0aGlzIGZpbGUgdG8geW91IHVuZGVyXG4gKiB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpOyB5b3UgbWF5XG4gKiBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLFxuICogc29mdHdhcmUgZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW5cbiAqIFwiQVMgSVNcIiBCQVNJUywgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZXG4gKiBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLiAgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGVcbiAqIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQgbGltaXRhdGlvbnNcbiAqIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbi8vIFRPRE8gTmVlZHMgX3NvbWVfIHdvcmtcbmV4cG9ydCB0eXBlIFN0YXR1c0NvZGUgPSAyMDAgfCAyMDIgfCAyMDQgfCA0MDA7XG5cbmV4cG9ydCBjbGFzcyBLaWJhbmFSZXNwb25zZTxUPiB7XG4gIGNvbnN0cnVjdG9yKHJlYWRvbmx5IHN0YXR1czogU3RhdHVzQ29kZSwgcmVhZG9ubHkgcGF5bG9hZD86IFQpIHt9XG59XG5cbmV4cG9ydCBjb25zdCByZXNwb25zZUZhY3RvcnkgPSB7XG4gIGFjY2VwdGVkOiA8VCBleHRlbmRzIHsgW2tleTogc3RyaW5nXTogYW55IH0+KHBheWxvYWQ6IFQpID0+IG5ldyBLaWJhbmFSZXNwb25zZSgyMDIsIHBheWxvYWQpLFxuICBiYWRSZXF1ZXN0OiA8VCBleHRlbmRzIEVycm9yPihlcnI6IFQpID0+IG5ldyBLaWJhbmFSZXNwb25zZSg0MDAsIGVyciksXG4gIG5vQ29udGVudDogKCkgPT4gbmV3IEtpYmFuYVJlc3BvbnNlPHZvaWQ+KDIwNCksXG4gIG9rOiA8VCBleHRlbmRzIHsgW2tleTogc3RyaW5nXTogYW55IH0+KHBheWxvYWQ6IFQpID0+IG5ldyBLaWJhbmFSZXNwb25zZSgyMDAsIHBheWxvYWQpLFxufTtcblxuZXhwb3J0IHR5cGUgUmVzcG9uc2VGYWN0b3J5ID0gdHlwZW9mIHJlc3BvbnNlRmFjdG9yeTtcbiJdfQ==

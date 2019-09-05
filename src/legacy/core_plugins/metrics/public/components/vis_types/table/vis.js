@@ -17,25 +17,20 @@
  * under the License.
  */
 
-import _, { isArray, last, get } from 'lodash';
+import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { fieldFormats } from 'ui/registry/field_formats';
-import { tickFormatter } from '../../lib/tick_formatter';
-import { calculateLabel } from '../../../../common/calculate_label';
+import tickFormatter from '../../lib/tick_formatter';
+import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
-import { replaceVars } from '../../lib/replace_vars';
+import replaceVars from '../../lib/replace_vars';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { METRIC_TYPES } from '../../../../common/metric_types';
-
-const DateFormat = fieldFormats.getType('date');
 
 function getColor(rules, colorKey, value) {
   let color;
   if (rules) {
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       if (rule.operator && rule.value != null) {
         if (_[rule.operator](value, rule.value)) {
           color = rule[colorKey];
@@ -46,89 +41,61 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
-export class TableVis extends Component {
+class TableVis extends Component {
+
   constructor(props) {
     super(props);
-    this.dateFormatter = new DateFormat({}, this.props.getConfig);
+    this.renderRow = this.renderRow.bind(this);
   }
 
-  get visibleSeries() {
-    return get(this.props, 'model.series', []).filter(series => !series.hidden);
-  }
-
-  renderRow = row => {
+  renderRow(row) {
     const { model } = this.props;
-    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
+    const rowId = row.key;
+    let rowDisplay = rowId;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
-      rowDisplay = <a href={url}>{rowDisplay}</a>;
+      rowDisplay = (<a href={url}>{rowDisplay}</a>);
     }
-    const columns = row.series
-      .filter(item => item)
-      .map(item => {
-        const column = this.visibleSeries.find(c => c.id === item.id);
-        if (!column) return null;
-        const formatter = tickFormatter(
-          column.formatter,
-          column.value_template,
-          this.props.getConfig
+    const columns = row.series.filter(item => item).map(item => {
+      const column = model.series.find(c => c.id === item.id);
+      if (!column) return null;
+      const formatter = tickFormatter(column.formatter, column.value_template, this.props.getConfig);
+      const value = formatter(item.last);
+      let trend;
+      if (column.trend_arrows) {
+        const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
+        trend = (
+          <span>
+            &nbsp; <EuiIcon type={trendIcon} color="subdued" />
+          </span>
         );
-        const value = formatter(item.last);
-        let trend;
-        if (column.trend_arrows) {
-          const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
-          trend = (
-            <span>
-              &nbsp; <EuiIcon type={trendIcon} color="subdued" />
-            </span>
-          );
-        }
-        const style = { color: getColor(column.color_rules, 'text', item.last) };
-        return (
-          <td
-            key={`${row.key}-${item.id}`}
-            data-test-subj="tvbTableVis__value"
-            className="eui-textRight"
-            style={style}
-          >
-            <span>{value}</span>
-            {trend}
-          </td>
-        );
-      });
+      }
+      const style = { color: getColor(column.color_rules, 'text', item.last) };
+      return (
+        <td key={`${rowId}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
+          <span>{ value }</span>
+          {trend}
+        </td>
+      );
+    });
     return (
-      <tr key={row.key}>
+      <tr key={rowId}>
         <td>{rowDisplay}</td>
         {columns}
       </tr>
     );
-  };
+  }
 
   renderHeader() {
     const { model, uiState, onUiState } = this.props;
     const stateKey = `${model.type}.sort`;
     const sort = uiState.get(stateKey, {
       column: '_default_',
-      order: 'asc',
+      order: 'asc'
     });
-
-    const calculateHeaderLabel = (metric, item) => {
-      const defaultLabel = item.label || calculateLabel(metric, item.metrics);
-
-      switch (metric.type) {
-        case METRIC_TYPES.PERCENTILE:
-          return `${defaultLabel} (${last(metric.percentiles).value || 0})`;
-        case METRIC_TYPES.PERCENTILE_RANK:
-          return `${defaultLabel} (${last(metric.values) || 0})`;
-        default:
-          return defaultLabel;
-      }
-    };
-
-    const columns = this.visibleSeries.map(item => {
-      const metric = last(item.metrics);
-      const label = calculateHeaderLabel(metric, item);
-
+    const columns  = model.series.map(item => {
+      const metric = _.last(item.metrics);
+      const label = item.label || calculateLabel(metric, item.metrics);
       const handleClick = () => {
         if (!isSortable(metric)) return;
         let order;
@@ -147,22 +114,20 @@ export class TableVis extends Component {
         } else {
           sortIcon = 'empty';
         }
-        sortComponent = <EuiIcon type={sortIcon} />;
+        sortComponent = (
+          <EuiIcon type={sortIcon} />
+        );
       }
       let headerContent = (
-        <span>
-          {label} {sortComponent}
-        </span>
+        <span>{label} {sortComponent}</span>
       );
       if (!isSortable(metric)) {
         headerContent = (
           <EuiToolTip
-            content={
-              <FormattedMessage
-                id="tsvb.table.columnNotSortableTooltip"
-                defaultMessage="This column is not sortable"
-              />
-            }
+            content={(<FormattedMessage
+              id="tsvb.table.columnNotSortableTooltip"
+              defaultMessage="This column is not sortable"
+            />)}
           >
             {headerContent}
           </EuiToolTip>
@@ -170,7 +135,11 @@ export class TableVis extends Component {
       }
 
       return (
-        <th onClick={handleClick} key={item.id} scope="col">
+        <th
+          onClick={handleClick}
+          key={item.id}
+          scope="col"
+        >
           {headerContent}
         </th>
       );
@@ -182,7 +151,9 @@ export class TableVis extends Component {
     } else {
       sortIcon = 'empty';
     }
-    const sortComponent = <EuiIcon type={sortIcon} />;
+    const sortComponent = (
+      <EuiIcon type={sortIcon} />
+    );
     const handleSortClick = () => {
       let order;
       if (sort.column === '_default_') {
@@ -194,10 +165,8 @@ export class TableVis extends Component {
     };
     return (
       <tr>
-        <th className="eui-textLeft" scope="col" onClick={handleSortClick}>
-          {label} {sortComponent}
-        </th>
-        {columns}
+        <th className="eui-textLeft" scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
+        { columns }
       </tr>
     );
   }
@@ -206,40 +175,52 @@ export class TableVis extends Component {
     const { visData, model } = this.props;
     const header = this.renderHeader();
     let rows;
+    let reversedClass = '';
 
-    if (isArray(visData.series) && visData.series.length) {
+    if (this.props.reversed) {
+      reversedClass = 'reversed';
+    }
+
+    if (_.isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
     } else {
-      const message = model.pivot_id ? (
-        <FormattedMessage
+      const message = model.pivot_id ?
+        (<FormattedMessage
           id="tsvb.table.noResultsAvailableMessage"
           defaultMessage="No results available."
-        />
-      ) : (
-        <FormattedMessage
+        />)
+        : (<FormattedMessage
           id="tsvb.table.noResultsAvailableWithDescriptionMessage"
           defaultMessage="No results available. You must choose a group by field for this visualization."
-        />
-      );
+        />);
       rows = (
         <tr>
-          <td colSpan={this.visibleSeries.length + 1}>{message}</td>
+          <td
+            colSpan={model.series.length + 1}
+          >
+            {message}
+          </td>
         </tr>
       );
     }
-    return (
-      <div className="tvbVis" data-test-subj="tableView">
+    return(
+      <div className={`tvbVis ${reversedClass}`} data-test-subj="tableView">
         <table className="table">
-          <thead>{header}</thead>
-          <tbody>{rows}</tbody>
+          <thead>
+            {header}
+          </thead>
+          <tbody>
+            {rows}
+          </tbody>
         </table>
       </div>
     );
   }
+
 }
 
 TableVis.defaultProps = {
-  sort: {},
+  sort: {}
 };
 
 TableVis.propTypes = {
@@ -250,5 +231,8 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  getConfig: PropTypes.func,
+  reversed: PropTypes.bool,
+  getConfig: PropTypes.func
 };
+
+export default TableVis;

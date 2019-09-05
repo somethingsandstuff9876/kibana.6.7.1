@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { deleteTestSuiteFactory } from '../../common/suites/delete';
 
-// eslint-disable-next-line import/no-default-export
+// tslint:disable:no-default-export
 export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -17,6 +17,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
   const {
     deleteTest,
+    createExpectLegacyForbidden,
     expectRbacForbidden,
     expectEmptyResult,
     expectNotFound,
@@ -34,6 +35,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -47,6 +49,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -58,15 +61,15 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         tests: {
           exists: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
           },
           reservedSpace: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
           },
           doesntExist: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
           },
         },
       });
@@ -133,16 +136,16 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         user: scenario.users.legacyAll,
         tests: {
           exists: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 204,
+            response: expectEmptyResult,
           },
           reservedSpace: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 400,
+            response: expectReservedSpaceResult,
           },
           doesntExist: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 404,
+            response: expectNotFound,
           },
         },
       });
@@ -181,6 +184,28 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           doesntExist: {
             statusCode: 403,
             response: expectRbacForbidden,
+          },
+        },
+      });
+
+      deleteTest(`legacy readonly user from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.legacyRead,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: createExpectLegacyForbidden(
+              scenario.users.legacyRead.username,
+              'write/delete'
+            ),
+          },
+          reservedSpace: {
+            statusCode: 400,
+            response: expectReservedSpaceResult,
+          },
+          doesntExist: {
+            statusCode: 404,
+            response: expectNotFound,
           },
         },
       });

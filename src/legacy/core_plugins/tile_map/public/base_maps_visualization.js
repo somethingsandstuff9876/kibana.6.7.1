@@ -18,18 +18,24 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
+import { uiModules } from 'ui/modules';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(serviceSettings) {
+const emsServiceSettings = new Promise((resolve) => {
+  uiModules.get('kibana').run(($injector) => {
+    const serviceSttings = $injector.get('serviceSettings');
+    resolve(serviceSttings);
+  });
+});
+
+export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
@@ -65,7 +71,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, visParams, status) {
+    async render(esResponse, status) {
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
@@ -77,7 +83,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         this._kibanaMap.resize();
       }
       if (status.params || status.aggs) {
-        this._params = visParams;
         await this._updateParams();
       }
 
@@ -138,7 +143,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     async _updateBaseLayer() {
 
-      const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
+      const DEFAULT_EMS_BASEMAP = 'road_map';
 
       if (!this._kibanaMap) {
         return;
@@ -151,7 +156,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
-            : tmsServices.find(s => s.id === emsTileLayerId.bright);
+            : tmsServices.find(s => s.id === DEFAULT_EMS_BASEMAP);
           if (initBasemapLayer) { this._setTmsLayer(initBasemapLayer); }
         } catch (e) {
           toastNotifications.addWarning(e.message);
@@ -191,24 +196,19 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      let isDesaturated = this._getMapsParams().isDesaturated;
-      if (typeof isDesaturated !== 'boolean') {
-        isDesaturated = true;
-      }
-      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
-      const meta = await serviceSettings.getAttributesForTMSLayer(tmsLayer, isDesaturated, isDarkMode);
+      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer);
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
-      delete options.subdomains;
+      delete options.url;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { ...options, showZoomMessage, ...meta, }
+        options: { url, showZoomMessage, ...options }
       });
     }
 
     async _updateData() {
-      throw new Error(i18n.translate('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
+      throw new Error(i18n('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
         defaultMessage: 'Child should implement this method to respond to data-update',
       }));
     }
@@ -233,7 +233,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         {},
         this.vis.type.visConfig.defaults,
         { type: this.vis.type.name },
-        this._params
+        this.vis.params
       );
     }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export function InspectorProvider({ getService }) {
   const log = getService('log');
@@ -30,7 +30,8 @@ export function InspectorProvider({ getService }) {
 
   return new class Inspector {
     async getIsEnabled() {
-      const ariaDisabled = await testSubjects.getAttribute('openInspectorButton', 'disabled');
+      const button = await testSubjects.find('openInspectorButton');
+      const ariaDisabled = await button.getAttribute('aria-disabled');
       return ariaDisabled !== 'true';
     }
 
@@ -85,7 +86,7 @@ export function InspectorProvider({ getService }) {
       // The buttons for setting table page size are in a popover element. This popover
       // element appears as if it's part of the inspectorPanel but it's really attached
       // to the body element by a portal.
-      const tableSizesPopover = await find.byCssSelector('.euiPanel .euiContextMenuPanel');
+      const tableSizesPopover = await find.byCssSelector('.euiPanel');
       await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 
@@ -93,20 +94,13 @@ export function InspectorProvider({ getService }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      const $ = await tableBody.parseDomContent();
-      return $('tr').toArray().map(tr => {
-        return $(tr).find('td').toArray().map(cell => {
-          // if this is an EUI table, filter down to the specific cell content
-          // otherwise this will include mobile-specific header information
-          const euiTableCellContent = $(cell).find('.euiTableCellContent');
-
-          if (euiTableCellContent.length > 0) {
-            return $(cell).find('.euiTableCellContent').text().trim();
-          } else {
-            return $(cell).text().trim();
-          }
-        });
-      });
+      // Convert the data into a nested array format:
+      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
+      const rows = await tableBody.findAllByTagName('tr');
+      return await Promise.all(rows.map(async row => {
+        const cells = await row.findAllByTagName('td');
+        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+      }));
     }
 
     async getTableHeaders() {
@@ -116,9 +110,11 @@ export function InspectorProvider({ getService }) {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
         return await inspectorPanel.findByTagName('thead');
       });
-      const $ = await dataTableHeader.parseDomContent();
-      return $('th span.euiTableCellContent__text').toArray()
-        .map(cell => $(cell).text().trim());
+      const cells = await dataTableHeader.findAllByTagName('th');
+      return await Promise.all(cells.map(async (cell) => {
+        const untrimmed = await cell.getVisibleText();
+        return untrimmed.trim();
+      }));
     }
 
     async expectTableHeaders(expected) {
@@ -148,30 +144,6 @@ export function InspectorProvider({ getService }) {
         await filterBtn.click();
       });
       await renderable.waitForRender();
-    }
-
-    async openInspectorView(viewId) {
-      log.debug(`Open Inspector view ${viewId}`);
-      await testSubjects.click('inspectorViewChooser');
-      await testSubjects.click(viewId);
-    }
-
-    async openInspectorRequestsView() {
-      await this.openInspectorView('inspectorViewChooserRequests');
-    }
-
-    async getRequestNames() {
-      await this.openInspectorRequestsView();
-      const requestChooserExists = await testSubjects.exists('inspectorRequestChooser');
-      if (requestChooserExists) {
-        await testSubjects.click('inspectorRequestChooser');
-        const menu = await testSubjects.find('inspectorRequestChooserMenuPanel');
-        const requestNames = await menu.getVisibleText();
-        return requestNames.trim().split('\n').join(',');
-      }
-
-      const singleRequest = await testSubjects.find('inspectorRequestName');
-      return await singleRequest.getVisibleText();
     }
   };
 }

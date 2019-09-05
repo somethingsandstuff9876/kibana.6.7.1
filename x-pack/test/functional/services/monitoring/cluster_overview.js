@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 export function MonitoringClusterOverviewProvider({ getService }) {
   const testSubjects = getService('testSubjects');
@@ -66,8 +66,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       });
       return true;
     }
-
-    async getClusterName() {
+    getClusterName() {
       return testSubjects.getVisibleText(SUBJ_CLUSTER_NAME);
     }
 

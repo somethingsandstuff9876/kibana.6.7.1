@@ -1,4 +1,4 @@
-@import 'src/legacy/ui/public/styles/styling_constants';
+@import 'ui/public/styles/styling_constants';
 
 // Prefix all styles with "con" to avoid conflicts.
 // Examples
@@ -8,4 +8,5 @@
 //   conChart__legend-isLoading
 
 @import './app';
+@import './ace_overrides';
 @import './src/directives/index';

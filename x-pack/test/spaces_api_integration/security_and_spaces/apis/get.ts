@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { getTestSuiteFactory } from '../../common/suites/get';
 
-// eslint-disable-next-line import/no-default-export
+// tslint:disable:no-default-export
 export default function getSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -19,6 +19,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
     createExpectResults,
     createExpectNotFoundResult,
     createExpectRbacForbidden,
+    createExpectLegacyForbidden,
     nonExistantSpaceId,
   } = getTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
@@ -36,6 +37,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           readAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
           allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -52,6 +54,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -64,7 +67,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         tests: {
           default: {
             statusCode: 403,
-            response: createExpectRbacForbidden(scenario.spaceId),
+            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
           },
         },
       });
@@ -111,8 +114,8 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         user: scenario.users.legacyAll,
         tests: {
           default: {
-            statusCode: 403,
-            response: createExpectRbacForbidden(scenario.spaceId),
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
           },
         },
       });
@@ -141,6 +144,18 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         },
       });
 
+      getTest(`legacy readonly`, {
+        currentSpaceId: scenario.spaceId,
+        spaceId: scenario.spaceId,
+        user: scenario.users.legacyRead,
+        tests: {
+          default: {
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
+          },
+        },
+      });
+
       getTest(`rbac user with read at space from the ${scenario.spaceId} space`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
@@ -154,7 +169,9 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
       });
 
       getTest(
-        `rbac user with all at other space from the ${scenario.otherSpaceId} getting the ${scenario.spaceId}`,
+        `rbac user with all at other space from the ${scenario.otherSpaceId} getting the ${
+          scenario.spaceId
+        }`,
         {
           currentSpaceId: scenario.otherSpaceId,
           spaceId: scenario.spaceId,
@@ -179,6 +196,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
             readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
             allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
             legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+            legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
             dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
             dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
           },
@@ -214,8 +232,8 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           user: scenario.users.legacyAll,
           tests: {
             default: {
-              statusCode: 403,
-              response: createExpectRbacForbidden(scenario.otherSpaceId),
+              statusCode: 404,
+              response: createExpectNotFoundResult(),
             },
           },
         });
@@ -236,6 +254,18 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,
           user: scenario.users.dualRead,
+          tests: {
+            default: {
+              statusCode: 404,
+              response: createExpectNotFoundResult(),
+            },
+          },
+        });
+
+        getTest(`legacy readonly user`, {
+          currentSpaceId: scenario.spaceId,
+          spaceId: scenario.otherSpaceId,
+          user: scenario.users.legacyRead,
           tests: {
             default: {
               statusCode: 404,

@@ -1,0 +1,14 @@
+.ccrFollowerIndicesFormRow {
+  padding-bottom: 0; }
+
+.ccrFollowerIndicesHelpText {
+  -webkit-transform: translateY(-3px);
+          transform: translateY(-3px); }
+
+/**
+ * 1. Prevent context menu popover appearing above confirmation modal
+ */
+.ccrFollowerIndicesDetailPanel {
+  z-index: 5999;
+  /* 1 */ }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3gtcGFjay9wbHVnaW5zL2Nyb3NzX2NsdXN0ZXJfcmVwbGljYXRpb24vcHVibGljL2FwcC9fYXBwLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX3pfaW5kZXguc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFLGtCQUFpQixFQUNsQjs7QUFFRDtFQUNFLG9DQUEyQjtVQUEzQiw0QkFBMkIsRUFDNUI7O0FBRUQ7O0dBRUc7QUFDSDtFQUNFLGNDU3dCO0VEVEEsT0FBTyxFQUNoQyIsImZpbGUiOiJ0by5jc3MifQ== */

@@ -24,11 +24,8 @@ wherever possible.
 have breaking changes in any version of Kibana, or it might even be removed
 entirely.
 
-NOTE: You cannot access these APIs via the Console in Kibana.
-
 [float]
 == APIs
-* <<features-api>>
 * <<spaces-api>>
 * <<role-management-api>>
 * <<saved-objects-api>>
@@ -38,7 +35,6 @@ NOTE: You cannot access these APIs via the Console in Kibana.
 * <<upgrade-assistant-api>>
 --
 
-include::api/features.asciidoc[]
 include::api/spaces-management.asciidoc[]
 include::api/role-management.asciidoc[]
 include::api/saved-objects.asciidoc[]

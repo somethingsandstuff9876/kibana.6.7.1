@@ -132,7 +132,7 @@ export function extractArchive(archive, targetDir, extractPath) {
                 return reject(err);
               }
 
-              readStream.pipe(createWriteStream(fileName, { mode: entry.externalFileAttributes >>> 16 }));
+              readStream.pipe(createWriteStream(fileName));
               readStream.on('end', function () {
                 zipfile.readEntry();
               });

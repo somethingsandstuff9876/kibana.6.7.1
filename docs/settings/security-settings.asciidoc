@@ -1,17 +1,16 @@
 [role="xpack"]
 [[security-settings-kb]]
-=== Security settings in Kibana
+=== Security Settings in Kibana
 ++++
-<titleabbrev>Security settings</titleabbrev>
+<titleabbrev>Security Settings</titleabbrev>
 ++++
 
-You do not need to configure any additional settings to use the
-{security-features} in {kib}. They are enabled by default.
+You do not need to configure any additional settings to use {security} in {kib}.
+It is enabled by default.
 
 [float]
 [[general-security-settings]]
-==== General security settings
-
+==== General Security Settings
 `xpack.security.enabled`::
 By default, {kib} automatically detects whether to enable the
 {security-features} based on the license and whether {es} {security-features}
@@ -26,14 +25,18 @@ screens, and authorization using <<kibana-privileges>>. To disable
 Set to `true` to enable audit logging for security events. By default, it is set
 to `false`. For more details see <<xpack-security-audit-logging>>.
 
+`xpack.security.authorization.legacyFallback`::
+Set to `true` (default) to enable the legacy fallback. See <<xpack-security-authorization>>
+for more details.
+
 [float]
 [[security-ui-settings]]
-==== User interface security settings
+==== User Interface Security Settings
 
 You can configure the following settings in the `kibana.yml` file:
 
 `xpack.security.cookieName`::
-Sets the name of the cookie used for the session. The default value is `"sid"`.
+Sets the name of the cookie used for the session. The default value is `"sid"`
 
 `xpack.security.encryptionKey`::
 An arbitrary string of 32 characters or more that is used to encrypt credentials

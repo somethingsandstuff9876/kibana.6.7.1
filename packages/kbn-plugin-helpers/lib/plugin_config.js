@@ -21,11 +21,10 @@ const resolve = require('path').resolve;
 const readFileSync = require('fs').readFileSync;
 const configFile = require('./config_file');
 
-module.exports = function(root) {
+module.exports = function (root) {
   if (!root) root = process.cwd();
 
-  const pluginPackageJsonPath = resolve(root, 'package.json');
-  const pkg = JSON.parse(readFileSync(pluginPackageJsonPath));
+  const pkg = JSON.parse(readFileSync(resolve(root, 'package.json')));
   const config = configFile(root);
 
   const buildSourcePatterns = [
@@ -36,30 +35,16 @@ module.exports = function(root) {
     '{lib,public,server,webpackShims,translations}/**/*',
   ];
 
-  const kibanaExtraDir = resolve(root, '../../kibana');
-  const kibanaPluginsDir = resolve(root, '../../');
-  const isPluginOnKibanaExtra = pluginPackageJsonPath.includes(kibanaExtraDir);
-  const isPluginXpack = pkg.name === 'x-pack';
-
-  if (isPluginOnKibanaExtra && !isPluginXpack) {
-    console.warn(
-      `In the future we will disable ../kibana-extra/{pluginName}. You should move your plugin ${pkg.name} as soon as possible to ./plugins/{pluginName}`
-    );
-  }
-
-  const kibanaRootWhenNotXpackPlugin = isPluginOnKibanaExtra ? kibanaExtraDir : kibanaPluginsDir;
-
-  return Object.assign(
-    {
-      root: root,
-      kibanaRoot: isPluginXpack ? resolve(root, '..') : kibanaRootWhenNotXpackPlugin,
-      serverTestPatterns: ['server/**/__tests__/**/*.js'],
-      buildSourcePatterns: buildSourcePatterns,
-      skipInstallDependencies: false,
-      id: pkg.name,
-      pkg: pkg,
-      version: pkg.version,
-    },
-    config
-  );
+  return Object.assign({
+    root: root,
+    kibanaRoot: pkg.name === 'x-pack'
+      ? resolve(root, '..')
+      : resolve(root, '../../kibana'),
+    serverTestPatterns: ['server/**/__tests__/**/*.js'],
+    buildSourcePatterns: buildSourcePatterns,
+    skipInstallDependencies: false,
+    id: pkg.name,
+    pkg: pkg,
+    version: pkg.version,
+  }, config);
 };

@@ -20,7 +20,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiToolTip,
+} from '@elastic/eui';
 
 export function FormRow(props) {
   let control = props.children;
@@ -32,20 +35,9 @@ export function FormRow(props) {
     );
   }
 
-  const label = props.warningMsg ? (
-    <>
-      <EuiToolTip position="top" content={props.warningMsg}>
-        <EuiIcon type="alert" />
-      </EuiToolTip>
-      {props.label}
-    </>
-  ) : (
-    props.label
-  );
-
   return (
     <EuiFormRow
-      label={label}
+      label={props.label}
       id={props.id}
       data-test-subj={'inputControl' + props.controlIndex}
     >
@@ -56,7 +48,6 @@ export function FormRow(props) {
 
 FormRow.propTypes = {
   label: PropTypes.string.isRequired,
-  warningMsg: PropTypes.string,
   id: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   controlIndex: PropTypes.number.isRequired,

@@ -18,7 +18,6 @@
  */
 
 jest.mock('../../layouts/layouts', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { schema } = require('@kbn/config-schema');
   return {
     Layouts: {
@@ -83,10 +82,10 @@ test('`append()` correctly formats records and pushes them to console.', () => {
 
   for (const record of records) {
     appender.append(record);
-    // eslint-disable-next-line no-console
+    // tslint:disable-next-line no-console
     expect(console.log).toHaveBeenCalledWith(`mock-${JSON.stringify(record)}`);
   }
 
-  // eslint-disable-next-line no-console
+  // tslint:disable-next-line no-console
   expect(console.log).toHaveBeenCalledTimes(records.length);
 });

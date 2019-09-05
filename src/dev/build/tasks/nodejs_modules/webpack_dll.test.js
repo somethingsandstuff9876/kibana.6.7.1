@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { isFileAccessible, read } from '../../lib';
+import { read } from '../../lib';
 import { getDllEntries } from './webpack_dll';
 
 jest.mock('../../lib', () => ({
-  read: jest.fn(),
-  isFileAccessible: jest.fn(),
+  read: jest.fn()
 }));
 
 const manifestContentMock = JSON.stringify({
@@ -50,27 +49,11 @@ describe('Webpack DLL Build Tasks Utils', () => {
   it('should get dll entries correctly', async () => {
     read.mockImplementationOnce(async () => manifestContentMock);
 
-    isFileAccessible.mockImplementation(() => true);
-
     const mockManifestPath = '/mock/mock_dll_manifest.json';
     const mockModulesWhitelist = [ 'dep1' ];
     const dllEntries = await getDllEntries(mockManifestPath, mockModulesWhitelist);
 
     expect(dllEntries).toEqual(expect.arrayContaining(['/mock/node_modules/dep2', '/mock/node_modules/dep3']));
-  });
-
-  it('should only include accessible files', async () => {
-    read.mockImplementationOnce(async () => manifestContentMock);
-
-    isFileAccessible.mockImplementation(() => false);
-
-    const mockManifestPath = '/mock/mock_dll_manifest.json';
-    const mockModulesWhitelist = [ 'dep1' ];
-    const dllEntries = await getDllEntries(mockManifestPath, mockModulesWhitelist);
-
-    isFileAccessible.mockRestore();
-
-    expect(dllEntries.length).toEqual(0);
   });
 
   it('should throw an error for no manifest file', async () => {

@@ -1,55 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsApi args 1`] = `
+exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi args 1`] = `
 [MockFunction MockUiSettingsApi] {
   "calls": Array [
     Array [
       Object {
-        "addLoadingCount": [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {
-                "loadingCountObservable": true,
-              },
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
-        "basePath": Object {
-          "get": [MockFunction],
-          "prepend": [MockFunction],
-          "remove": [MockFunction],
-        },
-        "delete": [MockFunction],
-        "fetch": [MockFunction],
-        "get": [MockFunction],
-        "getLoadingCount$": [MockFunction],
-        "head": [MockFunction],
-        "intercept": [MockFunction],
-        "options": [MockFunction],
-        "patch": [MockFunction],
-        "post": [MockFunction],
-        "put": [MockFunction],
-        "removeAllInterceptors": [MockFunction],
-        "stop": [MockFunction],
+        "basePathStartContract": true,
       },
+      "kibanaVersion",
     ],
   ],
   "results": Array [
     Object {
-      "type": "return",
+      "isThrow": false,
       "value": undefined,
     },
   ],
 }
 `;
 
-exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsClient args 1`] = `
+exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient args 1`] = `
 [MockFunction MockUiSettingsClient] {
   "calls": Array [
     Array [
@@ -61,7 +31,7 @@ exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
             ],
             "results": Array [
               Object {
-                "type": "return",
+                "isThrow": false,
                 "value": Object {
                   "loadingCountObservable": true,
                 },
@@ -76,19 +46,20 @@ exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
         "initialSettings": Object {
           "legacyInjectedUiSettingUserValues": true,
         },
+        "onUpdateError": [Function],
       },
     ],
   ],
   "results": Array [
     Object {
-      "type": "return",
+      "isThrow": false,
       "value": undefined,
     },
   ],
 }
 `;
 
-exports[`#setup passes the uiSettings loading count to the loading count api: http.addLoadingCount calls 1`] = `
+exports[`#start passes the uiSettings loading count to the loading count api: loadingCount.add calls 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -99,7 +70,7 @@ exports[`#setup passes the uiSettings loading count to the loading count api: ht
   ],
   "results": Array [
     Object {
-      "type": "return",
+      "isThrow": false,
       "value": undefined,
     },
   ],

@@ -1,0 +1,44 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const http_config_1 = require("./http_config");
+exports.HttpConfig = http_config_1.HttpConfig;
+const http_service_1 = require("./http_service");
+exports.HttpService = http_service_1.HttpService;
+exports.HttpServiceStartContract = http_service_1.HttpServiceStartContract;
+const router_1 = require("./router");
+var router_2 = require("./router");
+exports.Router = router_2.Router;
+exports.KibanaRequest = router_2.KibanaRequest;
+var http_server_1 = require("./http_server");
+exports.HttpServerInfo = http_server_1.HttpServerInfo;
+var base_path_proxy_server_1 = require("./base_path_proxy_server");
+exports.BasePathProxyServer = base_path_proxy_server_1.BasePathProxyServer;
+class HttpModule {
+    constructor(config$, logger) {
+        this.config$ = config$;
+        this.service = new http_service_1.HttpService(this.config$, logger);
+        const router = new router_1.Router('/core');
+        router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
+        this.service.registerRouter(router);
+    }
+}
+exports.HttpModule = HttpModule;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL2NvcmUvc2VydmVyL2h0dHAvaW5kZXgudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3NyYy9jb3JlL3NlcnZlci9odHRwL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FpQkc7O0FBS0gsK0NBQTJDO0FBU2xDLHFCQVRBLHdCQUFVLENBU0E7QUFSbkIsaURBQXVFO0FBSTlELHNCQUpBLDBCQUFXLENBSUE7QUFBRSxtQ0FKQSx1Q0FBd0IsQ0FJQTtBQUg5QyxxQ0FBa0M7QUFFbEMsbUNBQWlEO0FBQXhDLDBCQUFBLE1BQU0sQ0FBQTtBQUFFLGlDQUFBLGFBQWEsQ0FBQTtBQUU5Qiw2Q0FBK0M7QUFBdEMsdUNBQUEsY0FBYyxDQUFBO0FBQ3ZCLG1FQUErRDtBQUF0RCx1REFBQSxtQkFBbUIsQ0FBQTtBQUk1QixNQUFhLFVBQVU7SUFHckIsWUFBcUIsT0FBK0IsRUFBRSxNQUFxQjtRQUF0RCxZQUFPLEdBQVAsT0FBTyxDQUF3QjtRQUNsRCxJQUFJLENBQUMsT0FBTyxHQUFHLElBQUksMEJBQVcsQ0FBQyxJQUFJLENBQUMsT0FBTyxFQUFFLE1BQU0sQ0FBQyxDQUFDO1FBRXJELE1BQU0sTUFBTSxHQUFHLElBQUksZUFBTSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1FBQ25DLE1BQU0sQ0FBQyxHQUFHLENBQUMsRUFBRSxJQUFJLEVBQUUsR0FBRyxFQUFFLFFBQVEsRUFBRSxLQUFLLEVBQUUsRUFBRSxLQUFLLEVBQUUsR0FBRyxFQUFFLEdBQUcsRUFBRSxFQUFFLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FBQyxFQUFFLE9BQU8sRUFBRSxPQUFPLEVBQUUsQ0FBQyxDQUFDLENBQUM7UUFDN0YsSUFBSSxDQUFDLE9BQU8sQ0FBQyxjQUFjLENBQUMsTUFBTSxDQUFDLENBQUM7SUFDdEMsQ0FBQztDQUNGO0FBVkQsZ0NBVUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogTGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZSBvciBtb3JlIGNvbnRyaWJ1dG9yXG4gKiBsaWNlbnNlIGFncmVlbWVudHMuIFNlZSB0aGUgTk9USUNFIGZpbGUgZGlzdHJpYnV0ZWQgd2l0aFxuICogdGhpcyB3b3JrIGZvciBhZGRpdGlvbmFsIGluZm9ybWF0aW9uIHJlZ2FyZGluZyBjb3B5cmlnaHRcbiAqIG93bmVyc2hpcC4gRWxhc3RpY3NlYXJjaCBCLlYuIGxpY2Vuc2VzIHRoaXMgZmlsZSB0byB5b3UgdW5kZXJcbiAqIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSBcIkxpY2Vuc2VcIik7IHlvdSBtYXlcbiAqIG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuXG4gKiBZb3UgbWF5IG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXRcbiAqXG4gKiAgICBodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjBcbiAqXG4gKiBVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsXG4gKiBzb2Z0d2FyZSBkaXN0cmlidXRlZCB1bmRlciB0aGUgTGljZW5zZSBpcyBkaXN0cmlidXRlZCBvbiBhblxuICogXCJBUyBJU1wiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTllcbiAqIEtJTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuICBTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZVxuICogc3BlY2lmaWMgbGFuZ3VhZ2UgZ292ZXJuaW5nIHBlcm1pc3Npb25zIGFuZCBsaW1pdGF0aW9uc1xuICogdW5kZXIgdGhlIExpY2Vuc2UuXG4gKi9cblxuaW1wb3J0IHsgT2JzZXJ2YWJsZSB9IGZyb20gJ3J4anMnO1xuXG5pbXBvcnQgeyBMb2dnZXJGYWN0b3J5IH0gZnJvbSAnLi4vbG9nZ2luZyc7XG5pbXBvcnQgeyBIdHRwQ29uZmlnIH0gZnJvbSAnLi9odHRwX2NvbmZpZyc7XG5pbXBvcnQgeyBIdHRwU2VydmljZSwgSHR0cFNlcnZpY2VTdGFydENvbnRyYWN0IH0gZnJvbSAnLi9odHRwX3NlcnZpY2UnO1xuaW1wb3J0IHsgUm91dGVyIH0gZnJvbSAnLi9yb3V0ZXInO1xuXG5leHBvcnQgeyBSb3V0ZXIsIEtpYmFuYVJlcXVlc3QgfSBmcm9tICcuL3JvdXRlcic7XG5leHBvcnQgeyBIdHRwU2VydmljZSwgSHR0cFNlcnZpY2VTdGFydENvbnRyYWN0IH07XG5leHBvcnQgeyBIdHRwU2VydmVySW5mbyB9IGZyb20gJy4vaHR0cF9zZXJ2ZXInO1xuZXhwb3J0IHsgQmFzZVBhdGhQcm94eVNlcnZlciB9IGZyb20gJy4vYmFzZV9wYXRoX3Byb3h5X3NlcnZlcic7XG5cbmV4cG9ydCB7IEh0dHBDb25maWcgfTtcblxuZXhwb3J0IGNsYXNzIEh0dHBNb2R1bGUge1xuICBwdWJsaWMgcmVhZG9ubHkgc2VydmljZTogSHR0cFNlcnZpY2U7XG5cbiAgY29uc3RydWN0b3IocmVhZG9ubHkgY29uZmlnJDogT2JzZXJ2YWJsZTxIdHRwQ29uZmlnPiwgbG9nZ2VyOiBMb2dnZXJGYWN0b3J5KSB7XG4gICAgdGhpcy5zZXJ2aWNlID0gbmV3IEh0dHBTZXJ2aWNlKHRoaXMuY29uZmlnJCwgbG9nZ2VyKTtcblxuICAgIGNvbnN0IHJvdXRlciA9IG5ldyBSb3V0ZXIoJy9jb3JlJyk7XG4gICAgcm91dGVyLmdldCh7IHBhdGg6ICcvJywgdmFsaWRhdGU6IGZhbHNlIH0sIGFzeW5jIChyZXEsIHJlcykgPT4gcmVzLm9rKHsgdmVyc2lvbjogJzAuMC4xJyB9KSk7XG4gICAgdGhpcy5zZXJ2aWNlLnJlZ2lzdGVyUm91dGVyKHJvdXRlcik7XG4gIH1cbn1cbiJdfQ==

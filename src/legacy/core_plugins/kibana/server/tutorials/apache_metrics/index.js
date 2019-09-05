@@ -43,7 +43,7 @@ export function apacheMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'Metricbeat-Apache-HTTPD-server-status-ecs',
+          id: 'Metricbeat-Apache-HTTPD-server-status',
           linkLabel: i18n.translate('kbn.server.tutorials.apacheMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Apache metrics dashboard',
           }),

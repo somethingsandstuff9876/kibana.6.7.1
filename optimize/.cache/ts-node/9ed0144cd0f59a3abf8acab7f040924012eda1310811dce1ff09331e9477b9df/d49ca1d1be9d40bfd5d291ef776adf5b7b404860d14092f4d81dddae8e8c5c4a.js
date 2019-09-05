@@ -1,0 +1,33 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Given a function that runs a batch of tasks (e.g. taskPool.run), a function
+ * that fetches task records (e.g. store.fetchAvailableTasks), and a function
+ * that converts task records to the appropriate task runner, this function
+ * fills the pool with work.
+ *
+ * This is annoyingly general in order to simplify testing.
+ *
+ * @param run - a function that runs a batch of tasks (e.g. taskPool.run)
+ * @param fetchAvailableTasks - a function that fetches task records (e.g. store.fetchAvailableTasks)
+ * @param converter - a function that converts task records to the appropriate task runner
+ */
+async function fillPool(run, fetchAvailableTasks, converter) {
+    while (true) {
+        const instances = await fetchAvailableTasks();
+        if (!instances.length) {
+            return;
+        }
+        const tasks = instances.map(converter);
+        if (!(await run(tasks))) {
+            return;
+        }
+    }
+}
+exports.fillPool = fillPool;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvdGFza19tYW5hZ2VyL2xpYi9maWxsX3Bvb2wudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3gtcGFjay9wbHVnaW5zL3Rhc2tfbWFuYWdlci9saWIvZmlsbF9wb29sLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7OztHQUlHOztBQU1IOzs7Ozs7Ozs7OztHQVdHO0FBQ0ksS0FBSyxVQUFVLFFBQVEsQ0FDNUIsR0FBc0IsRUFDdEIsbUJBQXFDLEVBQ3JDLFNBQXNDO0lBRXRDLE9BQU8sSUFBSSxFQUFFO1FBQ1gsTUFBTSxTQUFTLEdBQUcsTUFBTSxtQkFBbUIsRUFBRSxDQUFDO1FBRTlDLElBQUksQ0FBQyxTQUFTLENBQUMsTUFBTSxFQUFFO1lBQ3JCLE9BQU87U0FDUjtRQUVELE1BQU0sS0FBSyxHQUFHLFNBQVMsQ0FBQyxHQUFHLENBQUMsU0FBUyxDQUFDLENBQUM7UUFFdkMsSUFBSSxDQUFDLENBQUMsTUFBTSxHQUFHLENBQUMsS0FBSyxDQUFDLENBQUMsRUFBRTtZQUN2QixPQUFPO1NBQ1I7S0FDRjtBQUNILENBQUM7QUFsQkQsNEJBa0JDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIENvcHlyaWdodCBFbGFzdGljc2VhcmNoIEIuVi4gYW5kL29yIGxpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmVcbiAqIG9yIG1vcmUgY29udHJpYnV0b3IgbGljZW5zZSBhZ3JlZW1lbnRzLiBMaWNlbnNlZCB1bmRlciB0aGUgRWxhc3RpYyBMaWNlbnNlO1xuICogeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBFbGFzdGljIExpY2Vuc2UuXG4gKi9cblxudHlwZSBCYXRjaFJ1bjxUPiA9ICh0YXNrczogVFtdKSA9PiBQcm9taXNlPGJvb2xlYW4+O1xudHlwZSBGZXRjaGVyPFQ+ID0gKCkgPT4gUHJvbWlzZTxUW10+O1xudHlwZSBDb252ZXJ0ZXI8VDEsIFQyPiA9ICh0OiBUMSkgPT4gVDI7XG5cbi8qKlxuICogR2l2ZW4gYSBmdW5jdGlvbiB0aGF0IHJ1bnMgYSBiYXRjaCBvZiB0YXNrcyAoZS5nLiB0YXNrUG9vbC5ydW4pLCBhIGZ1bmN0aW9uXG4gKiB0aGF0IGZldGNoZXMgdGFzayByZWNvcmRzIChlLmcuIHN0b3JlLmZldGNoQXZhaWxhYmxlVGFza3MpLCBhbmQgYSBmdW5jdGlvblxuICogdGhhdCBjb252ZXJ0cyB0YXNrIHJlY29yZHMgdG8gdGhlIGFwcHJvcHJpYXRlIHRhc2sgcnVubmVyLCB0aGlzIGZ1bmN0aW9uXG4gKiBmaWxscyB0aGUgcG9vbCB3aXRoIHdvcmsuXG4gKlxuICogVGhpcyBpcyBhbm5veWluZ2x5IGdlbmVyYWwgaW4gb3JkZXIgdG8gc2ltcGxpZnkgdGVzdGluZy5cbiAqXG4gKiBAcGFyYW0gcnVuIC0gYSBmdW5jdGlvbiB0aGF0IHJ1bnMgYSBiYXRjaCBvZiB0YXNrcyAoZS5nLiB0YXNrUG9vbC5ydW4pXG4gKiBAcGFyYW0gZmV0Y2hBdmFpbGFibGVUYXNrcyAtIGEgZnVuY3Rpb24gdGhhdCBmZXRjaGVzIHRhc2sgcmVjb3JkcyAoZS5nLiBzdG9yZS5mZXRjaEF2YWlsYWJsZVRhc2tzKVxuICogQHBhcmFtIGNvbnZlcnRlciAtIGEgZnVuY3Rpb24gdGhhdCBjb252ZXJ0cyB0YXNrIHJlY29yZHMgdG8gdGhlIGFwcHJvcHJpYXRlIHRhc2sgcnVubmVyXG4gKi9cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBmaWxsUG9vbDxUUmVjb3JkLCBUUnVubmVyPihcbiAgcnVuOiBCYXRjaFJ1bjxUUnVubmVyPixcbiAgZmV0Y2hBdmFpbGFibGVUYXNrczogRmV0Y2hlcjxUUmVjb3JkPixcbiAgY29udmVydGVyOiBDb252ZXJ0ZXI8VFJlY29yZCwgVFJ1bm5lcj5cbik6IFByb21pc2U8dm9pZD4ge1xuICB3aGlsZSAodHJ1ZSkge1xuICAgIGNvbnN0IGluc3RhbmNlcyA9IGF3YWl0IGZldGNoQXZhaWxhYmxlVGFza3MoKTtcblxuICAgIGlmICghaW5zdGFuY2VzLmxlbmd0aCkge1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIGNvbnN0IHRhc2tzID0gaW5zdGFuY2VzLm1hcChjb252ZXJ0ZXIpO1xuXG4gICAgaWYgKCEoYXdhaXQgcnVuKHRhc2tzKSkpIHtcbiAgICAgIHJldHVybjtcbiAgICB9XG4gIH1cbn1cbiJdfQ==

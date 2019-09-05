@@ -18,13 +18,13 @@
  */
 
 import Chance from 'chance';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
-} from '../../../../legacy/utils';
+} from '../../../../utils';
 
 import {
   createFilterRecordsStream,

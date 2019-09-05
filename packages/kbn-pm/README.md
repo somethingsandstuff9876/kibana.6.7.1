@@ -88,16 +88,15 @@ are running inside of.
 ```
 
 This works because we moved to a strict location of Kibana plugins,
-`./plugins/{pluginName}` inside of Kibana, or `../kibana-extra/{pluginName}`
-relative to Kibana. This is one of the reasons we wanted to move towards a setup
-that looks like this:
+`../kibana-extra/{pluginName}` relative to Kibana. This is one of the reasons we
+wanted to move towards a setup that looks like this:
 
 ```
 elastic
-└── kibana
-    └── plugins
-        ├── kibana-canvas
-        └── x-pack-kibana
+├── kibana
+└── kibana-extra
+    ├── kibana-canvas
+    └── x-pack-kibana
 ```
 
 Relying on `link:` style dependencies means we no longer need to `npm publish`
@@ -120,12 +119,11 @@ yarn kbn bootstrap
 ```
 
 By default, `@kbn/pm` will bootstrap all packages within Kibana, plus all
-Kibana plugins located in `./plugins` or `../kibana-extra`. There are several
-options for skipping parts of this, e.g. to skip bootstrapping of Kibana
-plugins:
+Kibana plugins located in `../kibana-extra`. There are several options for
+skipping parts of this, e.g. to skip bootstrapping of Kibana plugins:
 
 ```
-yarn kbn bootstrap --skip-kibana-plugins
+yarn kbn bootstrap --skip-kibana-extra
 ```
 
 Or just skip few selected packages:
@@ -154,7 +152,7 @@ yarn kbn run build
 ```
 
 And if needed, you can skip packages in the same way as for bootstrapping, e.g.
-with `--exclude` and `--skip-kibana-plugins`:
+with `--exclude` and `--skip-kibana-extra`:
 
 ```
 yarn kbn run build --exclude kibana
@@ -259,6 +257,10 @@ _libraries_, so it's focused on publishing packages and other use-cases that are
 not necessarily optimized for our use-cases. It's also not ideal for the setup
 we currently have, with one app that "owns everything" and the rest being
 packages for that app.
+
+### Why a local version of Yarn?
+
+See the [vendor readme](./vendor/README.md).
 
 [npm-link]: https://docs.npmjs.com/cli/link
 [npm5-file]: https://github.com/npm/npm/pull/15900

@@ -60,7 +60,7 @@ describe('reloading', () => {
 
     expect(locationReloadSpy).not.toHaveBeenCalled();
     const [, handler] = addEventListenerSpy.mock.calls[0];
-    (handler as jest.Mock)();
+    handler();
     expect(locationReloadSpy).toHaveBeenCalledTimes(1);
   });
 });

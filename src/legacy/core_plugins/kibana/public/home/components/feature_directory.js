@@ -116,7 +116,7 @@ export class FeatureDirectory extends React.Component {
 
   render() {
     return (
-      <EuiPage restrictWidth={1200}>
+      <EuiPage className="homPage">
         <EuiPageBody>
           <EuiTitle size="l">
             <h1>

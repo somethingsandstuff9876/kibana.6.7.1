@@ -104,14 +104,9 @@ module.exports = function (grunt) {
     Promise.all([uiFrameworkWatch(), uiFrameworkServerStart()]).then(done);
   });
 
-  grunt.registerTask('compileCssLight', function () {
+  grunt.registerTask('compileCss', function () {
     const done = this.async();
-    uiFrameworkCompileLight().then(done);
-  });
-
-  grunt.registerTask('compileCssDark', function () {
-    const done = this.async();
-    uiFrameworkCompileDark().then(done);
+    uiFrameworkCompile().then(done);
   });
 
   function uiFrameworkServerStart() {
@@ -146,36 +141,9 @@ module.exports = function (grunt) {
     });
   }
 
-  function uiFrameworkCompileLight() {
-    const src = 'src/kui_light.scss';
-    const dest = 'dist/kui_light.css';
-
-    return new Promise(resolve => {
-      sass.render({
-        file: src,
-      }, function (error, result) {
-        if (error) {
-          grunt.log.error(error);
-        }
-
-        postcss([postcssConfig])
-          .process(result.css, { from: src, to: dest })
-          .then(result => {
-            grunt.file.write(dest, result.css);
-
-            if (result.map) {
-              grunt.file.write(`${dest}.map`, result.map);
-            }
-
-            resolve();
-          });
-      });
-    });
-  }
-
-  function uiFrameworkCompileDark() {
-    const src = 'src/kui_dark.scss';
-    const dest = 'dist/kui_dark.css';
+  function uiFrameworkCompile() {
+    const src = 'src/index.scss';
+    const dest = 'dist/ui_framework.css';
 
     return new Promise(resolve => {
       sass.render({
@@ -207,8 +175,7 @@ module.exports = function (grunt) {
       grunt.util.spawn({
         cmd: isPlatformWindows ? '.\\node_modules\\.bin\\grunt.cmd' : './node_modules/.bin/grunt',
         args: [
-          'compileCssLight',
-          'compileCssDark',
+          'compileCss',
         ],
       }, (error, result) => {
         if (error) {

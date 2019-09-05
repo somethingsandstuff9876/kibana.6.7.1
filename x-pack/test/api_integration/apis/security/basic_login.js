@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import request from 'request';
 
 export default function ({ getService }) {
@@ -21,13 +21,6 @@ export default function ({ getService }) {
         .expect(302);
 
       expect(response.headers.location).to.be('/login?next=%2Fabc%2Fxyz');
-    });
-
-    it('should redirect non-AJAX New platform requests to the login page if not authenticated', async () => {
-      const response = await supertest.get('/core/')
-        .expect(302);
-
-      expect(response.headers.location).to.be('/login?next=%2Fcore%2F');
     });
 
     it('should reject API requests if client is not authenticated', async () => {
@@ -105,6 +98,7 @@ export default function ({ getService }) {
         'full_name',
         'email',
         'roles',
+        'scope',
         'metadata',
         'enabled',
         'authentication_realm',
@@ -143,6 +137,7 @@ export default function ({ getService }) {
           'full_name',
           'email',
           'roles',
+          'scope',
           'metadata',
           'enabled',
           'authentication_realm',

@@ -20,7 +20,7 @@ export default function ({ getService }) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
-  describe('BWC report generation into existing indexes', () => {
+  describe('BWC report generation into existing indexes', async () => {
     let expectedCompletedReportCount;
     let cleanupIndexAlias;
 

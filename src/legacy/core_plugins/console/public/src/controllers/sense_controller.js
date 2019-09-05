@@ -16,48 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { docTitle } from 'ui/doc_title';
-
-import { applyResizeCheckerToEditors } from '../sense_editor_resize';
+import 'ui/doc_title';
+import { useResizeChecker } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
 import init from '../app';
+import { SenseTopNavController } from './sense_top_nav_controller';
 import { getEndpointFromPosition } from '../autocomplete';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 
-// welcome message
-import { showWelcomePanel } from '../helpers/welcome_show_panel';
-import storage from '../storage';
-
-import { getTopNavConfig } from '../helpers/get_top_nav';
-
 const module = require('ui/modules').get('app/sense');
 
-module.run(function ($rootScope) {
+module.run(function (Private, $rootScope) {
   module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
-    return applyResizeCheckerToEditors($rootScope, $el, ...editors);
+    return useResizeChecker($rootScope, $el, ...editors);
   };
 });
 
-function showWelcomeMessageIfNeeded($scope) {
-  if (storage.get('version_welcome_shown') !== '@@SENSE_REVISION') {
-    const hideWelcomePanel = showWelcomePanel();
-    $scope.$on('$destroy', () => {
-      hideWelcomePanel();
-    });
-  }
-}
-
-module.controller('SenseController', function SenseController($scope, $timeout, $location, kbnUiAceKeyboardModeService) {
+module.controller('SenseController', function SenseController(Private, $scope, $timeout, $location, docTitle, kbnUiAceKeyboardModeService) {
   docTitle.change('Console');
 
-  showWelcomeMessageIfNeeded($scope);
-
-  // Since we pass this callback via reactDirective into a react component, which has the function defined as required
-  // in it's prop types, we should set this initially (before it's set in the $timeout below). Without this line
-  // the component we pass this in will throw an propType validation error.
-  $scope.getRequestsAsCURL = () => '';
+  $scope.topNavController = Private(SenseTopNavController);
 
   // We need to wait for these elements to be rendered before we can select them with jQuery
   // and then initialize this app
@@ -66,16 +46,22 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
   $timeout(async () => {
     output = initializeOutput($('#ConAppOutput'));
     input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), output, $scope.openDocumentation);
-    init(input, output, $location.search().load_from);
+
+    const urlParams = $location.search();
+    if (urlParams.load_from) {
+      init(input, output, 'http', urlParams.load_from);
+    } else if  (urlParams.command) {
+      init(input, output, 'text', urlParams.command);
+    } else {
+      init(input, output);
+    }
+
     kbnUiAceKeyboardModeService.initialize($scope, $('#ConAppEditor'));
     const session = input.getSession();
     session.getSelection().on('changeCursor', () => {
       $scope.getDocumentation();
     });
     $scope.getDocumentation();
-
-    // expose method for React Consumption
-    $scope.getRequestsAsCURL = input.getRequestsAsCURL;
   });
   $scope.getDocumentation = () => {
     input.getRequestsInRange(function (requests) {
@@ -99,19 +85,6 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
       }
     });
   };
-
-  $scope.showHistory = false;
-  $scope.historyDirty = undefined;
-  $scope.toggleHistory = () => {
-    $scope.showHistory = !$scope.showHistory;
-  };
-
-  $scope.closeHistory = () => {
-    $scope.showHistory = false;
-  };
-
-  $scope.topNavMenu = getTopNavConfig($scope, $scope.toggleHistory);
-
   $scope.openDocumentation = () => {
     if (!$scope.documentation) {
       return;
@@ -121,11 +94,7 @@ module.controller('SenseController', function SenseController($scope, $timeout, 
 
   $scope.sendSelected = () => {
     input.focus();
-    input.sendCurrentRequestToES(() => {
-      // History watches this value and will re-render itself when it changes, so that
-      // the list of requests stays up-to-date as new requests are sent.
-      $scope.lastRequestTimestamp = new Date().getTime();
-    });
+    input.sendCurrentRequestToES();
     return false;
   };
 

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { SPACES } from '../../common/lib/spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { createTestSuiteFactory } from '../../common/suites/create';
 
 const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
@@ -21,7 +21,8 @@ const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   });
 };
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -30,7 +31,6 @@ export default function({ getService }: FtrProviderContext) {
     createTest,
     createExpectSpaceAwareResults,
     expectNotSpaceAwareResults,
-    expectBadRequestForHiddenType,
   } = createTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('create', () => {
@@ -44,10 +44,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
-        },
-        hiddenType: {
-          statusCode: 400,
-          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',
@@ -74,10 +70,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectNotSpaceAwareResults,
-        },
-        hiddenType: {
-          statusCode: 400,
-          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',

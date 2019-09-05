@@ -20,11 +20,13 @@
 import _ from 'lodash';
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { toastNotifications } from 'ui/notify';
-import { i18n } from '@kbn/i18n';
 
-const TimelionRequestHandlerProvider = function (Private, $http, config) {
+const TimelionRequestHandlerProvider = function (Private, Notifier, $http, config) {
   const timezone = Private(timezoneProvider)();
+
+  const notify = new Notifier({
+    location: 'Timelion'
+  });
 
   return {
     name: 'timelion',
@@ -38,7 +40,7 @@ const TimelionRequestHandlerProvider = function (Private, $http, config) {
           sheet: [expression],
           extended: {
             es: {
-              filter: buildEsQuery(undefined, query, filters, esQueryConfigs)
+              filter: buildEsQuery(undefined, [query], filters, esQueryConfigs)
             }
           },
           time: _.extend(timeRange, {
@@ -56,11 +58,7 @@ const TimelionRequestHandlerProvider = function (Private, $http, config) {
           .catch(function (resp) {
             const err = new Error(resp.message);
             err.stack = resp.stack;
-            toastNotifications.addError(err, {
-              title: i18n.translate('timelion.requestHandlerErrorTitle', {
-                defaultMessage: 'Timelion request error',
-              }),
-            });
+            notify.error(err);
             reject(err);
           });
       });

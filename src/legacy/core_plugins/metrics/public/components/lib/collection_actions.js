@@ -56,4 +56,4 @@ export function handleAdd(props, fn = newFn) {
   }
 }
 
-export const collectionActions = { handleAdd, handleDelete, handleChange };
+export default { handleAdd, handleDelete, handleChange };

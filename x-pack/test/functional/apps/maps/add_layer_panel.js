@@ -4,41 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 
-export default function ({ getService, getPageObjects }) {
-  const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['maps']);
+export default function ({ getPageObjects }) {
+  const PageObjects = getPageObjects(['maps', 'common']);
 
   describe('Add layer panel', () => {
-    const LAYER_NAME = 'World Countries';
-
     before(async () => {
       await PageObjects.maps.openNewMap();
+    });
+
+    beforeEach(async () => {
       await PageObjects.maps.clickAddLayer();
-      await PageObjects.maps.selectVectorSource();
-      await PageObjects.maps.selectVectorLayer(LAYER_NAME);
     });
 
-    it('should show unsaved layer in layer TOC', async () => {
-      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-      expect(vectorLayerExists).to.be(true);
+    afterEach(async () => {
+      await PageObjects.maps.cancelLayerAdd();
     });
 
-    it('should disable Map application save button', async () => {
-      // saving map should be a no-op because its diabled
-      await testSubjects.click('mapSaveButton');
-
+    it('should open on clicking "Add layer"', async () => {
+      // Verify panel page element is open
       const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
       expect(panelOpen).to.be(true);
-      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-      expect(vectorLayerExists).to.be(true);
     });
 
-    it('should remove layer on cancel', async () => {
-      await PageObjects.maps.cancelLayerAdd(LAYER_NAME);
+    it('should close on clicking "Cancel"', async () => {
+      // Verify panel page element is open
+      let panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
+      expect(panelOpen).to.be(true);
+      // Click cancel
+      await PageObjects.maps.cancelLayerAdd();
+      // Verify panel isn't open
+      panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
+      expect(panelOpen).to.be(false);
+    });
 
-      const vectorLayerExists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+    it('should close & remove layer on clicking "Cancel" after selecting layer',
+      async () => {
+        // Verify panel page element is open
+        let panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
+        expect(panelOpen).to.be(true);
+        // Select source
+        await PageObjects.maps.selectVectorSource();
+        // Select layer
+        const vectorLayer = await PageObjects.maps.selectVectorLayer();
+        // Confirm layer added
+        await PageObjects.maps.waitForLayersToLoad();
+        let vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
+        expect(vectorLayerExists).to.be(true);
+        // Click cancel
+        await PageObjects.maps.cancelLayerAdd();
+        // Verify panel isn't open
+        panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
+        expect(panelOpen).to.be(false);
+        // Verify layer has been removed
+        await PageObjects.maps.waitForLayerDeleted(vectorLayer);
+        vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
+        expect(vectorLayerExists).to.be(false);
+      });
+
+    it('should close and remove layer on map save', async () => {
+      // Verify panel page element is open
+      let panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
+      expect(panelOpen).to.be(true);
+      // Select source
+      await PageObjects.maps.selectVectorSource();
+      // Select layer
+      const vectorLayer = await PageObjects.maps.selectVectorLayer();
+      // Confirm layer added
+      await PageObjects.maps.waitForLayersToLoad();
+      let vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
+      expect(vectorLayerExists).to.be(true);
+      // Click save
+      await PageObjects.maps.saveMap('Mappishness');
+      // Verify panel isn't open
+      panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
+      expect(panelOpen).to.be(false);
+      // Verify layer has been removed
+      await PageObjects.maps.waitForLayerDeleted(vectorLayer);
+      vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
       expect(vectorLayerExists).to.be(false);
     });
   });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { EuiGlobalToastList, Toast } from '@elastic/eui';
 
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -53,15 +53,9 @@ export class GlobalToastList extends React.Component<Props, State> {
   public render() {
     return (
       <EuiGlobalToastList
-        data-test-subj="globalToastList"
         toasts={this.state.toasts}
         dismissToast={this.props.dismissToast}
-        /**
-         * This prop is overriden by the individual toasts that are added.
-         * Use `Infinity` here so that it's obvious a timeout hasn't been
-         * provided in development.
-         */
-        toastLifeTimeMs={Infinity}
+        toastLifeTimeMs={6000}
       />
     );
   }

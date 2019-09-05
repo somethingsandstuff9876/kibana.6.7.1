@@ -24,7 +24,7 @@ import { ncp } from 'ncp';
 import { dirname, relative } from 'path';
 import { promisify } from 'util';
 
-const lstat = promisify(fs.lstat);
+const stat = promisify(fs.stat);
 const readFile = promisify(fs.readFile);
 const symlink = promisify(fs.symlink);
 const chmod = promisify(fs.chmod);
@@ -37,21 +37,13 @@ export { chmod, readFile, mkdirp };
 
 async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {
-    return block(await lstat(path));
+    return block(await stat(path));
   } catch (e) {
     if (e.code === 'ENOENT') {
       return false;
     }
     throw e;
   }
-}
-
-/**
- * Test if a path points to a symlink.
- * @param path
- */
-export async function isSymlink(path: string) {
-  return await statTest(path, stats => stats.isSymbolicLink());
 }
 
 /**

@@ -19,7 +19,7 @@
 
 export const TUTORIAL_CATEGORY = {
   LOGGING: 'logging',
-  SIEM: 'siem',
+  SECURITY: 'security',
   METRICS: 'metrics',
   OTHER: 'other',
 };

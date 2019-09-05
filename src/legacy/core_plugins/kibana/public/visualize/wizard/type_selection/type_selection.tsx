@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { sortByOrder } from 'lodash';
 import React, { ChangeEvent } from 'react';
-import chrome from 'ui/chrome';
 
 import {
   EuiFieldSearch,
@@ -35,42 +34,30 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { memoizeLast } from 'ui/utils/memoize';
-import { VisType } from 'ui/vis';
-import { VisTypeAlias } from '../../../../../visualizations/public/np_ready/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
 
-interface VisTypeListEntry extends VisType {
-  highlighted: boolean;
-}
+import { memoizeLast } from 'ui/utils/memoize';
+import { VisType } from 'ui/vis';
 
-interface VisTypeAliasListEntry extends VisTypeAlias {
+interface VisTypeListEntry extends VisType {
   highlighted: boolean;
 }
 
 interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
   visTypesRegistry: VisType[];
-  visTypeAliases?: VisTypeAlias[];
   showExperimental: boolean;
 }
 
-interface HighlightedType {
-  name: string;
-  title: string;
-  description?: string;
-  highlightMsg?: string;
-}
-
 interface TypeSelectionState {
-  highlightedType: HighlightedType | null;
+  highlightedType: VisType | null;
   query: string;
 }
 
 class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionState> {
-  public state: TypeSelectionState = {
+  public state = {
     highlightedType: null,
     query: '',
   };
@@ -79,11 +66,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
   public render() {
     const { query, highlightedType } = this.state;
-    const visTypes = this.getFilteredVisTypes(
-      this.props.visTypesRegistry,
-      this.props.visTypeAliases,
-      query
-    );
+    const visTypes = this.getFilteredVisTypes(this.props.visTypesRegistry, query);
     return (
       <React.Fragment>
         <EuiModalHeader>
@@ -144,7 +127,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
             </EuiFlexItem>
             <EuiFlexItem className="visNewVisDialog__description" grow={false}>
               {highlightedType ? (
-                <VisHelpText {...highlightedType} />
+                <VisHelpText visType={highlightedType} />
               ) : (
                 <React.Fragment>
                   <EuiTitle size="s">
@@ -166,11 +149,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     );
   }
 
-  private filteredVisTypes(
-    visTypes: VisType[],
-    visTypeAliases: any[] = [],
-    query: string
-  ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
+  private filteredVisTypes(visTypes: VisType[], query: string): VisTypeListEntry[] {
     const types = visTypes.filter(type => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
@@ -185,14 +164,12 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       return true;
     });
 
-    const allTypes = [...types, ...visTypeAliases];
-
-    let entries: Array<VisTypeListEntry | VisTypeAliasListEntry>;
+    let entries: VisTypeListEntry[];
     if (!query) {
-      entries = allTypes.map(type => ({ ...type, highlighted: false }));
+      entries = types.map(type => ({ ...type, highlighted: false }));
     } else {
       const q = query.toLowerCase();
-      entries = allTypes.map(type => {
+      entries = types.map(type => {
         const matchesQuery =
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||
@@ -204,83 +181,43 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     return sortByOrder(entries, ['highlighted', 'title'], ['desc', 'asc']);
   }
 
-  private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
+  private renderVisType = (visType: VisTypeListEntry) => {
     let stage = {};
-    let highlightMsg;
-    if (!('aliasUrl' in visType) && visType.stage === 'experimental') {
+    if (visType.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
         }),
         betaBadgeTooltipContent: i18n.translate('kbn.visualize.newVisWizard.experimentalTooltip', {
-          defaultMessage:
-            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+          defaultMessage: 'This visualization is experimental.',
         }),
       };
-      highlightMsg = i18n.translate('kbn.visualize.newVisWizard.experimentalDescription', {
-        defaultMessage:
-          'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
-      });
-    } else if ('aliasUrl' in visType) {
-      const aliasDescription = i18n.translate(
-        'kbn.visualize.newVisWizard.visTypeAliasDescription',
-        {
-          defaultMessage: 'Opens a Kibana application that is outside of Visualize.',
-        }
-      );
-      stage = {
-        betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
-          defaultMessage: 'Kibana application',
-        }),
-        betaBadgeTooltipContent: aliasDescription,
-        betaBadgeIconType: 'popout',
-      };
-      highlightMsg = aliasDescription;
     }
-
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick =
-      'aliasUrl' in visType
-        ? () => {
-            window.location = chrome.addBasePath(visType.aliasUrl);
-          }
-        : () => this.props.onVisTypeSelected(visType);
-
-    const highlightedType: HighlightedType = {
-      title: visType.title,
-      name: visType.name,
-      description: visType.description,
-      highlightMsg,
-    };
-
     return (
       <EuiKeyPadMenuItemButton
         key={visType.name}
         label={<span data-test-subj="visTypeTitle">{visType.title}</span>}
-        onClick={onClick}
-        onFocus={() => this.setHighlightType(highlightedType)}
-        onMouseEnter={() => this.setHighlightType(highlightedType)}
-        onMouseLeave={() => this.setHighlightType(null)}
-        onBlur={() => this.setHighlightType(null)}
+        onClick={() => this.props.onVisTypeSelected(visType)}
+        onFocus={() => this.highlightType(visType)}
+        onMouseEnter={() => this.highlightType(visType)}
+        onMouseLeave={() => this.highlightType(null)}
+        onBlur={() => this.highlightType(null)}
         className="visNewVisDialog__type"
         data-test-subj={`visType-${visType.name}`}
-        data-vis-stage={!('aliasUrl' in visType) ? visType.stage : 'alias'}
+        data-vis-stage={visType.stage}
         disabled={isDisabled}
         aria-describedby={`visTypeDescription-${visType.name}`}
-        role="menuitem"
         {...stage}
       >
-        <VisTypeIcon
-          icon={visType.icon}
-          image={!('aliasUrl' in visType) ? visType.image : undefined}
-        />
+        <VisTypeIcon visType={visType} />
       </EuiKeyPadMenuItemButton>
     );
   };
 
-  private setHighlightType(highlightedType: HighlightedType | null) {
+  private highlightType(visType: VisType | null) {
     this.setState({
-      highlightedType,
+      highlightedType: visType,
     });
   }
 

@@ -45,7 +45,8 @@ const overall = fnName => targetSeries => {
   return [keys.map(k => [k, fn(values)])];
 };
 
-export const SeriesAgg = {
+
+export default {
   sum: basic('sum'),
   max: basic('max'),
   min: basic('min'),
@@ -58,6 +59,7 @@ export const SeriesAgg = {
     });
     return [data];
   },
+
 
   overall_max: overall('max'),
   overall_min: overall('min'),
@@ -83,5 +85,7 @@ export const SeriesAgg = {
       data.push([key, sum]);
     });
     return [data];
-  },
+  }
+
 };
+

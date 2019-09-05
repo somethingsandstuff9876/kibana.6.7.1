@@ -22,7 +22,7 @@ import { readFileSync } from 'fs';
 import crypto from 'crypto';
 
 import Chance from 'chance';
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import Hapi from 'hapi';
 import Inert from 'inert';
 import sinon from 'sinon';
@@ -56,8 +56,7 @@ describe('optimizer/bundle route', () => {
     const {
       regularBundlesPath = outputFixture,
       dllBundlesPath = outputFixture,
-      basePublicPath = '',
-      builtCssPath = outputFixture
+      basePublicPath = ''
     } = options;
 
     const server = new Hapi.Server();
@@ -67,7 +66,6 @@ describe('optimizer/bundle route', () => {
       regularBundlesPath,
       dllBundlesPath,
       basePublicPath,
-      builtCssPath
     }));
 
     return server;

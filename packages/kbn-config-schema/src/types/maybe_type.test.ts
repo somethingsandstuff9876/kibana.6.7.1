@@ -45,12 +45,6 @@ test('validates contained type', () => {
   expect(() => type.validate('foo')).toThrowErrorMatchingSnapshot();
 });
 
-test('validates basic type', () => {
-  const type = schema.maybe(schema.string());
-
-  expect(() => type.validate(666)).toThrowErrorMatchingSnapshot();
-});
-
 test('fails if null', () => {
   const type = schema.maybe(schema.string());
   expect(() => type.validate(null)).toThrowErrorMatchingSnapshot();

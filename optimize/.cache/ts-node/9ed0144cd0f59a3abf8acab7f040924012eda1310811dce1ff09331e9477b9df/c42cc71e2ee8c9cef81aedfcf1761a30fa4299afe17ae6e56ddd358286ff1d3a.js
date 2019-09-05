@@ -1,0 +1,34 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const lodash_1 = require("lodash");
+// We should add `any` return type to overcome bug in lodash types, customizer
+// in lodash 3.* can return `undefined` if cloning is handled by the lodash, but
+// type of the customizer function doesn't expect that.
+function cloneBuffersCustomizer(val) {
+    if (Buffer.isBuffer(val)) {
+        return new Buffer(val);
+    }
+}
+function deepCloneWithBuffers(val) {
+    return lodash_1.cloneDeep(val, cloneBuffersCustomizer);
+}
+exports.deepCloneWithBuffers = deepCloneWithBuffers;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL3V0aWxzL2RlZXBfY2xvbmVfd2l0aF9idWZmZXJzLnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS9zcmMvdXRpbHMvZGVlcF9jbG9uZV93aXRoX2J1ZmZlcnMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7OztHQWlCRzs7QUFFSCxtQ0FBbUM7QUFFbkMsOEVBQThFO0FBQzlFLGdGQUFnRjtBQUNoRix1REFBdUQ7QUFDdkQsU0FBUyxzQkFBc0IsQ0FBQyxHQUFZO0lBQzFDLElBQUksTUFBTSxDQUFDLFFBQVEsQ0FBQyxHQUFHLENBQUMsRUFBRTtRQUN4QixPQUFPLElBQUksTUFBTSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0tBQ3hCO0FBQ0gsQ0FBQztBQUVELFNBQWdCLG9CQUFvQixDQUFJLEdBQU07SUFDNUMsT0FBTyxrQkFBUyxDQUFDLEdBQUcsRUFBRSxzQkFBc0IsQ0FBQyxDQUFDO0FBQ2hELENBQUM7QUFGRCxvREFFQyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBMaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lIG9yIG1vcmUgY29udHJpYnV0b3JcbiAqIGxpY2Vuc2UgYWdyZWVtZW50cy4gU2VlIHRoZSBOT1RJQ0UgZmlsZSBkaXN0cmlidXRlZCB3aXRoXG4gKiB0aGlzIHdvcmsgZm9yIGFkZGl0aW9uYWwgaW5mb3JtYXRpb24gcmVnYXJkaW5nIGNvcHlyaWdodFxuICogb3duZXJzaGlwLiBFbGFzdGljc2VhcmNoIEIuVi4gbGljZW5zZXMgdGhpcyBmaWxlIHRvIHlvdSB1bmRlclxuICogdGhlIEFwYWNoZSBMaWNlbnNlLCBWZXJzaW9uIDIuMCAodGhlIFwiTGljZW5zZVwiKTsgeW91IG1heVxuICogbm90IHVzZSB0aGlzIGZpbGUgZXhjZXB0IGluIGNvbXBsaWFuY2Ugd2l0aCB0aGUgTGljZW5zZS5cbiAqIFlvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdFxuICpcbiAqICAgIGh0dHA6Ly93d3cuYXBhY2hlLm9yZy9saWNlbnNlcy9MSUNFTlNFLTIuMFxuICpcbiAqIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZyxcbiAqIHNvZnR3YXJlIGRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuXG4gKiBcIkFTIElTXCIgQkFTSVMsIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWVxuICogS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZC4gIFNlZSB0aGUgTGljZW5zZSBmb3IgdGhlXG4gKiBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kIGxpbWl0YXRpb25zXG4gKiB1bmRlciB0aGUgTGljZW5zZS5cbiAqL1xuXG5pbXBvcnQgeyBjbG9uZURlZXAgfSBmcm9tICdsb2Rhc2gnO1xuXG4vLyBXZSBzaG91bGQgYWRkIGBhbnlgIHJldHVybiB0eXBlIHRvIG92ZXJjb21lIGJ1ZyBpbiBsb2Rhc2ggdHlwZXMsIGN1c3RvbWl6ZXJcbi8vIGluIGxvZGFzaCAzLiogY2FuIHJldHVybiBgdW5kZWZpbmVkYCBpZiBjbG9uaW5nIGlzIGhhbmRsZWQgYnkgdGhlIGxvZGFzaCwgYnV0XG4vLyB0eXBlIG9mIHRoZSBjdXN0b21pemVyIGZ1bmN0aW9uIGRvZXNuJ3QgZXhwZWN0IHRoYXQuXG5mdW5jdGlvbiBjbG9uZUJ1ZmZlcnNDdXN0b21pemVyKHZhbDogdW5rbm93bik6IGFueSB7XG4gIGlmIChCdWZmZXIuaXNCdWZmZXIodmFsKSkge1xuICAgIHJldHVybiBuZXcgQnVmZmVyKHZhbCk7XG4gIH1cbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGRlZXBDbG9uZVdpdGhCdWZmZXJzPFQ+KHZhbDogVCk6IFQge1xuICByZXR1cm4gY2xvbmVEZWVwKHZhbCwgY2xvbmVCdWZmZXJzQ3VzdG9taXplcik7XG59XG4iXX0=

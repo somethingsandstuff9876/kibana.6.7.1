@@ -18,8 +18,6 @@
  */
 
 import Joi from 'joi';
-import { abortableRequestHandler } from './abortable_request_handler';
-import { handleESError } from './handle_es_error';
 
 export function createProxy(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -32,15 +30,15 @@ export function createProxy(server) {
         parse: 'gunzip'
       }
     },
-    handler: abortableRequestHandler((signal, req, h) => {
+    async handler(req, h) {
       const { query, payload } = req;
       return callWithRequest(req, 'transport.request', {
         path: '/_msearch',
         method: 'POST',
         query,
         body: payload.toString('utf8')
-      }, { signal }).finally(r => h.response(r));
-    })
+      }).finally(r => h.response(r));
+    }
   });
 
   server.route({
@@ -53,18 +51,14 @@ export function createProxy(server) {
         })
       }
     },
-    handler: abortableRequestHandler(async (signal, req) => {
+    handler(req, h) {
       const { query, payload: body } = req;
-      try {
-        return await callWithRequest(req, 'transport.request', {
-          path: `/${encodeURIComponent(req.params.index)}/_search`,
-          method: 'POST',
-          query,
-          body
-        }, { signal });
-      } catch (error) {
-        throw handleESError(error);
-      }
-    })
+      return callWithRequest(req, 'transport.request', {
+        path: `/${encodeURIComponent(req.params.index)}/_search`,
+        method: 'POST',
+        query,
+        body
+      }).finally(r => h.response(r));
+    }
   });
 }

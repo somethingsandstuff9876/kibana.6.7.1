@@ -1,10 +1,15 @@
 {
   "monitorStatus": [
     {
-      "timestamp": "2019-01-28T18:43:16.078Z",
-      "monitor": { "status": "up", "duration": { "us": 3328 } },
-      "observer": null,
-      "url": { "full": "tcp://localhost:9200" }
+      "timestamp": "2019-01-18T23:02:58.384Z",
+      "monitor": {
+        "status": "up",
+        "host": "www.google.com",
+        "ip": "172.217.12.196",
+        "duration": { "us": 234267 },
+        "scheme": "http"
+      },
+      "tcp": { "port": 80 }
     }
   ]
 }

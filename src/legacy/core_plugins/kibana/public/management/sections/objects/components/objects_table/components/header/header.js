@@ -97,7 +97,7 @@ export const Header = ({
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="m"/>
-    <EuiText size="s">
+    <EuiText>
       <p>
         <EuiTextColor color="subdued">
           <FormattedMessage

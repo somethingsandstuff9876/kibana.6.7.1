@@ -48,7 +48,7 @@
 }
 
 .conApp__resizer {
-  @include kbnResizer;
+  @include kibana-resizer;
 }
 
 // SASSTODO: This component seems to not be used anymore?
@@ -60,8 +60,4 @@
   /* by pass any other element in ace and resize bar, but not modal popups  */
   z-index: $euiZLevel1 + 2;
   margin-top: 22px;
-}
-
-.conApp__settingsModal {
-  min-width: 460px;
 }

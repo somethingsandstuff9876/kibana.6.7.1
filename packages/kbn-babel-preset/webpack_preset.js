@@ -17,22 +17,21 @@
  * under the License.
  */
 
-module.exports = () => {
-  return {
-    presets: [
-      [
-        require.resolve('@babel/preset-env'),
-        {
-          useBuiltIns: 'entry',
-          modules: false,
-          corejs: 3,
+module.exports = {
+  presets: [
+    [
+      require.resolve('babel-preset-env'),
+      {
+        targets: {
+          browsers: [
+            'last 2 versions',
+            '> 5%',
+            'Safari 7', // for PhantomJS support
+          ],
         },
-      ],
-      require('./common_preset'),
+        useBuiltIns: true,
+      },
     ],
-    plugins: [
-      require.resolve('@babel/plugin-transform-modules-commonjs'),
-      require.resolve('@babel/plugin-syntax-dynamic-import'),
-    ]
-  };
+    require('./common_preset'),
+  ]
 };

@@ -27,7 +27,7 @@ import supertest from 'supertest';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig } from '.';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { logger } from '../logging/__mocks__';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 const chance = new Chance();
@@ -50,11 +50,12 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpsRedirectServer(loggingServiceMock.create().get());
+  server = new HttpsRedirectServer(logger.get());
 });
 
 afterEach(async () => {
   await server.stop();
+  logger.mockClear();
 });
 
 test('throws if SSL is not enabled', async () => {
@@ -80,7 +81,6 @@ test('throws if [redirectHttpFromPort] is not specified', async () => {
 
 test('throws if [redirectHttpFromPort] is in use', async () => {
   const mockListen = jest.spyOn(Server.prototype, 'listen').mockImplementation(() => {
-    // eslint-disable-next-line no-throw-literal
     throw { code: 'EADDRINUSE' };
   });
 
@@ -91,7 +91,8 @@ test('throws if [redirectHttpFromPort] is in use', async () => {
     } as HttpConfig)
   ).rejects.toMatchSnapshot();
 
-  mockListen.mockRestore();
+  // Workaround for https://github.com/DefinitelyTyped/DefinitelyTyped/issues/17605.
+  (mockListen as any).mockRestore();
 });
 
 test('forwards http requests to https', async () => {

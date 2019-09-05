@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { createColorFormat } from '../color';
-import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../../ui/field_formats/field_format';
 
 const ColorFormat = createColorFormat(FieldFormat);
 

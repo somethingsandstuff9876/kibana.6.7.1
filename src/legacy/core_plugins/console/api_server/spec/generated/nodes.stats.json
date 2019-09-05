@@ -26,7 +26,6 @@
       "_nodes/{nodes}/stats/{metrics}/{index_metric}"
     ],
     "url_components": {
-      "nodes": null,
       "metrics": [
         "_all",
         "breaker",
@@ -57,8 +56,9 @@
         "store",
         "suggest",
         "warmer"
-      ]
+      ],
+      "nodes": null
     },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html"
   }
 }

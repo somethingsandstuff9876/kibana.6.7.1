@@ -18,14 +18,12 @@
  */
 
 import sinon from 'sinon';
-import moment from 'moment';
 
 export function createIndexPatternsStub() {
   return {
     get: sinon.spy(indexPatternId =>
       Promise.resolve({
         id: indexPatternId,
-        isTimeNanosBased: () => false
       })
     ),
   };
@@ -60,7 +58,7 @@ export function createSearchSourceStubProvider(hits, timeField) {
     const filteredHits = searchSourceStub._stubHits
       .filter(
         hit =>
-          moment(hit[timeField]).isSameOrAfter(timeRange.gte) && moment(hit[timeField]).isSameOrBefore(timeRange.lte)
+          hit[timeField] >= timeRange.gte && hit[timeField] <= timeRange.lte
       )
       .sort(sortFunction);
     return Promise.resolve({

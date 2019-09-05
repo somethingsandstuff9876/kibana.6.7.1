@@ -81,7 +81,7 @@ export default function SenseEditor($el) {
 
   // dirty check for tokenizer state, uses a lot less cycles
   // than listening for tokenizerUpdate
-  const onceDoneTokenizing = function (callback, cancelAlreadyScheduledCalls) {
+  const onceDoneTokenizing = function (func, cancelAlreadyScheduledCalls) {
     const session = editor.getSession();
     let timer = false;
     const checkInterval = 25;
@@ -95,15 +95,11 @@ export default function SenseEditor($el) {
       }
 
       setTimeout(function check() {
-        // If the bgTokenizer doesn't exist, we can assume that the underlying editor has been
-        // torn down, e.g. by closing the History tab, and we don't need to do anything further.
-        if (session.bgTokenizer) {
-          // Wait until the bgTokenizer is done running before executing the callback.
-          if (session.bgTokenizer.running) {
-            timer = setTimeout(check, checkInterval);
-          } else {
-            callback.apply(self, args);
-          }
+        if (session.bgTokenizer.running) {
+          timer = setTimeout(check, checkInterval);
+        }
+        else {
+          func.apply(self, args);
         }
       });
     };

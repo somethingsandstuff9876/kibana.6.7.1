@@ -26,20 +26,15 @@
  */
 
 import { VisProvider } from 'ui/vis';
-import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
-import {
-  extractReferences,
-  injectReferences,
-} from './saved_visualization_references';
+import { SavedObjectProvider } from 'ui/courier';
 
 uiModules
   .get('app/visualize')
-  .factory('SavedVis', function (Promise, savedSearches, Private) {
+  .factory('SavedVis', function (config, $injector, Promise, savedSearches, Private, i18n) {
     const Vis = Private(VisProvider);
     const SavedObject = Private(SavedObjectProvider);
     createLegacyClass(SavedVis).inherits(SavedObject);
@@ -52,13 +47,11 @@ uiModules
         type: SavedVis.type,
         mapping: SavedVis.mapping,
         searchSource: SavedVis.searchSource,
-        extractReferences: extractReferences,
-        injectReferences: injectReferences,
 
         id: opts.id,
         indexPattern: opts.indexPattern,
         defaults: {
-          title: i18n.translate('kbn.visualize.defaultVisualizationTitle', {
+          title: i18n('kbn.visualize.defaultVisualizationTitle', {
             defaultMessage: 'New Visualization',
           }),
           visState: (function () {

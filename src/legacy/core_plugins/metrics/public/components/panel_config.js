@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import PropTypes from 'prop-types';
-import React, { useState, useEffect } from 'react';
-import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
-import { MetricPanelConfig as metric } from './panel_config/metric';
-import { TopNPanelConfig as topN } from './panel_config/top_n';
-import { TablePanelConfig as table } from './panel_config/table';
-import { GaugePanelConfig as gauge } from './panel_config/gauge';
-import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
-import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FormValidationContext } from '../contexts/form_validation_context';
-import { VisDataContext } from '../contexts/vis_data_context';
+import PropTypes from 'prop-types';
+import React from 'react';
+import timeseries from './panel_config/timeseries';
+import metric from './panel_config/metric';
+import topN from './panel_config/top_n';
+import table from './panel_config/table';
+import gauge from './panel_config/gauge';
+import markdown from './panel_config/markdown';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const types = {
   timeseries,
@@ -35,44 +33,15 @@ const types = {
   metric,
   top_n: topN,
   gauge,
-  markdown,
+  markdown
 };
 
-const checkModelValidity = validationResults =>
-  Boolean(Object.values(validationResults).every(isValid => isValid));
-
-export function PanelConfig(props) {
+function PanelConfig(props) {
   const { model } = props;
-  const Component = types[model.type];
-  const [formValidationResults] = useState({});
-  const [visData, setVisData] = useState({});
-
-  useEffect(() => {
-    model.isModelInvalid = !checkModelValidity(formValidationResults);
-  });
-
-  useEffect(() => {
-    const visDataSubscription = props.visData$.subscribe((visData = {}) => setVisData(visData));
-
-    return function cleanup() {
-      visDataSubscription.unsubscribe();
-    };
-  }, [props.visData$]);
-
-  const updateControlValidity = (controlKey, isControlValid) => {
-    formValidationResults[controlKey] = isControlValid;
-  };
-
-  if (Component) {
-    return (
-      <FormValidationContext.Provider value={updateControlValidity}>
-        <VisDataContext.Provider value={visData}>
-          <Component {...props} />
-        </VisDataContext.Provider>
-      </FormValidationContext.Provider>
-    );
+  const component = types[model.type];
+  if (component) {
+    return React.createElement(component, props);
   }
-
   return (
     <div>
       <FormattedMessage
@@ -80,8 +49,7 @@ export function PanelConfig(props) {
         defaultMessage="Missing panel config for &ldquo;{modelType}&rdquo;"
         values={{ modelType: model.type }}
       />
-    </div>
-  );
+    </div>);
 }
 
 PanelConfig.propTypes = {
@@ -91,3 +59,5 @@ PanelConfig.propTypes = {
   dateFormat: PropTypes.string,
   visData$: PropTypes.object,
 };
+
+export default PanelConfig;

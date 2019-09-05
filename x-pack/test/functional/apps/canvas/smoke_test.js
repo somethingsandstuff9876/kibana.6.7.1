@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect.js';
 import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
@@ -12,21 +12,25 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const log = getService('log');
   const PageObjects = getPageObjects(['common']);
 
-  describe('smoke test', function () {
-    this.tags('smoke');
+  describe('smoke test', async () => {
     const workpadListSelector = 'canvasWorkpadLoaderTable canvasWorkpadLoaderWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
       // init data
+      log.debug('canvas smoke test: start beforeAll');
       await esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('canvas smoke test: logstash data loaded');
       await esArchiver.load('canvas/default');
+      log.debug('canvas smoke test: canvas data loaded');
 
       // load canvas
       // see also navigateToUrl(app, hash)
       await PageObjects.common.navigateToApp('canvas');
+      log.debug('canvas smoke test: app navigation success');
     });
 
     it('loads workpad list', async () => {
@@ -47,10 +51,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       // check that workpad loaded in url
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-
-        // remove all the search params, just compare the route
-        const hashRoute = parse(url).hash.split('?')[0];
-        expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
+        expect(parse(url).hash).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
     });
 

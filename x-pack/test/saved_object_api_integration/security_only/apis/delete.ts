@@ -5,23 +5,23 @@
  */
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { TestInvoker } from '../../common/lib/types';
 import { deleteTestSuiteFactory } from '../../common/suites/delete';
 
-export default function({ getService }: FtrProviderContext) {
+// tslint:disable:no-default-export
+export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
     const {
+      createExpectLegacyForbidden,
       createExpectUnknownDocNotFound,
       deleteTest,
       expectEmpty,
       expectRbacSpaceAwareForbidden,
       expectRbacNotSpaceAwareForbidden,
       expectRbacInvalidIdForbidden,
-      expectRbacHiddenTypeForbidden: expectRbacSpaceTypeForbidden,
-      expectGenericNotFound,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
     deleteTest(`user with no access`, {
@@ -29,19 +29,15 @@ export default function({ getService }: FtrProviderContext) {
       tests: {
         spaceAware: {
           statusCode: 403,
-          response: expectRbacSpaceAwareForbidden,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
         notSpaceAware: {
           statusCode: 403,
-          response: expectRbacNotSpaceAwareForbidden,
-        },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
         invalidId: {
           statusCode: 403,
-          response: expectRbacInvalidIdForbidden,
+          response: createExpectLegacyForbidden(AUTHENTICATION.NOT_A_KIBANA_USER.username),
         },
       },
     });
@@ -57,10 +53,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: expectEmpty,
         },
-        hiddenType: {
-          statusCode: 404,
-          response: expectGenericNotFound,
-        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(),
@@ -72,20 +64,40 @@ export default function({ getService }: FtrProviderContext) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         spaceAware: {
+          statusCode: 200,
+          response: expectEmpty,
+        },
+        notSpaceAware: {
+          statusCode: 200,
+          response: expectEmpty,
+        },
+        invalidId: {
+          statusCode: 404,
+          response: createExpectUnknownDocNotFound(),
+        },
+      },
+    });
+
+    deleteTest(`legacy readonly user`, {
+      user: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
+      tests: {
+        spaceAware: {
           statusCode: 403,
-          response: expectRbacSpaceAwareForbidden,
+          response: createExpectLegacyForbidden(
+            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
+          ),
         },
         notSpaceAware: {
           statusCode: 403,
-          response: expectRbacNotSpaceAwareForbidden,
-        },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
+          response: createExpectLegacyForbidden(
+            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
+          ),
         },
         invalidId: {
           statusCode: 403,
-          response: expectRbacInvalidIdForbidden,
+          response: createExpectLegacyForbidden(
+            AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER.username
+          ),
         },
       },
     });
@@ -100,10 +112,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
-        },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 404,
@@ -123,10 +131,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
-        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -144,10 +148,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
-        },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 404,
@@ -167,10 +167,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
-        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -188,10 +184,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
-        },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
@@ -211,10 +203,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
-        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -233,10 +221,6 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
-        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -254,10 +238,6 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
-        },
-        hiddenType: {
-          statusCode: 403,
-          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,

@@ -27,7 +27,14 @@ export const CreateArchivesSourcesTask = {
       // copy all files from generic build source directory into platform-specific build directory
       await scanCopy({
         source: build.resolvePath(),
-        destination: build.resolvePathForPlatform(platform)
+        destination: build.resolvePathForPlatform(platform),
+        filter: record => !(record.isDirectory && record.name === 'node_modules')
+      });
+
+      await scanCopy({
+        source: build.resolvePath('node_modules'),
+        destination: build.resolvePathForPlatform(platform, 'node_modules'),
+        time: new Date()
       });
 
       log.debug('Generic build source copied into', platform.getName(), 'specific build directory');

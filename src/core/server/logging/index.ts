@@ -17,11 +17,9 @@
  * under the License.
  */
 
-export { Logger, LogMeta } from './logger';
+export { Logger } from './logger';
 export { LoggerFactory } from './logger_factory';
-export { LogRecord } from './log_record';
-export { LogLevel } from './log_level';
 /** @internal */
-export { config, LoggingConfigType } from './logging_config';
+export { LoggingConfig } from './logging_config';
 /** @internal */
 export { LoggingService } from './logging_service';

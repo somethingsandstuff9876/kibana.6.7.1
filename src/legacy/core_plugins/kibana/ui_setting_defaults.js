@@ -30,26 +30,6 @@ export function getUiSettingDefaults() {
     return numeralLanguage.id;
   })];
 
-  const luceneQueryLanguageLabel = i18n.translate('kbn.advancedSettings.searchQueryLanguageLucene', {
-    defaultMessage: 'Lucene',
-  });
-
-  const queryLanguageSettingName = i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
-    defaultMessage: 'Query language',
-  });
-
-  const requestPreferenceOptionLabels = {
-    sessionId: i18n.translate('kbn.advancedSettings.courier.requestPreferenceSessionId', {
-      defaultMessage: 'Session ID',
-    }),
-    custom: i18n.translate('kbn.advancedSettings.courier.requestPreferenceCustom', {
-      defaultMessage: 'Custom',
-    }),
-    none: i18n.translate('kbn.advancedSettings.courier.requestPreferenceNone', {
-      defaultMessage: 'None',
-    }),
-  };
-
   // wrapped in provider so that a new instance is given to each app/test
   return {
     'buildNum': {
@@ -59,11 +39,10 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',
       }),
-      value: '{ "analyze_wildcard": true }',
+      value: '{ "analyze_wildcard": true, "default_field": "*" }',
       description:
         i18n.translate('kbn.advancedSettings.query.queryStringOptionsText', {
-          defaultMessage: '{optionsLink} for the lucene query string parser. Is only used when "{queryLanguage}" is set ' +
-            'to {luceneLanguage}.',
+          defaultMessage: '{optionsLink} for the lucene query string parser',
           description: 'Part of composite text: kbn.advancedSettings.query.queryStringOptions.optionsLinkText + ' +
                        'kbn.advancedSettings.query.queryStringOptionsText',
           values: {
@@ -73,8 +52,6 @@ export function getUiSettingDefaults() {
                 defaultMessage: 'Options',
               }) +
               '</a>',
-            luceneLanguage: luceneQueryLanguageLabel,
-            queryLanguage: queryLanguageSettingName,
           },
         }),
       type: 'json'
@@ -88,27 +65,33 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
           'Currently only applies when experimental query features are enabled in the query bar. ' +
-          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
+          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}',
         values: {
           queryStringOptionsPattern: 'query:queryString:options',
         },
       }),
     },
+    'k7design': {
+      name: i18n.translate('kbn.advancedSettings.k7designTitle', {
+        defaultMessage: 'Use the new K7 UI design',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.k7designText', {
+        defaultMessage:
+          'When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are implemented.',
+      }),
+    },
     'search:queryLanguage': {
-      name: queryLanguageSettingName,
-      value: 'kuery',
+      name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
+        defaultMessage: 'Query language',
+      }),
+      value: 'lucene',
       description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
-          'Query language used by the query bar. KQL is a new language built specifically for Kibana.',
+          'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
       }),
       type: 'select',
-      options: ['lucene', 'kuery'],
-      optionLabels: {
-        lucene: luceneQueryLanguageLabel,
-        kuery: i18n.translate('kbn.advancedSettings.searchQueryLanguageKql', {
-          defaultMessage: 'KQL',
-        }),
-      },
+      options: ['lucene', 'kuery']
     },
     'sort:options': {
       name: i18n.translate('kbn.advancedSettings.sortOptionsTitle', {
@@ -134,14 +117,14 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.dateFormatTitle', {
         defaultMessage: 'Date format',
       }),
-      value: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      value: 'MMMM Do YYYY, HH:mm:ss.SSS',
       description: i18n.translate('kbn.advancedSettings.dateFormatText', {
         defaultMessage: 'When displaying a pretty formatted date, use this {formatLink}',
         description: 'Part of composite text: kbn.advancedSettings.dateFormatText + ' +
                      'kbn.advancedSettings.dateFormat.optionsLinkText',
         values: {
           formatLink:
-            '<a href="https://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('kbn.advancedSettings.dateFormat.optionsLinkText', {
               defaultMessage: 'format',
             }) +
@@ -162,8 +145,7 @@ export function getUiSettingDefaults() {
         },
       }),
       type: 'select',
-      options: ['Browser', ...moment.tz.names()],
-      requiresPageReload: true,
+      options: ['Browser', ...moment.tz.names()]
     },
     'dateFormat:scaled': {
       name: i18n.translate('kbn.advancedSettings.dateFormat.scaledTitle', {
@@ -207,23 +189,6 @@ export function getUiSettingDefaults() {
       }),
       type: 'select',
       options: weekdays
-    },
-    'dateNanosFormat': {
-      name: i18n.translate('kbn.advancedSettings.dateNanosFormatTitle', {
-        defaultMessage: 'Date with nanoseconds format',
-      }),
-      value: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
-      description: i18n.translate('kbn.advancedSettings.dateNanosFormatText', {
-        defaultMessage: 'Used for the {dateNanosLink} datatype of Elasticsearch',
-        values: {
-          dateNanosLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.dateNanosLinkTitle', {
-              defaultMessage: 'date_nanos',
-            }) +
-            '</a>',
-        },
-      }),
     },
     'defaultIndex': {
       name: i18n.translate('kbn.advancedSettings.defaultIndexTitle', {
@@ -283,31 +248,10 @@ export function getUiSettingDefaults() {
       }),
       value: 'desc',
       options: ['desc', 'asc'],
-      optionLabels: {
-        desc: i18n.translate('kbn.advancedSettings.discover.sortOrderDesc', {
-          defaultMessage: 'Descending',
-        }),
-        asc: i18n.translate('kbn.advancedSettings.discover.sortOrderAsc', {
-          defaultMessage: 'Ascending',
-        }),
-      },
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderText', {
         defaultMessage:
           'Controls the default sort direction for time based index patterns in the Discover app.',
-      }),
-      category: ['discover'],
-    },
-    'discover:searchOnPageLoad': {
-      name: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadTitle', {
-        defaultMessage: 'Search on page load',
-      }),
-      value: true,
-      type: 'boolean',
-      description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
-        defaultMessage:
-          'Controls whether a search is executed when Discover first loads. This setting does not ' +
-          'have an effect when loading a saved search.',
       }),
       category: ['discover'],
     },
@@ -333,6 +277,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'courier:maxSegmentCount': {
+      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
+        defaultMessage: 'Maximum segment count',
+      }),
+      value: 30,
+      description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
+        defaultMessage:
+          'Requests in discover are split into segments to prevent massive requests from being sent to elasticsearch. ' +
+          'This setting attempts to prevent the list of segments from getting too long, ' +
+          'which might cause requests to take much longer to process.',
+      }),
+      category: ['search'],
+    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
@@ -341,8 +298,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-          'When disabled, all filters are applied to all visualizations. ' +
-          'When enabled, filter(s) will be ignored for a visualization ' +
+          'When set to false, all filters are applied to all visualizations. ' +
+          'When set to true, filter(s) will be ignored for a visualization ' +
           `when the visualization's index does not contain the filtering field.`,
       }),
       category: ['search'],
@@ -353,25 +310,19 @@ export function getUiSettingDefaults() {
       }),
       value: 'sessionId',
       options: ['sessionId', 'custom', 'none'],
-      optionLabels: requestPreferenceOptionLabels,
       type: 'select',
       description: i18n.translate('kbn.advancedSettings.courier.requestPreferenceText', {
         defaultMessage:
           `Allows you to set which shards handle your search requests.
           <ul>
-            <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
+            <li><strong>sessionId:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
-            <li><strong>{custom}:</strong> allows you to define a your own preference.
+            <li><strong>custom:</strong> allows you to define a your own preference.
               Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
-            <li><strong>{none}:</strong> means do not set a preference.
+            <li><strong>none:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
           </ul>`,
-        values: {
-          sessionId: requestPreferenceOptionLabels.sessionId,
-          custom: requestPreferenceOptionLabels.custom,
-          none: requestPreferenceOptionLabels.none,
-        },
       }),
       category: ['search'],
     },
@@ -415,19 +366,6 @@ export function getUiSettingDefaults() {
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
             target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`
         },
-      }),
-      category: ['search'],
-    },
-    'courier:batchSearches': {
-      name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
-        defaultMessage: 'Batch concurrent searches',
-      }),
-      value: true,
-      type: 'boolean',
-      description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
-        defaultMessage:
-          'Batch multiple concurrent searches in a single request. This may improve overall load' +
-          'times, but it also means that no single search request will be returned until the last has completed.',
       }),
       category: ['search'],
     },
@@ -585,19 +523,6 @@ export function getUiSettingDefaults() {
       }),
       category: ['visualization'],
     },
-    'visualization:heatmap:maxBuckets': {
-      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
-        defaultMessage: 'Heatmap maximum buckets',
-      }),
-      value: 50,
-      type: 'number',
-      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
-        defaultMessage:
-          'The maximum number of buckets a single datasource can return. ' +
-          'A higher number might have negative impact on browser rendering performance'
-      }),
-      category: ['visualization'],
-    },
     'csv:separator': {
       name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
         defaultMessage: 'CSV separator',
@@ -656,6 +581,17 @@ export function getUiSettingDefaults() {
           'patterns from which to query the field mapping',
       }),
     },
+    'indexPatterns:warnAboutUnsupportedTimePatterns': {
+      name: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningTitle', {
+        defaultMessage: 'Time pattern warning',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningText', {
+        defaultMessage:
+          'When an index pattern is using the now unsupported "time pattern" format, a warning will ' +
+          'be displayed once per session that is using this pattern. Set this to false to disable that warning.',
+      }),
+    },
     'format:defaultTypeMap': {
       name: i18n.translate('kbn.advancedSettings.format.defaultTypeMapTitle', {
         defaultMessage: 'Field type format name',
@@ -664,7 +600,6 @@ export function getUiSettingDefaults() {
 `{
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
-  "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
   "_source": { "id": "_source", "params": {} },
@@ -706,7 +641,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
         defaultMessage: 'Bytes format',
       }),
-      value: '0,0.[0]b',
+      value: '0,0.[000]b',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
         defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',
@@ -815,13 +750,13 @@ export function getUiSettingDefaults() {
       value:
 `{
   "from": "now-15m",
-  "to": "now"
+  "to": "now",
+  "mode": "quick"
 }`,
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
         defaultMessage: 'The timefilter selection to use when Kibana is started without one',
       }),
-      requiresPageReload: true,
     },
     'timepicker:refreshIntervalDefaults': {
       name: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
@@ -836,69 +771,66 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsText', {
         defaultMessage: `The timefilter's default refresh interval`,
       }),
-      requiresPageReload: true,
     },
     'timepicker:quickRanges': {
       name: i18n.translate('kbn.advancedSettings.timepicker.quickRangesTitle', {
         defaultMessage: 'Time picker quick ranges',
       }),
       value: JSON.stringify([
-        {
-          from: 'now/d',
-          to: 'now/d',
-          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' }),
-        },
-        {
-          from: 'now/w',
-          to: 'now/w',
-          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' }),
-        },
-        {
-          from: 'now-15m',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last15Minutes', { defaultMessage: 'Last 15 minutes' }),
-        },
-        {
-          from: 'now-30m',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last30Minutes', { defaultMessage: 'Last 30 minutes' }) },
-        {
-          from: 'now-1h',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last1Hour', { defaultMessage: 'Last 1 hour' }),
-        },
-        {
-          from: 'now-24h',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last24Hours', { defaultMessage: 'Last 24 hours' }),
-        },
-        {
-          from: 'now-7d',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last7Days', { defaultMessage: 'Last 7 days' }),
-        },
-        {
-          from: 'now-30d',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last30Days', { defaultMessage: 'Last 30 days' }),
-        },
-        {
-          from: 'now-90d',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last90Days', { defaultMessage: 'Last 90 days' }),
-        },
-        {
-          from: 'now-1y',
-          to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.last1Year', { defaultMessage: 'Last 1 year' }),
-        },
+        { from: 'now/d',    to: 'now/d',
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' }),			              section: 0 },
+        { from: 'now/w',    to: 'now/w',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' }),			      section: 0 },
+        { from: 'now/M',    to: 'now/M',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisMonth', { defaultMessage: 'This month' }),			    section: 0 },
+        { from: 'now/y',    to: 'now/y',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisYear', { defaultMessage: 'This year' }),			      section: 0 },
+        { from: 'now/d',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.todaySoFar', { defaultMessage: 'Today so far' }),			  section: 0 },
+        { from: 'now/w',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.weekToDate', { defaultMessage: 'Week to date' }),			  section: 0 },
+        { from: 'now/M',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.monthToDate', { defaultMessage: 'Month to date' }),			section: 0 },
+        { from: 'now/y',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.yearToDate', { defaultMessage: 'Year to date' }),			  section: 0 },
+
+        { from: 'now-15m',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last15Minutes', { defaultMessage: 'Last 15 minutes' }),	section: 1 },
+        { from: 'now-30m',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Minutes', { defaultMessage: 'Last 30 minutes' }),	section: 1 },
+        { from: 'now-1h',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Hour', { defaultMessage: 'Last 1 hour' }),			    section: 1 },
+        { from: 'now-4h',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last4Hours', { defaultMessage: 'Last 4 hours' }),			  section: 1 },
+        { from: 'now-12h',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last12Hours', { defaultMessage: 'Last 12 hours' }),			section: 1 },
+        { from: 'now-24h',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last24Hours', { defaultMessage: 'Last 24 hours' }),			section: 1 },
+        { from: 'now-7d',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last7Days', { defaultMessage: 'Last 7 days' }),			    section: 1 },
+
+        { from: 'now-30d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Days', { defaultMessage: 'Last 30 days' }),			  section: 2 },
+        { from: 'now-60d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last60Days', { defaultMessage: 'Last 60 days' }),			  section: 2 },
+        { from: 'now-90d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last90Days', { defaultMessage: 'Last 90 days' }),			  section: 2 },
+        { from: 'now-6M',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last6Months', { defaultMessage: 'Last 6 months' }),			section: 2 },
+        { from: 'now-1y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Year', { defaultMessage: 'Last 1 year' }),			    section: 2 },
+        { from: 'now-2y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last2Years', { defaultMessage: 'Last 2 years' }),			  section: 2 },
+        { from: 'now-5y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last5Years', { defaultMessage: 'Last 5 years' }),			  section: 2 },
+
       ], null, 2),
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
         defaultMessage:
           'The list of ranges to show in the Quick section of the time picker. This should be an array of objects, ' +
-          'with each object containing "from", "to" (see {acceptedFormatsLink}), and ' +
-          '"display" (the title to be displayed).',
+          'with each object containing "from", "to" (see {acceptedFormatsLink}), ' +
+          '"display" (the title to be displayed), and "section" (which column to put the option in).',
         description:
           'Part of composite text: kbn.advancedSettings.timepicker.quickRangesText + ' +
           'kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText',
@@ -913,15 +845,15 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'theme:darkMode': {
-      name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
-        defaultMessage: 'Dark mode',
+    'dashboard:defaultDarkTheme': {
+      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
+        defaultMessage: 'Dark theme',
       }),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.darkModeText', {
-        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
+      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
+        defaultMessage: 'New dashboards use dark theme by default',
       }),
-      requiresPageReload: true,
+      category: ['dashboard'],
     },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
@@ -1101,7 +1033,18 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
-      requiresPageReload: true,
+    },
+    'rollups:enableIndexPatterns': {
+      name: i18n.translate('kbn.advancedSettings.rollupIndexPatternsTitle', {
+        defaultMessage: 'Enable rollup index patterns',
+      }),
+      value: true,
+      description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
+        defaultMessage:
+          'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
+          'visualizations based on rollup data. Refresh the page to apply the changes.',
+      }),
+      category: ['rollups'],
     },
   };
 }

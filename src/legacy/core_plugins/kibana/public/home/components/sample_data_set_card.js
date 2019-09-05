@@ -31,10 +31,7 @@ import {
 export const INSTALLED_STATUS = 'installed';
 export const UNINSTALLED_STATUS = 'not_installed';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { SampleDataViewDataButton } from './sample_data_view_data_button';
 
 export class SampleDataSetCard extends React.Component {
 
@@ -58,28 +55,13 @@ export class SampleDataSetCard extends React.Component {
     switch (this.props.status) {
       case INSTALLED_STATUS:
         return (
-          <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 isLoading={this.props.isProcessing}
                 onClick={this.uninstall}
                 color="danger"
                 data-test-subj={`removeSampleDataSet${this.props.id}`}
-                flush="left"
-                aria-label={this.props.isProcessing
-                  ? i18n.translate('kbn.home.sampleDataSetCard.removingButtonAriaLabel', {
-                    defaultMessage: 'Removing {datasetName}',
-                    values: {
-                      datasetName: this.props.name,
-                    },
-                  })
-                  : i18n.translate('kbn.home.sampleDataSetCard.removeButtonAriaLabel', {
-                    defaultMessage: 'Remove {datasetName}',
-                    values: {
-                      datasetName: this.props.name,
-                    },
-                  })
-                }
               >
                 {this.props.isProcessing
                   ? <FormattedMessage
@@ -93,12 +75,15 @@ export class SampleDataSetCard extends React.Component {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SampleDataViewDataButton
-                id={this.props.id}
-                name={this.props.name}
-                overviewDashboard={this.props.overviewDashboard}
-                appLinks={this.props.appLinks}
-              />
+              <EuiButton
+                href={this.props.launchUrl}
+                data-test-subj={`launchSampleDataSet${this.props.id}`}
+              >
+                <FormattedMessage
+                  id="kbn.home.sampleDataSetCard.viewDataButtonLabel"
+                  defaultMessage="View data"
+                />
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -111,20 +96,6 @@ export class SampleDataSetCard extends React.Component {
                 isLoading={this.props.isProcessing}
                 onClick={this.install}
                 data-test-subj={`addSampleDataSet${this.props.id}`}
-                aria-label={this.props.isProcessing
-                  ? i18n.translate('kbn.home.sampleDataSetCard.addingButtonAriaLabel', {
-                    defaultMessage: 'Adding {datasetName}',
-                    values: {
-                      datasetName: this.props.name,
-                    },
-                  })
-                  : i18n.translate('kbn.home.sampleDataSetCard.addButtonAriaLabel', {
-                    defaultMessage: 'Add {datasetName}',
-                    values: {
-                      datasetName: this.props.name,
-                    }
-                  })
-                }
               >
                 {this.props.isProcessing
                   ? <FormattedMessage
@@ -133,7 +104,7 @@ export class SampleDataSetCard extends React.Component {
                   />
                   : <FormattedMessage
                     id="kbn.home.sampleDataSetCard.addButtonLabel"
-                    defaultMessage="Add data"
+                    defaultMessage="Add"
                   />
                 }
               </EuiButton>
@@ -160,16 +131,10 @@ export class SampleDataSetCard extends React.Component {
                 <EuiButton
                   isDisabled
                   data-test-subj={`addSampleDataSet${this.props.id}`}
-                  aria-label={i18n.translate('kbn.home.sampleDataSetCard.default.addButtonAriaLabel', {
-                    defaultMessage: 'Add {datasetName}',
-                    values: {
-                      datasetName: this.props.name,
-                    },
-                  })}
                 >
                   <FormattedMessage
                     id="kbn.home.sampleDataSetCard.default.addButtonLabel"
-                    defaultMessage="Add data"
+                    defaultMessage="Add"
                   />
                 </EuiButton>
               </EuiToolTip>
@@ -183,7 +148,6 @@ export class SampleDataSetCard extends React.Component {
   render() {
     return (
       <EuiCard
-        textAlign="left"
         className="homSampleDataSetCard"
         image={this.props.previewUrl}
         title={this.props.name}
@@ -200,12 +164,7 @@ SampleDataSetCard.propTypes = {
   id: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  overviewDashboard: PropTypes.string.isRequired,
-  appLinks: PropTypes.arrayOf(PropTypes.shape({
-    path: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-  })).isRequired,
+  launchUrl: PropTypes.string.isRequired,
   status: PropTypes.oneOf([
     INSTALLED_STATUS,
     UNINSTALLED_STATUS,

@@ -24,7 +24,6 @@ export default {
   testMatch: [
     '**/integration_tests/**/*.test.js',
     '**/integration_tests/**/*.test.ts',
-    '**/integration_tests/**/*.test.tsx',
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
@@ -33,7 +32,4 @@ export default {
     'default',
     ['<rootDir>/src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],
   ],
-  setupFilesAfterEnv: [
-    '<rootDir>/src/dev/jest/setup/after_env.integration.js'
-  ]
 };

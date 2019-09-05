@@ -1,0 +1,45 @@
+"use strict";
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const glob_1 = tslib_1.__importDefault(require("glob"));
+const path_1 = require("path");
+const constants_1 = require("../constants");
+const project_1 = require("./project");
+exports.PROJECTS = [
+    new project_1.Project(path_1.resolve(constants_1.REPO_ROOT, 'tsconfig.json')),
+    new project_1.Project(path_1.resolve(constants_1.REPO_ROOT, 'x-pack/tsconfig.json')),
+    new project_1.Project(path_1.resolve(constants_1.REPO_ROOT, 'x-pack/test/tsconfig.json'), 'x-pack/test'),
+    // NOTE: using glob.sync rather than glob-all or globby
+    // because it takes less than 10 ms, while the other modules
+    // both took closer to 1000ms.
+    ...glob_1.default
+        .sync('packages/*/tsconfig.json', { cwd: constants_1.REPO_ROOT })
+        .map(path => new project_1.Project(path_1.resolve(constants_1.REPO_ROOT, path))),
+];
+function filterProjectsByFlag(projectFlag) {
+    if (!projectFlag) {
+        return exports.PROJECTS;
+    }
+    const tsConfigPath = path_1.resolve(projectFlag);
+    return exports.PROJECTS.filter(project => project.tsConfigPath === tsConfigPath);
+}
+exports.filterProjectsByFlag = filterProjectsByFlag;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEvc3JjL2Rldi90eXBlc2NyaXB0L3Byb2plY3RzLnRzIiwic291cmNlcyI6WyIvaG9tZS9hbnRob255L2dpdF93b3Jrc3BhY2VzL2tpYmFuYS9zcmMvZGV2L3R5cGVzY3JpcHQvcHJvamVjdHMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7Ozs7Ozs7Ozs7OztHQWlCRzs7O0FBRUgsd0RBQXdCO0FBQ3hCLCtCQUErQjtBQUUvQiw0Q0FBeUM7QUFDekMsdUNBQW9DO0FBRXZCLFFBQUEsUUFBUSxHQUFHO0lBQ3RCLElBQUksaUJBQU8sQ0FBQyxjQUFPLENBQUMscUJBQVMsRUFBRSxlQUFlLENBQUMsQ0FBQztJQUNoRCxJQUFJLGlCQUFPLENBQUMsY0FBTyxDQUFDLHFCQUFTLEVBQUUsc0JBQXNCLENBQUMsQ0FBQztJQUN2RCxJQUFJLGlCQUFPLENBQUMsY0FBTyxDQUFDLHFCQUFTLEVBQUUsMkJBQTJCLENBQUMsRUFBRSxhQUFhLENBQUM7SUFFM0UsdURBQXVEO0lBQ3ZELDREQUE0RDtJQUM1RCw4QkFBOEI7SUFDOUIsR0FBRyxjQUFJO1NBQ0osSUFBSSxDQUFDLDBCQUEwQixFQUFFLEVBQUUsR0FBRyxFQUFFLHFCQUFTLEVBQUUsQ0FBQztTQUNwRCxHQUFHLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxJQUFJLGlCQUFPLENBQUMsY0FBTyxDQUFDLHFCQUFTLEVBQUUsSUFBSSxDQUFDLENBQUMsQ0FBQztDQUN0RCxDQUFDO0FBRUYsU0FBZ0Isb0JBQW9CLENBQUMsV0FBb0I7SUFDdkQsSUFBSSxDQUFDLFdBQVcsRUFBRTtRQUNoQixPQUFPLGdCQUFRLENBQUM7S0FDakI7SUFFRCxNQUFNLFlBQVksR0FBRyxjQUFPLENBQUMsV0FBVyxDQUFDLENBQUM7SUFDMUMsT0FBTyxnQkFBUSxDQUFDLE1BQU0sQ0FBQyxPQUFPLENBQUMsRUFBRSxDQUFDLE9BQU8sQ0FBQyxZQUFZLEtBQUssWUFBWSxDQUFDLENBQUM7QUFDM0UsQ0FBQztBQVBELG9EQU9DIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIExpY2Vuc2VkIHRvIEVsYXN0aWNzZWFyY2ggQi5WLiB1bmRlciBvbmUgb3IgbW9yZSBjb250cmlidXRvclxuICogbGljZW5zZSBhZ3JlZW1lbnRzLiBTZWUgdGhlIE5PVElDRSBmaWxlIGRpc3RyaWJ1dGVkIHdpdGhcbiAqIHRoaXMgd29yayBmb3IgYWRkaXRpb25hbCBpbmZvcm1hdGlvbiByZWdhcmRpbmcgY29weXJpZ2h0XG4gKiBvd25lcnNoaXAuIEVsYXN0aWNzZWFyY2ggQi5WLiBsaWNlbnNlcyB0aGlzIGZpbGUgdG8geW91IHVuZGVyXG4gKiB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUgXCJMaWNlbnNlXCIpOyB5b3UgbWF5XG4gKiBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLlxuICogWW91IG1heSBvYnRhaW4gYSBjb3B5IG9mIHRoZSBMaWNlbnNlIGF0XG4gKlxuICogICAgaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wXG4gKlxuICogVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yIGFncmVlZCB0byBpbiB3cml0aW5nLFxuICogc29mdHdhcmUgZGlzdHJpYnV0ZWQgdW5kZXIgdGhlIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW5cbiAqIFwiQVMgSVNcIiBCQVNJUywgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZXG4gKiBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLiAgU2VlIHRoZSBMaWNlbnNlIGZvciB0aGVcbiAqIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJtaXNzaW9ucyBhbmQgbGltaXRhdGlvbnNcbiAqIHVuZGVyIHRoZSBMaWNlbnNlLlxuICovXG5cbmltcG9ydCBnbG9iIGZyb20gJ2dsb2InO1xuaW1wb3J0IHsgcmVzb2x2ZSB9IGZyb20gJ3BhdGgnO1xuXG5pbXBvcnQgeyBSRVBPX1JPT1QgfSBmcm9tICcuLi9jb25zdGFudHMnO1xuaW1wb3J0IHsgUHJvamVjdCB9IGZyb20gJy4vcHJvamVjdCc7XG5cbmV4cG9ydCBjb25zdCBQUk9KRUNUUyA9IFtcbiAgbmV3IFByb2plY3QocmVzb2x2ZShSRVBPX1JPT1QsICd0c2NvbmZpZy5qc29uJykpLFxuICBuZXcgUHJvamVjdChyZXNvbHZlKFJFUE9fUk9PVCwgJ3gtcGFjay90c2NvbmZpZy5qc29uJykpLFxuICBuZXcgUHJvamVjdChyZXNvbHZlKFJFUE9fUk9PVCwgJ3gtcGFjay90ZXN0L3RzY29uZmlnLmpzb24nKSwgJ3gtcGFjay90ZXN0JyksXG5cbiAgLy8gTk9URTogdXNpbmcgZ2xvYi5zeW5jIHJhdGhlciB0aGFuIGdsb2ItYWxsIG9yIGdsb2JieVxuICAvLyBiZWNhdXNlIGl0IHRha2VzIGxlc3MgdGhhbiAxMCBtcywgd2hpbGUgdGhlIG90aGVyIG1vZHVsZXNcbiAgLy8gYm90aCB0b29rIGNsb3NlciB0byAxMDAwbXMuXG4gIC4uLmdsb2JcbiAgICAuc3luYygncGFja2FnZXMvKi90c2NvbmZpZy5qc29uJywgeyBjd2Q6IFJFUE9fUk9PVCB9KVxuICAgIC5tYXAocGF0aCA9PiBuZXcgUHJvamVjdChyZXNvbHZlKFJFUE9fUk9PVCwgcGF0aCkpKSxcbl07XG5cbmV4cG9ydCBmdW5jdGlvbiBmaWx0ZXJQcm9qZWN0c0J5RmxhZyhwcm9qZWN0RmxhZz86IHN0cmluZykge1xuICBpZiAoIXByb2plY3RGbGFnKSB7XG4gICAgcmV0dXJuIFBST0pFQ1RTO1xuICB9XG5cbiAgY29uc3QgdHNDb25maWdQYXRoID0gcmVzb2x2ZShwcm9qZWN0RmxhZyk7XG4gIHJldHVybiBQUk9KRUNUUy5maWx0ZXIocHJvamVjdCA9PiBwcm9qZWN0LnRzQ29uZmlnUGF0aCA9PT0gdHNDb25maWdQYXRoKTtcbn1cbiJdfQ==

@@ -12,25 +12,9 @@ Elasticsearch will run with a basic license. To run with a trial license, includ
 
 Example: `yarn es snapshot --license trial --password changeme`
 
-By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana` user which `elasticsearch.username` defaults to in development. If you wish to specific a password for a given native realm account, you can do that like so: `--password.kibana=notsecure`
-
 # Testing
-## Running specific tests
-| Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
-| ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
-| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
-Examples:
-  - Run the jest test case whose description matches 'filtering should skip values of null':
-    `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/explorer/explorer_charts/explorer_charts_container_service.test.js`
-  - Run the x-pack api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.js`
-    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
-
-In addition to to providing a regular expression argument, specific tests can also be run by appeding `.only` to an `it` or `describe` function block. E.g. `describe(` to `describe.only(`.
-
-## Running all tests
+## Running unit tests_bundle
 
 You can run unit tests by running:
 
@@ -42,6 +26,15 @@ If you want to run tests only for a specific plugin (to save some time), you can
 
 ```
 yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc.
+```
+
+#### Running single test file
+Edit test file, changing top level `describe` to `describe.only`. Run tests with normal commands.
+
+#### Running Jest Unit Tests
+```bash
+# from x-pack folder
+node scripts/jest
 ```
 
 #### Debugging browser tests
@@ -61,8 +54,6 @@ yarn test:server
 
 #### Running functional tests
 
-For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
-
 The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.js)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.js)).
 
 The script runs all sets of tests sequentially like so:
@@ -81,7 +72,7 @@ node scripts/functional_tests
 
 #### Running UI tests
 
-To run _only_ the functional UI tests:
+The functional UI tests can be run separately like so:
 
 ```sh
 node scripts/functional_tests --config test/functional/config
@@ -95,7 +86,7 @@ API integration tests are run with a unique setup usually without UI assets buil
 
 API integration tests are intended to test _only programmatic API exposed by Kibana_. There is no need to run browser and simulate user actions, which significantly reduces execution time. In addition, the configuration for API integration tests typically sets `optimize.enabled=false` for Kibana because UI assets are usually not needed for these tests.
 
-To run _only_ the API integration tests:
+The API integration tests can be run separately like so:
 
 ```sh
 node scripts/functional_tests --config test/api_integration/config
@@ -103,7 +94,7 @@ node scripts/functional_tests --config test/api_integration/config
 
 #### Running SAML API integration tests
 
-We also have SAML API integration tests which set up Elasticsearch and Kibana with SAML support. Run _only_ API integration tests with SAML enabled like so:
+We also have SAML API integration tests which set up Elasticsearch and Kibana with SAML support. Run API integration tests separately with SAML support like so:
 
 ```sh
 node scripts/functional_tests --config test/saml_api_integration/config
@@ -134,15 +125,30 @@ node scripts/functional_tests_server
 After the servers are started, open a new terminal and run this command to run just the tests (without tearing down Elasticsearch or Kibana):
 
 ```sh
-# Make sure you are in the x-pack directory
+# make sure you are in the x-pack-kibana project
 cd x-pack
 
-# Invoke the functional_test_runner from Kibana. Try sending --help to learn more
+# invoke the functional_test_runner from kibana project. try sending --help to learn more
 node ../scripts/functional_test_runner
 ```
 
 For both of the above commands, it's crucial that you pass in `--config` to specify the same config file to both commands. This makes sure that the right tests will run against the right servers. Typically a set of tests and server configuration go together.
 
-Read more about how the scripts work [here](../scripts/README.md).
+Read more about how the scripts work [here](scripts/README.md).
 
-For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.md).
+For a deeper dive, read more about the way functional tests and servers work [here](packages/kbn-test/README.md).
+
+### Issues starting dev more of creating builds
+
+You may see an error like this when you are getting started:
+
+```
+[14:08:15] Error: Linux x86 checksum failed
+    at download_phantom.js:42:15
+    at process._tickDomainCallback (node.js:407:9)
+```
+
+That's thanks to the binary Phantom downloads that have to happen, and Bitbucket being annoying with throttling and redirecting or... something. The real issue eludes me, but you have 2 options to resolve it.
+
+1. Just keep re-running the command until it passes. Eventually the downloads will work, and since they are cached, it won't ever be an issue again.
+1. Download them by hand [from Bitbucket](https://bitbucket.org/ariya/phantomjs/downloads) and copy them into the `.phantom` path. We're currently using 1.9.8, and you'll need the Window, Mac, and Linux builds.

@@ -18,14 +18,13 @@
  */
 
 import Boom from 'boom';
-import { first } from 'rxjs/operators';
 import { resolve, join, sep } from 'path';
 import url from 'url';
-import { has, isEmpty, head, pick } from 'lodash';
+import { has, isEmpty, head } from 'lodash';
 
 import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';
-import { setHeaders } from './server/set_headers';
+import setHeaders from '../elasticsearch/lib/set_headers';
 
 import {
   ProxyConfigCollection,
@@ -33,30 +32,22 @@ import {
   createProxyRoute
 } from './server';
 
-function filterHeaders(originalHeaders, headersToKeep) {
-  const normalizeHeader = function (header) {
-    if (!header) {
-      return '';
-    }
-    header = header.toString();
-    return header.trim().toLowerCase();
-  };
-
-  // Normalize list of headers we want to allow in upstream request
-  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
-
-  return pick(originalHeaders, headersToKeepNormalized);
-}
-
 export default function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
   const src = resolve(__dirname, 'public/src/');
 
-  let defaultVars;
   const apps = [];
   return new kibana.Plugin({
     id: 'console',
     require: ['elasticsearch'],
+
+    isEnabled(config) {
+      // console must be disabled when tribe mode is configured
+      return (
+        config.get('console.enabled') &&
+        !config.get('elasticsearch.tribe.hosts')
+      );
+    },
 
     config: function (Joi) {
       return Joi.object({
@@ -96,38 +87,24 @@ export default function (kibana) {
       ];
     },
 
-    uiCapabilities() {
-      return {
-        dev_tools: {
-          show: true,
-          save: true,
-        },
-      };
-    },
-
-    async init(server, options) {
+    init: function (server, options) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
       const config = server.config();
-      const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
+      const { filterHeaders } = server.plugins.elasticsearch;
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
-      defaultVars = {
-        elasticsearchUrl: url.format(
-          Object.assign(url.parse(head(legacyEsConfig.hosts)), { auth: false })
-        ),
-      };
-
       server.route(createProxyRoute({
-        baseUrl: head(legacyEsConfig.hosts),
+        baseUrl: head(config.get('elasticsearch.hosts')),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
-          const filteredHeaders = filterHeaders(req.headers, legacyEsConfig.requestHeadersWhitelist);
-          const headers = setHeaders(filteredHeaders, legacyEsConfig.customHeaders);
+          const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
+          const filteredHeaders = filterHeaders(req.headers, whitelist);
+          const headers = setHeaders(filteredHeaders, config.get('elasticsearch.customHeaders'));
 
           if (!isEmpty(config.get('console.proxyConfig'))) {
             return {
@@ -137,7 +114,7 @@ export default function (kibana) {
           }
 
           return {
-            ...getElasticsearchProxyConfig(legacyEsConfig),
+            ...getElasticsearchProxyConfig(server),
             headers,
           };
         }
@@ -163,7 +140,20 @@ export default function (kibana) {
       devTools: ['plugins/console/console'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
 
-      injectDefaultVars: () => defaultVars,
+      injectDefaultVars(server) {
+        return {
+          elasticsearchUrl: url.format(
+            Object.assign(
+              url.parse(
+                head(
+                  server.config().get('elasticsearch.hosts')
+                )
+              ),
+              { auth: false }
+            )
+          )
+        };
+      },
 
       noParse: [
         join(modules, 'ace' + sep),

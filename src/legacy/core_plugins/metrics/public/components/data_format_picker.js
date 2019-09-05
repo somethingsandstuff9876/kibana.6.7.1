@@ -21,44 +21,37 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
-  htmlIdGenerator,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFieldText,
-  EuiLink,
+  htmlIdGenerator, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiLink,
 } from '@elastic/eui';
-import { durationOutputOptions, durationInputOptions, isDuration } from './lib/durations';
+import { durationOutputOptions, durationInputOptions } from './lib/durations';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
-const DEFAULT_OUTPUT_PRECISION = '2';
+class DataFormatPicker extends Component {
 
-class DataFormatPickerUI extends Component {
   constructor(props) {
     super(props);
-
-    let from;
-    let to;
-    let decimals;
-
-    if (isDuration(props.value)) {
+    this.handleChange = this.handleChange.bind(this);
+    this.handleCustomChange = this.handleCustomChange.bind(this);
+    let from = 'ms';
+    let to = 'ms';
+    let decimals = 2;
+    if (durationFormatTest.test(props.value)) {
       [from, to, decimals] = props.value.split(',');
     }
-
     this.state = {
-      from: from || 'ms',
-      to: to || 'ms',
-      decimals: decimals || '',
+      from,
+      to,
+      decimals
     };
   }
 
-  handleCustomChange = () => {
-    this.props.onChange([{ value: (this.custom && this.custom.value) || '' }]);
-  };
+  handleCustomChange() {
+    this.props.onChange([{ value: this.custom && this.custom.value || '' }]);
+  }
 
-  handleChange = selectedOptions => {
+  handleChange(selectedOptions) {
     if (selectedOptions.length < 1) {
       return;
     }
@@ -67,18 +60,16 @@ class DataFormatPickerUI extends Component {
       this.handleCustomChange();
     } else if (selectedOptions[0].value === 'duration') {
       const { from, to, decimals } = this.state;
-      this.props.onChange([
-        {
-          value: `${from},${to},${decimals}`,
-        },
-      ]);
+      this.props.onChange([{
+        value: `${from},${to},${decimals}`
+      }]);
     } else {
       this.props.onChange(selectedOptions);
     }
-  };
+  }
 
   handleDurationChange(name) {
-    return selectedOptions => {
+    return (selectedOptions) => {
       if (selectedOptions.length < 1) {
         return;
       }
@@ -90,19 +81,14 @@ class DataFormatPickerUI extends Component {
         newValue = selectedOptions[0].value;
       }
 
-      this.setState(
-        {
-          [name]: newValue,
-        },
-        () => {
-          const { from, to, decimals } = this.state;
-          this.props.onChange([
-            {
-              value: `${from},${to},${decimals}`,
-            },
-          ]);
-        }
-      );
+      this.setState({
+        [name]: newValue
+      }, () => {
+        const { from, to, decimals } = this.state;
+        this.props.onChange([{
+          value: `${from},${to},${decimals}`
+        }]);
+      });
     };
   }
 
@@ -113,46 +99,16 @@ class DataFormatPickerUI extends Component {
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
       defaultValue = 'custom';
     }
-    if (isDuration(value)) {
+    if (durationFormatTest.test(value)) {
       defaultValue = 'duration';
     }
     const { intl } = this.props;
     const options = [
-      {
-        label: intl.formatMessage({
-          id: 'tsvb.dataFormatPicker.bytesLabel',
-          defaultMessage: 'Bytes',
-        }),
-        value: 'bytes',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'tsvb.dataFormatPicker.numberLabel',
-          defaultMessage: 'Number',
-        }),
-        value: 'number',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'tsvb.dataFormatPicker.percentLabel',
-          defaultMessage: 'Percent',
-        }),
-        value: 'percent',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'tsvb.dataFormatPicker.durationLabel',
-          defaultMessage: 'Duration',
-        }),
-        value: 'duration',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'tsvb.dataFormatPicker.customLabel',
-          defaultMessage: 'Custom',
-        }),
-        value: 'custom',
-      },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.bytesLabel', defaultMessage: 'Bytes' }), value: 'bytes' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.numberLabel', defaultMessage: 'Number' }), value: 'number' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.percentLabel', defaultMessage: 'Percent' }), value: 'percent' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.durationLabel', defaultMessage: 'Duration' }), value: 'duration' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.customLabel', defaultMessage: 'Custom' }), value: 'custom' }
     ];
     const selectedOption = options.find(option => {
       return defaultValue === option.value;
@@ -161,9 +117,12 @@ class DataFormatPickerUI extends Component {
     let custom;
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
-      const selectedFrom = durationInputOptions.find(option => from === option.value);
-      const selectedTo = durationOutputOptions.find(option => to === option.value);
-
+      const selectedFrom = durationInputOptions.find(option => {
+        return from === option.value;
+      });
+      const selectedTo = durationOutputOptions.find(option => {
+        return to === option.value;
+      });
       return (
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -173,61 +132,59 @@ class DataFormatPickerUI extends Component {
                 options={options}
                 selectedOptions={selectedOption ? [selectedOption] : []}
                 onChange={this.handleChange}
-                singleSelection={{ asPlainText: true }}
+                singleSelection={true}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow
               id={htmlId('from')}
-              label={
-                <FormattedMessage id="tsvb.dataFormatPicker.fromLabel" defaultMessage="From" />
-              }
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.fromLabel"
+                defaultMessage="From"
+              />)}
             >
               <EuiComboBox
                 isClearable={false}
                 options={durationInputOptions}
                 selectedOptions={selectedFrom ? [selectedFrom] : []}
                 onChange={this.handleDurationChange('from')}
-                singleSelection={{ asPlainText: true }}
+                singleSelection={true}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow
               id={htmlId('to')}
-              label={<FormattedMessage id="tsvb.dataFormatPicker.toLabel" defaultMessage="To" />}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.toLabel"
+                defaultMessage="To"
+              />)}
             >
               <EuiComboBox
                 isClearable={false}
                 options={durationOutputOptions}
                 selectedOptions={selectedTo ? [selectedTo] : []}
                 onChange={this.handleDurationChange('to')}
-                singleSelection={{ asPlainText: true }}
+                singleSelection={true}
               />
             </EuiFormRow>
           </EuiFlexItem>
-
-          {selectedTo && selectedTo.value !== 'humanize' && (
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                id={htmlId('decimal')}
-                label={
-                  <FormattedMessage
-                    id="tsvb.dataFormatPicker.decimalPlacesLabel"
-                    defaultMessage="Decimal places"
-                  />
-                }
-              >
-                <EuiFieldText
-                  defaultValue={decimals}
-                  inputRef={el => (this.decimals = el)}
-                  placeholder={DEFAULT_OUTPUT_PRECISION}
-                  onChange={this.handleDurationChange('decimals')}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              id={htmlId('decimal')}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.decimalPlacesLabel"
+                defaultMessage="Decimal places"
+              />)}
+            >
+              <EuiFieldText
+                defaultValue={decimals}
+                inputRef={(el) => this.decimals = el}
+                onChange={this.handleDurationChange('decimals')}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
         </EuiFlexGroup>
       );
     }
@@ -235,31 +192,23 @@ class DataFormatPickerUI extends Component {
       custom = (
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={
-              <FormattedMessage
-                id="tsvb.dataFormatPicker.formatStringLabel"
-                defaultMessage="Format string"
-              />
-            }
+            label={(<FormattedMessage
+              id="tsvb.dataFormatPicker.formatStringLabel"
+              defaultMessage="Format string"
+            />)}
             helpText={
               <span>
                 <FormattedMessage
                   id="tsvb.dataFormatPicker.formatStringHelpText"
                   defaultMessage="See {numeralJsLink}"
-                  values={{
-                    numeralJsLink: (
-                      <EuiLink href="http://numeraljs.com/#format" target="_BLANK">
-                        Numeral.js
-                      </EuiLink>
-                    ),
-                  }}
+                  values={{ numeralJsLink: (<EuiLink href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</EuiLink>) }}
                 />
               </span>
             }
           >
             <EuiFieldText
               defaultValue={value}
-              inputRef={el => (this.custom = el)}
+              inputRef={(el) => this.custom = el}
               onChange={this.handleCustomChange}
             />
           </EuiFormRow>
@@ -275,7 +224,7 @@ class DataFormatPickerUI extends Component {
               options={options}
               selectedOptions={selectedOption ? [selectedOption] : []}
               onChange={this.handleChange}
-              singleSelection={{ asPlainText: true }}
+              singleSelection={true}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -283,16 +232,17 @@ class DataFormatPickerUI extends Component {
       </EuiFlexGroup>
     );
   }
+
 }
 
-DataFormatPickerUI.defaultProps = {
-  label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' }),
+DataFormatPicker.defaultProps = {
+  label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' })
 };
 
-DataFormatPickerUI.propTypes = {
+DataFormatPicker.propTypes = {
   value: PropTypes.string,
   label: PropTypes.string,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func
 };
 
-export const DataFormatPicker = injectI18n(DataFormatPickerUI);
+export default injectI18n(DataFormatPicker);

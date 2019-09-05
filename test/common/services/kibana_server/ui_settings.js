@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import Wreck from '@hapi/wreck';
+import Wreck from 'wreck';
 import { get } from 'lodash';
+
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
 
 export class KibanaServerUiSettings {
   constructor(url, log, defaults, lifecycle) {
@@ -48,6 +51,23 @@ export class KibanaServerUiSettings {
     return defaultIndex;
   }
 
+  /**
+   *  Sets the auto-hide timeout to 1 hour so that auto-hide is
+   *  effectively disabled. This gives the tests more time to
+   *  interact with the notifications without having to worry about
+   *  them disappearing if the tests are too slow.
+   *
+   *  @return {Promise<undefined>}
+   */
+  async disableToastAutohide() {
+    await this.update({
+      'notifications:lifetime:banner': HOUR,
+      'notifications:lifetime:error': HOUR,
+      'notifications:lifetime:warning': HOUR,
+      'notifications:lifetime:info': HOUR,
+    });
+  }
+
   async replace(doc) {
     const { payload } = await this._wreck.get('/api/kibana/settings');
 
@@ -64,8 +84,8 @@ export class KibanaServerUiSettings {
         changes: {
           ...this._defaults,
           ...doc,
-        },
-      },
+        }
+      }
     });
   }
 
@@ -77,8 +97,8 @@ export class KibanaServerUiSettings {
     this._log.debug('applying update to kibana config: %j', updates);
     await this._wreck.post('/api/kibana/settings', {
       payload: {
-        changes: updates,
-      },
+        changes: updates
+      }
     });
   }
 }

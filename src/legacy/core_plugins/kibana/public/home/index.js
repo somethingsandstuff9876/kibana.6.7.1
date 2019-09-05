@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './home.less';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
@@ -39,7 +40,7 @@ const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMess
 function getRoute() {
   return {
     template,
-    controller($scope, Private) {
+    controller($scope, config, indexPatterns, Private) {
       $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
       $scope.recentlyAccessed = recentlyAccessed.get().map(item => {
         item.link = chrome.addBasePath(item.link);

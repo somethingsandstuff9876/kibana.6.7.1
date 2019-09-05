@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
-
 export function isOSS() {
-  return !fs.existsSync(path.resolve(__dirname, '../../../x-pack'));
+  try {
+    require.resolve('x-pack');
+    return false;
+  } catch (error) {
+    if (error.code !== 'MODULE_NOT_FOUND') {
+      throw error;
+    }
+
+    return true;
+  }
 }

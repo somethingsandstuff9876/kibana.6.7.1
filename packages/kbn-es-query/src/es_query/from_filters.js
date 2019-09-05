@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { migrateFilter } from './migrate_filter';
+import { decorateQuery } from './decorate_query';
 import { filterMatchesIndex } from './filter_matches_index';
 
 /**
@@ -59,10 +60,15 @@ const cleanFilter = function (filter) {
   return _.omit(filter, ['meta', '$state']);
 };
 
-export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
+export function buildQueryFromFilters(filters = [], indexPattern, { queryStringOptions, ignoreFilterIfFieldNotInIndex } = {}) {
+  _.each(filters, function (filter) {
+    if (filter.query) {
+      decorateQuery(filter.query, queryStringOptions);
+    }
+  });
+
   return {
-    must: [],
-    filter: filters
+    must: filters
       .filter(filterNegate(false))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map(translateToQuery)
@@ -70,6 +76,7 @@ export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIf
       .map(filter => {
         return migrateFilter(filter, indexPattern);
       }),
+    filter: [],
     should: [],
     must_not: filters
       .filter(filterNegate(true))

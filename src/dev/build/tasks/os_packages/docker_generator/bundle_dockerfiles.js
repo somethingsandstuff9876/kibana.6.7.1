@@ -59,13 +59,10 @@ export async function bundleDockerFiles(config, log, build, scope) {
   await compress(
     'tar',
     {
-      archiverOptions: {
-        gzip: true,
-        gzipOptions: {
-          level: 9
-        }
-      },
-      createRootDirectory: false
+      gzip: true,
+      gzipOptions: {
+        level: 9
+      }
     },
     dockerFilesBuildDir,
     dockerFilesOutputDir

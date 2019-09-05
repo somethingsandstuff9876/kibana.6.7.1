@@ -20,7 +20,6 @@
 import BaseOptimizer from '../base_optimizer';
 import { createBundlesRoute } from '../bundles_route';
 import { DllCompiler } from '../dynamic_dll_plugin';
-import { fromRoot } from '../../legacy/utils';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 
@@ -118,8 +117,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     server.route(createBundlesRoute({
       regularBundlesPath: this.compiler.outputPath,
       dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
-      basePublicPath: basePath,
-      builtCssPath: fromRoot('built_assets/css'),
+      basePublicPath: basePath
     }));
   }
 

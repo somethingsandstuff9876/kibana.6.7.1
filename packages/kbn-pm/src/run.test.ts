@@ -116,7 +116,9 @@ test('respects both `include` and `exclude` filters if specified at the same tim
 });
 
 test('does not run command if all projects are filtered out', async () => {
-  const mockProcessExit = jest.spyOn(process, 'exit').mockReturnValue(undefined as never);
+  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+    // noop
+  });
 
   await runCommand(command, {
     ...config,

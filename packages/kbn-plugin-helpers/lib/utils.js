@@ -25,7 +25,7 @@ function babelRegister() {
   const plugin = pluginConfig();
 
   try {
-    // add support for moved @babel/register source: https://github.com/elastic/kibana/pull/13973
+    // add support for moved babel-register source: https://github.com/elastic/kibana/pull/13973
     require(resolve(plugin.kibanaRoot, 'src/setup_node_env/babel_register')); // eslint-disable-line import/no-dynamic-require
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
@@ -41,13 +41,22 @@ function resolveKibanaPath(path) {
   return resolve(plugin.kibanaRoot, path);
 }
 
+function createToolingLog(level) {
+  // The tooling log location changed in 6.1.0, see https://github.com/elastic/kibana/pull/14890
+  const utils = require(resolveKibanaPath('src/utils')); // eslint-disable-line import/no-dynamic-require
+  if (utils.createToolingLog) return utils.createToolingLog(level);
+  return require(resolveKibanaPath('src/dev')) // eslint-disable-line import/no-dynamic-require
+    .createToolingLog(level);
+}
+
 function readFtrConfigFile(log, path, settingOverrides) {
-  return require('@kbn/test') // eslint-disable-line import/no-dynamic-require
+  return require(resolveKibanaPath('src/functional_test_runner')) // eslint-disable-line import/no-dynamic-require
     .readConfigFile(log, path, settingOverrides);
 }
 
 module.exports = {
   babelRegister: babelRegister,
   resolveKibanaPath: resolveKibanaPath,
+  createToolingLog: createToolingLog,
   readFtrConfigFile: readFtrConfigFile,
 };

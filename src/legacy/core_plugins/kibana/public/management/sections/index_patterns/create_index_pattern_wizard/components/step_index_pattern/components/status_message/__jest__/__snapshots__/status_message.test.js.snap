@@ -3,12 +3,15 @@
 exports[`StatusMessage should render with exact matches 1`] = `
 <EuiText
   data-test-subj="createIndexPatternStatusMessage"
+  grow={true}
   size="s"
 >
   <EuiTextColor
     color="secondary"
+    component="span"
   >
     <EuiIcon
+      size="m"
       type="check"
     />
     <span>
@@ -47,10 +50,12 @@ exports[`StatusMessage should render with exact matches 1`] = `
 exports[`StatusMessage should render with no partial matches 1`] = `
 <EuiText
   data-test-subj="createIndexPatternStatusMessage"
+  grow={true}
   size="s"
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       <FormattedMessage
@@ -81,10 +86,12 @@ exports[`StatusMessage should render with no partial matches 1`] = `
 exports[`StatusMessage should render with partial matches 1`] = `
 <EuiText
   data-test-subj="createIndexPatternStatusMessage"
+  grow={true}
   size="s"
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       <FormattedMessage
@@ -115,10 +122,12 @@ exports[`StatusMessage should render with partial matches 1`] = `
 exports[`StatusMessage should render without a query 1`] = `
 <EuiText
   data-test-subj="createIndexPatternStatusMessage"
+  grow={true}
   size="s"
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       <FormattedMessage
@@ -141,10 +150,12 @@ exports[`StatusMessage should render without a query 1`] = `
 exports[`StatusMessage should show that no indices exist 1`] = `
 <EuiText
   data-test-subj="createIndexPatternStatusMessage"
+  grow={true}
   size="s"
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       <FormattedMessage
@@ -160,10 +171,12 @@ exports[`StatusMessage should show that no indices exist 1`] = `
 exports[`StatusMessage should show that system indices exist 1`] = `
 <EuiText
   data-test-subj="createIndexPatternStatusMessage"
+  grow={true}
   size="s"
 >
   <EuiTextColor
     color="default"
+    component="span"
   >
     <span>
       <FormattedMessage

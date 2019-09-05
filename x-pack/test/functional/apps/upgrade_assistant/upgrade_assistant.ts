@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
+// tslint:disable:no-default-export
 export default function upgradeAssistantFunctionalTests({
   getService,
   getPageObjects,
-}: FtrProviderContext) {
+}: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant']);
 
-  describe('Upgrade Checkup', function() {
-    this.tags('smoke');
+  describe('Upgrade Checkup', () => {
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => {
       await PageObjects.upgradeAssistant.expectTelemetryHasFinish();

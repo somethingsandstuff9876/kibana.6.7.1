@@ -62,7 +62,6 @@ export function registerScrollForExportRoute(server) {
             savedObjectVersion: 2
           },
           _migrationVersion: hit.migrationVersion,
-          _references: hit.references || [],
         };
       });
     }

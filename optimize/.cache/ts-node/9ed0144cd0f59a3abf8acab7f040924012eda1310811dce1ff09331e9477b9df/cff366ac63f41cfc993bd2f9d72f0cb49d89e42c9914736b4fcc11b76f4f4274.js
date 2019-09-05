@@ -1,0 +1,48 @@
+"use strict";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Returns a date that is the specified interval from now. Currently,
+ * only minute-intervals are supported.
+ *
+ * @param {string} interval - An interval of the form `Nm` such as `5m`
+ */
+function intervalFromNow(interval) {
+    if (interval === undefined) {
+        return;
+    }
+    assertValidInterval(interval);
+    return minutesFromNow(parseInterval(interval));
+}
+exports.intervalFromNow = intervalFromNow;
+/**
+ * Returns a date that is mins minutes from now.
+ *
+ * @param mins The number of mintues from now
+ */
+function minutesFromNow(mins) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + mins);
+    return now;
+}
+exports.minutesFromNow = minutesFromNow;
+/**
+ * Verifies that the specified interval matches our expected format.
+ *
+ * @param {string} interval - An interval such as `5m`
+ */
+function assertValidInterval(interval) {
+    if (/^[0-9]+m$/.test(interval)) {
+        return interval;
+    }
+    throw new Error(`Invalid interval "${interval}". Intervals must be of the form {number}m. Example: 5m.`);
+}
+exports.assertValidInterval = assertValidInterval;
+function parseInterval(interval) {
+    return parseInt(interval, 10);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2hvbWUvYW50aG9ueS9naXRfd29ya3NwYWNlcy9raWJhbmEveC1wYWNrL3BsdWdpbnMvdGFza19tYW5hZ2VyL2xpYi9pbnRlcnZhbHMudHMiLCJzb3VyY2VzIjpbIi9ob21lL2FudGhvbnkvZ2l0X3dvcmtzcGFjZXMva2liYW5hL3gtcGFjay9wbHVnaW5zL3Rhc2tfbWFuYWdlci9saWIvaW50ZXJ2YWxzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7OztHQUlHOztBQUVIOzs7OztHQUtHO0FBQ0gsU0FBZ0IsZUFBZSxDQUFDLFFBQWlCO0lBQy9DLElBQUksUUFBUSxLQUFLLFNBQVMsRUFBRTtRQUMxQixPQUFPO0tBQ1I7SUFFRCxtQkFBbUIsQ0FBQyxRQUFRLENBQUMsQ0FBQztJQUU5QixPQUFPLGNBQWMsQ0FBQyxhQUFhLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQztBQUNqRCxDQUFDO0FBUkQsMENBUUM7QUFFRDs7OztHQUlHO0FBQ0gsU0FBZ0IsY0FBYyxDQUFDLElBQVk7SUFDekMsTUFBTSxHQUFHLEdBQUcsSUFBSSxJQUFJLEVBQUUsQ0FBQztJQUV2QixHQUFHLENBQUMsVUFBVSxDQUFDLEdBQUcsQ0FBQyxVQUFVLEVBQUUsR0FBRyxJQUFJLENBQUMsQ0FBQztJQUV4QyxPQUFPLEdBQUcsQ0FBQztBQUNiLENBQUM7QUFORCx3Q0FNQztBQUVEOzs7O0dBSUc7QUFDSCxTQUFnQixtQkFBbUIsQ0FBQyxRQUFnQjtJQUNsRCxJQUFJLFdBQVcsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLEVBQUU7UUFDOUIsT0FBTyxRQUFRLENBQUM7S0FDakI7SUFFRCxNQUFNLElBQUksS0FBSyxDQUNiLHFCQUFxQixRQUFRLDBEQUEwRCxDQUN4RixDQUFDO0FBQ0osQ0FBQztBQVJELGtEQVFDO0FBRUQsU0FBUyxhQUFhLENBQUMsUUFBZ0I7SUFDckMsT0FBTyxRQUFRLENBQUMsUUFBUSxFQUFFLEVBQUUsQ0FBQyxDQUFDO0FBQ2hDLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxuICogQ29weXJpZ2h0IEVsYXN0aWNzZWFyY2ggQi5WLiBhbmQvb3IgbGljZW5zZWQgdG8gRWxhc3RpY3NlYXJjaCBCLlYuIHVuZGVyIG9uZVxuICogb3IgbW9yZSBjb250cmlidXRvciBsaWNlbnNlIGFncmVlbWVudHMuIExpY2Vuc2VkIHVuZGVyIHRoZSBFbGFzdGljIExpY2Vuc2U7XG4gKiB5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIEVsYXN0aWMgTGljZW5zZS5cbiAqL1xuXG4vKipcbiAqIFJldHVybnMgYSBkYXRlIHRoYXQgaXMgdGhlIHNwZWNpZmllZCBpbnRlcnZhbCBmcm9tIG5vdy4gQ3VycmVudGx5LFxuICogb25seSBtaW51dGUtaW50ZXJ2YWxzIGFyZSBzdXBwb3J0ZWQuXG4gKlxuICogQHBhcmFtIHtzdHJpbmd9IGludGVydmFsIC0gQW4gaW50ZXJ2YWwgb2YgdGhlIGZvcm0gYE5tYCBzdWNoIGFzIGA1bWBcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIGludGVydmFsRnJvbU5vdyhpbnRlcnZhbD86IHN0cmluZyk6IERhdGUgfCB1bmRlZmluZWQge1xuICBpZiAoaW50ZXJ2YWwgPT09IHVuZGVmaW5lZCkge1xuICAgIHJldHVybjtcbiAgfVxuXG4gIGFzc2VydFZhbGlkSW50ZXJ2YWwoaW50ZXJ2YWwpO1xuXG4gIHJldHVybiBtaW51dGVzRnJvbU5vdyhwYXJzZUludGVydmFsKGludGVydmFsKSk7XG59XG5cbi8qKlxuICogUmV0dXJucyBhIGRhdGUgdGhhdCBpcyBtaW5zIG1pbnV0ZXMgZnJvbSBub3cuXG4gKlxuICogQHBhcmFtIG1pbnMgVGhlIG51bWJlciBvZiBtaW50dWVzIGZyb20gbm93XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBtaW51dGVzRnJvbU5vdyhtaW5zOiBudW1iZXIpOiBEYXRlIHtcbiAgY29uc3Qgbm93ID0gbmV3IERhdGUoKTtcblxuICBub3cuc2V0TWludXRlcyhub3cuZ2V0TWludXRlcygpICsgbWlucyk7XG5cbiAgcmV0dXJuIG5vdztcbn1cblxuLyoqXG4gKiBWZXJpZmllcyB0aGF0IHRoZSBzcGVjaWZpZWQgaW50ZXJ2YWwgbWF0Y2hlcyBvdXIgZXhwZWN0ZWQgZm9ybWF0LlxuICpcbiAqIEBwYXJhbSB7c3RyaW5nfSBpbnRlcnZhbCAtIEFuIGludGVydmFsIHN1Y2ggYXMgYDVtYFxuICovXG5leHBvcnQgZnVuY3Rpb24gYXNzZXJ0VmFsaWRJbnRlcnZhbChpbnRlcnZhbDogc3RyaW5nKSB7XG4gIGlmICgvXlswLTldK20kLy50ZXN0KGludGVydmFsKSkge1xuICAgIHJldHVybiBpbnRlcnZhbDtcbiAgfVxuXG4gIHRocm93IG5ldyBFcnJvcihcbiAgICBgSW52YWxpZCBpbnRlcnZhbCBcIiR7aW50ZXJ2YWx9XCIuIEludGVydmFscyBtdXN0IGJlIG9mIHRoZSBmb3JtIHtudW1iZXJ9bS4gRXhhbXBsZTogNW0uYFxuICApO1xufVxuXG5mdW5jdGlvbiBwYXJzZUludGVydmFsKGludGVydmFsOiBzdHJpbmcpIHtcbiAgcmV0dXJuIHBhcnNlSW50KGludGVydmFsLCAxMCk7XG59XG4iXX0=

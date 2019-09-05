@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
     loadTestFile(require.resolve('./_discover_navigation'));
     loadTestFile(require.resolve('./_filters'));
     loadTestFile(require.resolve('./_size'));
-    loadTestFile(require.resolve('./_date_nanos'));
   });
 
 }

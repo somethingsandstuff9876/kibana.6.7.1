@@ -43,7 +43,7 @@ export function mongodbMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'Metricbeat-MongoDB-ecs',
+          id: 'Metricbeat-MongoDB',
           linkLabel: i18n.translate('kbn.server.tutorials.mongodbMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'MongoDB metrics dashboard',
           }),
